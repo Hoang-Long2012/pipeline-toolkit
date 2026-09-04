@@ -244,7 +244,7 @@ class Pipeline:
 		"""
 		if not isinstance(index, int):
 			raise TypeError(f"{index} is not int.")
-		if not 1 > index:
+		if not 1 < index <= len(self.pipeline) + 1:
 			raise IndexError("Index out of range.")
 		self._validate_step(step)
 		self.pipeline.insert(index - 1, step)
