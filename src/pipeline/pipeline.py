@@ -1,6 +1,9 @@
-from .stack import Stack
-from collections.abc import Mapping
 import threading
+from collections.abc import Mapping
+
+from .stack import Stack
+
+
 class Pipeline:
 	"""A simple asynchronous pipeline for executing callable steps sequentially.
 

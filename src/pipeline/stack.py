@@ -1,9 +1,7 @@
 class StackOverflowError(Exception):
 	"""Raised when attempting to push an item onto a full stack."""
-	pass
 class StackUnderflowError(Exception):
 	"""Raised when attempting to access or remove an item from an empty stack."""
-	pass
 class Stack:
 	"""A simple LIFO stack container with optional maximum capacity.
 
@@ -125,8 +123,7 @@ class Stack:
 		Returns:
 			An iterator over the stack's items.
 		"""
-		for item in self._stack:
-			yield item
+		yield from self.stack
 	def __repr__(self):
 		"""Return the developer-oriented representation of the stack."""
 		return f"{type(self).__name__}({self._stack!r}, maxsize={self._maxsize})"
