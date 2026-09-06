@@ -1,24 +1,33 @@
 """A small functional pipeline toolkit for Python.
 
-This package provides a simple asynchronous pipeline executor along with supporting container and utility components.
+This package provides a simple asynchronous pipeline executor along with supporting functional utilities and container components.
 
 The main components are:
 
-	- :class:`Pipeline`: Execute callable steps sequentially in a worker thread.
-	- :class:`Stack`: A simple LIFO container for storing values and errors.
+```
+	- :class:`Pipeline`: Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning execution.
+	- :class:`Stack`: A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
+	- :func:`compose`: Apply multiple callables sequentially to a value.
 	- :func:`tap`: Apply a side effect to a deep copy of a value while returning the original value unchanged.
+	- :decorator:`pipe`: Wrap a callable as a factory for creating :class:`step` objects with preconfigured arguments.
+	- :class:`step`: Represent a callable with preconfigured arguments and provide convenient execution and composition operations.
+```
 
 Example:
 	>>> from pipeline import Pipeline
-	>>> pipeline = Pipeline(
-	...     (lambda value: value + 1,),
-	...     (lambda value: value * 2,),
-	... )
-	>>> pipeline.run(5).wait()
+	>>> pipeline = Pipeline([
+			(lambda value: value + 1,),
+			(lambda value: value * 2,),
+		]
+		... ], default=5
+	)
+	>>> pipeline.run().wait()
 	>>> pipeline.results.get()
 	12
 """
 from .pipeline import Pipeline
-__version__ = "0.1.0"
-__author__ = "Hoàng Long"
-__all__ = ["__version__", "__author__", "Pipeline"]
+from .pipe import pipe, step
+from .compose import compose
+**version** = "0.2.0"
+**author** = "Hoàng Long"
+**all** = ["**version**", "**author**", "Pipeline", "pipe", "step", "compose"]

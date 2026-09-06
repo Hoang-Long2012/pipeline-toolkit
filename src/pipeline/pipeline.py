@@ -17,6 +17,7 @@ class Pipeline:
 
 	Args:
 		iterable: An iterable of pipeline steps. Defaults to an empty pipeline.
+		default: The default value for the first step of the pipeline if run(default=None).
 
 	Attributes:
 		stop_event: Event used to request that the worker stop execution.
@@ -24,6 +25,7 @@ class Pipeline:
 		pipeline: List containing the configured pipeline steps.
 		thread: The worker thread for the current execution, or ``None`` when no execution is active.
 		step: The one-based index of the currently executing step, or ``0`` when the pipeline is not running.
+		default: The default value for the first step of the pipeline if run(default=None).
 		results: Stack containing the initial value and results produced by executed steps.
 		errors: Stack containing exceptions raised by executed steps.
 
@@ -40,11 +42,12 @@ class Pipeline:
 		>>> pipeline.results.get()
 		15
 	"""
-	def __init__(self, iterable=()):
+	def __init__(self, iterable=(), default=None):
 		"""Initialize a pipeline.
 
 		Args:
 			iterable: An iterable containing pipeline steps.
+			default: The default value for the first step of the pipeline if run(default=None).
 
 		Raises:
 			TypeError: If any item in ``iterable`` is not a valid step.
@@ -57,6 +60,7 @@ class Pipeline:
 		self.step = 0
 		self.results = Stack()
 		self.errors = Stack()
+		self.default = default
 		for step in iterable:
 			self._validate_step(step)
 			self.pipeline.append(step)
@@ -117,7 +121,7 @@ class Pipeline:
 		pipeline = tuple(self.pipeline)
 		self.step = 0
 		self.results.clear()
-		self.results.push(default)
+		self.results.push(default if default is not None else self.default)
 		self.errors.clear()
 		def worker():
 			for index, step in enumerate(pipeline):
@@ -244,7 +248,7 @@ class Pipeline:
 		"""
 		if not isinstance(index, int):
 			raise TypeError(f"{index} is not int.")
-		if not 1 < index <= len(self.pipeline) + 1:
+		if not 1 <= index <= len(self.pipeline) + 1:
 			raise IndexError("Index out of range.")
 		self._validate_step(step)
 		self.pipeline.insert(index - 1, step)
