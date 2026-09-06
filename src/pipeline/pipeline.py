@@ -1,6 +1,7 @@
 import threading
 from collections.abc import Mapping
 
+from ._compat import _DEFAULT
 from .stack import Stack
 
 
@@ -20,15 +21,11 @@ class Pipeline:
 
 	Args:
 		iterable: An iterable of pipeline steps. Defaults to an empty pipeline.
-		default: The default value for the first step of the pipeline if run(default=None).
+		default: The value used for the first step when ``run()`` is called without an explicit ``default``.
 
 	Attributes:
-		stop_event: Event used to request that the worker stop execution.
-		skip_event: Event used to request that the next step be skipped.
-		pipeline: List containing the configured pipeline steps.
-		thread: The worker thread for the current execution, or ``None`` when no execution is active.
 		step: The one-based index of the currently executing step, or ``0`` when the pipeline is not running.
-		default: The default value for the first step of the pipeline if run(default=None).
+		default: The value used for the first step when ``run()`` is called without an explicit ``default``.
 		results: Stack containing the initial value and results produced by executed steps.
 		errors: Stack containing exceptions raised by executed steps.
 
@@ -50,7 +47,7 @@ class Pipeline:
 
 		Args:
 			iterable: An iterable containing pipeline steps.
-			default: The default value for the first step of the pipeline if run(default=None).
+			default: The value used for the first step when ``run()`` is called without an explicit ``default``.
 
 		Raises:
 			TypeError: If any item in ``iterable`` is not a valid step.
@@ -58,6 +55,8 @@ class Pipeline:
 		iterable = tuple(iterable)
 		self.stop_event = threading.Event()
 		self.skip_event = threading.Event()
+		self.error_event = threading.Event()
+		self.condition = threading.Condition()
 		self.pipeline = []
 		self.thread = None
 		self.step = 0
@@ -86,7 +85,7 @@ class Pipeline:
 		if isinstance(step[1], tuple):
 			return step[0](default, *step[1], **step[2]) if len(step) > 2 else step[0](default, *step[1])
 		return step[0](default, **step[1])
-	def run(self, default=None, delay=0, daemon=False, stop_on_error=True):
+	def run(self, default=_DEFAULT, delay=0, daemon=False, stop_on_error=True):
 		"""Run the pipeline asynchronously in a worker thread.
 
 		The supplied ``default`` value is stored as the initial result.
@@ -96,13 +95,16 @@ class Pipeline:
 		Execution stops when all steps have completed, ``stop()`` is called, or an exception is raised while ``stop_on_error`` is enabled.
 
 		Args:
-			default: Initial value passed to the first step.
-				Defaults to ``None``.
-			delay: Delay in seconds between steps. Must be a non-negative integer or floating-point number.
+			default: The initial value passed to the first step.
+				If omitted, the pipeline's ``default`` value is used.
+				``None`` may be passed explicitly.
+			delay: Delay in seconds before the first step and between subsequent steps.
+				Must be a non-negative integer or floating-point number.
 				Defaults to ``0``.
 			daemon: Whether the worker thread should be a daemon thread.
 				Defaults to ``False``.
 			stop_on_error: Whether execution should stop after the first exception.
+				When disabled, the failed step's result is not added to ``results``, and execution continues with the previous result.
 				Defaults to ``True``.
 
 		Returns:
@@ -121,12 +123,15 @@ class Pipeline:
 			raise RuntimeError("Pipeline is already running.")
 		self.stop_event.clear()
 		self.skip_event.clear()
+		self.error_event.clear()
 		pipeline = tuple(self.pipeline)
 		self.step = 0
 		self.results.clear()
-		self.results.push(default if default is not None else self.default)
+		self.results.push(default if default is not _DEFAULT else self.default)
 		self.errors.clear()
 		def worker():
+			if delay:
+				self.stop_event.wait(delay)
 			for index, step in enumerate(pipeline):
 				if self.stop_event.is_set():
 					break
@@ -137,14 +142,19 @@ class Pipeline:
 				try:
 					self.results.push(self._execute_step(step, self.results.get()))
 				except Exception as error:
-					self.errors.push(error)
+					with self.condition:
+						self.errors.push(error)
+						self.error_event.set()
+						self.condition.notify_all()
 					if stop_on_error:
 						break
-				if delay:
+				if delay and index < len(pipeline) - 1:
 					self.stop_event.wait(delay)
 			if not self.stop_event.is_set():
 				self.step = 0
-			self.thread = None
+			with self.condition:
+				self.thread = None
+				self.condition.notify_all()
 		self.thread = threading.Thread(target=worker, daemon=daemon)
 		self.thread.start()
 		return self
@@ -201,16 +211,28 @@ class Pipeline:
 		if self.thread is not None and self.running:
 			self.skip_event.set()
 		return self
-	def wait(self):
+	def wait(self, reraise_exception=False):
 		"""Wait until the currently running pipeline finishes.
 
-		This method blocks only when the pipeline is running.
+		This method blocks only while the pipeline is running.
+		If ``reraise_exception`` is enabled and an exception has been raised by the worker, the exception is re-raised in the calling thread as soon as it is detected.
+
+		Args:
+			reraise_exception: Whether to re-raise the most recent worker exception in the calling thread.
+				Defaults to ``False``.
 
 		Returns:
 			This pipeline instance.
+
+		Raises:
+			Exception: The exception raised by a pipeline step if ``reraise_exception`` is ``True`` and an exception has occurred.
 		"""
-		if self.thread is not None and self.running:
-			self.thread.join()
+		with self.condition:
+			while self.thread is not None and self.running:
+				if reraise_exception and self.error_event.is_set():
+					self.error_event.clear()
+					raise self.errors.get()
+				self.condition.wait()
 		return self
 	def rerun(self, *args, **kwargs):
 		"""Stop the current execution and start the pipeline again.
