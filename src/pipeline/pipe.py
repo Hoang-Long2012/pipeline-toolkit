@@ -1,4 +1,6 @@
 from functools import update_wrapper
+
+
 class step:
 	"""Represent a callable with preconfigured arguments.
 

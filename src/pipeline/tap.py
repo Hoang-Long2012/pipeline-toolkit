@@ -1,4 +1,6 @@
 import copy
+
+
 def tap(value, function, *args, **kwargs):
 	"""Apply a function to a deep copy of a value and return the original value.
 
