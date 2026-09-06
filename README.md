@@ -15,8 +15,10 @@ It also provides small utilities for composing functions, configuring callable s
 - Stop, skip, wait, and rerun execution.
 - Manual synchronous step execution.
 - Optional execution delays.
+- Initial cancellation window before the first step when a delay is enabled.
 - Configurable daemon worker threads.
 - Optional stop-on-error behavior.
+- Optional exception re-raising from worker threads.
 - Result and error history using a stack.
 - Pipeline modification with `add()`, `insert()`, `pop()`, and `clear()`.
 - Sequential callable composition with `compose()`.
@@ -174,26 +176,40 @@ The callable receives the previous result followed by the supplied positional an
 Start the pipeline asynchronously.
 
 ```python
-pipeline.run(default=None, delay=0, daemon=False, stop_on_error=True)
+pipeline.run(default, delay=0, daemon=False, stop_on_error=True)
 ```
 
-The default value becomes the initial result.
+The initial result is determined by the supplied `default` value.
 
-If it is None, the default value configured when creating the pipeline is used.
+If `default` is omitted, the value configured when creating the pipeline is used.
+
+`None` can be passed explicitly as the initial value:
 
 ```python
 pipeline = Pipeline([
 	(add, (5,)),
 ], default=10)
 
-pipeline.run().wait()
+pipeline.run(None).wait()
 ```
 
-`delay` specifies the delay in seconds between steps.
+In this example, the first step receives `None`, not `10`.
+
+`delay` specifies the delay in seconds before the first step and between subsequent steps.
+
+When `delay` is enabled, the initial delay provides an opportunity to cancel the pipeline before the first step begins.
+
+```python
+pipeline.run(10, delay=1)
+
+pipeline.stop()
+```
 
 `daemon` controls whether the worker thread is a daemon thread.
 
 `stop_on_error` controls whether execution stops after the first exception.
+
+When disabled, exceptions are stored in `errors` and execution continues with the previous result.
 
 `run()` returns the pipeline instance, allowing calls such as:
 
@@ -213,6 +229,19 @@ pipeline.wait()
 
 It returns the pipeline instance.
 
+By default, exceptions raised by pipeline steps are stored in `errors` and are not raised by `wait()`.
+
+To re-raise the most recent worker exception in the calling thread, use `reraise_exception=True`:
+
+```python
+try:
+	pipeline.wait(reraise_exception=True)
+except Exception as error:
+	print(error)
+```
+
+This allows an exception raised by a worker step to be re-raised in the thread waiting for the pipeline.
+
 ### `stop()`
 
 Request the running pipeline to stop and wait for its worker thread to terminate.
@@ -222,6 +251,8 @@ step = pipeline.stop()
 ```
 
 The return value is the current one-based step index when execution is stopped, or `0` if the pipeline was not running.
+
+If the pipeline is stopped before the first step begins, the return value is `0`.
 
 ### `skip()`
 
@@ -253,11 +284,11 @@ result = pipeline.run_step(2, 10)
 
 Unlike `run()`, this method:
 
-- does not create a worker thread
-- does not modify pipeline execution state
-- does not store the result in `results`
-- does not store exceptions in `errors`
-- allows exceptions to propagate to the caller
+- Does not create a worker thread.
+- Does not modify the pipeline's worker-thread state.
+- Does not store the result in `results`.
+- Does not store exceptions in `errors`.
+- Allows exceptions to propagate to the caller.
 
 This makes it useful when a single pipeline step needs to be executed manually.
 
@@ -270,7 +301,7 @@ pipeline.results
 pipeline.errors
 ```
 
-`results` contains the initial value and the results produced by executed steps.
+`results` contains the initial value and the results produced by successfully executed steps.
 
 For example:
 
@@ -285,6 +316,8 @@ print(pipeline.results.get())
 When `stop_on_error=True`, execution stops after the first exception.
 
 When `stop_on_error=False`, the exception is stored in `errors` and execution continues with the previous result.
+
+If multiple exceptions occur, they are stored in `errors` in execution order, with the most recent exception at the top of the stack.
 
 ## Managing Pipeline Steps
 
@@ -454,6 +487,8 @@ pipeline = Pipeline([
 ])
 ```
 
+The returned step can be placed directly inside a pipeline step tuple.
+
 ### `step`
 
 `step` represents a callable with preconfigured arguments.
@@ -493,7 +528,7 @@ print(result)  # 15
 
 The wrapped callable is executed once for each repetition, with each result passed to the next execution.
 
-Repeated execution starts with None; each result is passed to the next execution.
+Repeated execution starts with `None`; each result is passed to the next execution.
 
 `step` also provides convenience support for file-like objects through `<` and `>`:
 
@@ -522,7 +557,7 @@ def show(data):
 
 result = tap(value, show)
 
-print(result is value)
+print(result is value)  # True
 ```
 
 The function receives a deep copy, so mutations made by the side-effect function do not modify the original value.
@@ -574,22 +609,22 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ### `Pipeline`
 
-| Member       | Description                           |
-| ------------ | ------------------------------------- |
-| `run()`      | Start asynchronous pipeline execution |
-| `run_step()` | Execute one step synchronously        |
-| `stop()`     | Stop the current execution            |
-| `skip()`     | Request the next step to be skipped   |
-| `wait()`     | Wait for the current execution        |
-| `rerun()`    | Restart the pipeline                  |
-| `add()`      | Append a step                         |
-| `insert()`   | Insert a step                         |
-| `pop()`      | Remove and return a step              |
-| `clear()`    | Remove all steps                      |
-| `running`    | Whether the worker is running         |
-| `step`       | Current one-based step index          |
-| `results`    | Stack of initial value and results    |
-| `errors`     | Stack of raised exceptions            |
+| Member       | Description                                   |
+| ------------ | --------------------------------------------- |
+| `run()`      | Start asynchronous pipeline execution         |
+| `run_step()` | Execute one step synchronously                |
+| `stop()`     | Stop the current execution                    |
+| `skip()`     | Request the next step to be skipped           |
+| `wait()`     | Wait for the current execution                |
+| `rerun()`    | Restart the pipeline                          |
+| `add()`      | Append a step                                 |
+| `insert()`   | Insert a step                                 |
+| `pop()`      | Remove and return a step                      |
+| `clear()`    | Remove all steps                              |
+| `running`    | Whether the worker is running                 |
+| `step`       | Current one-based step index                  |
+| `results`    | Stack of initial value and successful results |
+| `errors`     | Stack of raised exceptions                    |
 
 ### Functional Utilities
 

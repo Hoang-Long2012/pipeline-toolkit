@@ -29,6 +29,6 @@ from .compose import compose
 from .pipe import pipe, step
 from .pipeline import Pipeline
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __author__ = "Hoàng Long"
 __all__ = ["Pipeline", "**author**", "**version**", "compose", "pipe", "step"]
