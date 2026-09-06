@@ -1,6 +1,6 @@
 [project]
 name = "pipeline-toolkit"
-version = "0.1.0"
+version = "0.2.0"
 description = "A small functional pipeline toolkit for Python."
 readme = "README.md"
 authors = [
@@ -14,6 +14,7 @@ keywords = [
 	"pipeline",
 	"functional programming",
 	"functional pipeline",
+	"functional toolkit",
 	"workflow",
 	"async",
 	"asynchronous",
