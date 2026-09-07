@@ -13,6 +13,7 @@ It also provides small utilities for composing functions, configuring callable s
 - Positional and keyword arguments for pipeline steps.
 - Configurable pipeline defaults.
 - Stop, skip, wait, and rerun execution.
+- Context manager support for automatic pipeline execution and cleanup.
 - Manual synchronous step execution.
 - Optional execution delays.
 - Initial cancellation window before the first step when a delay is enabled.
@@ -23,6 +24,7 @@ It also provides small utilities for composing functions, configuring callable s
 - Pipeline modification with `add()`, `insert()`, `pop()`, and `clear()`.
 - Sequential callable composition with `compose()`.
 - Configurable callable steps with `pipe` and `step`.
+- Step export and unpacking support.
 - Side-effect operations with `tap()`.
 
 ## Installation
@@ -274,6 +276,36 @@ pipeline.rerun(10)
 
 Arguments are passed directly to `run()`.
 
+### Context Manager
+
+`Pipeline` can be used as a context manager.
+
+Entering the context automatically starts the pipeline if it is not already running. Exiting the context requests the pipeline to stop and waits for the worker thread to terminate.
+
+```python
+with Pipeline([
+	(add, (5,)),
+	(multiply, (2,)),
+]) as pipeline:
+	print("Pipeline started")
+
+pipeline.results.get()
+```
+
+This is useful when the lifetime of the pipeline should be tied to a `with` block.
+
+The context manager does not start the pipeline again if it is already running:
+
+```python
+pipeline.run(10)
+
+with pipeline:
+	# The existing execution continues.
+	pass
+```
+
+When leaving the context, `stop()` is called regardless of whether the block exits normally or because of an exception.
+
 ## Manual Step Execution
 
 `run_step()` executes one configured step synchronously.
@@ -461,33 +493,34 @@ from pipeline import pipe
 def add(value, amount):
 	return value + amount
 
-step = add(5)
-print(step(10))
+add_five = add(5)
+
+print(add_five(10))
 ```
 
-The `pipe` object itself can be called to create a `step`:
+The `pipe` object itself is called to create a `step`.
 
 ```python
 add(5)
 ```
 
-`add(5)` returns a step containing `add` and the argument `5`.
+returns a `step` containing `add` and the argument `5`.
 
-It can then be used directly in a pipeline:
+A `step` can be used directly as a callable:
 
 ```python
-from pipeline import Pipeline, pipe
+result = add_five(10)
+```
 
-@pipe
-def add(value, amount):
-	return value + amount
+It can also be placed inside a pipeline step tuple:
 
+```python
 pipeline = Pipeline([
-	(add(5),),
+	(add_five,),
 ])
 ```
 
-The returned step can be placed directly inside a pipeline step tuple.
+Because `step` objects are callable, they are compatible with the standard pipeline step format without requiring special handling by `Pipeline`.
 
 ### `step`
 
@@ -530,13 +563,72 @@ The wrapped callable is executed once for each repetition, with each result pass
 
 Repeated execution starts with `None`; each result is passed to the next execution.
 
+#### Exporting a step
+
+A `step` can be converted into the standard pipeline step format with `export()`:
+
+```python
+add_five = step(add, 5)
+
+pipeline_step = add_five.export()
+
+print(pipeline_step)
+```
+
+The exported value is one of the standard pipeline step forms:
+
+```python
+(function,)
+(function, args)
+(function, kwargs)
+(function, args, kwargs)
+```
+
+For example:
+
+```python
+step(add, 5, amount=10).export()
+```
+
+produces:
+
+```python
+(add, (5,), {"amount": 10})
+```
+
+Empty positional or keyword arguments are omitted from the exported tuple.
+
+#### Unpacking a step
+
+A `step` can also be unpacked directly with the `*` operator:
+
+```python
+add_five = step(add, 5)
+
+pipeline = Pipeline([
+	(*add_five,),
+])
+```
+
+This is equivalent to:
+
+```python
+pipeline = Pipeline([
+	add_five.export(),
+])
+```
+
+Unpacking is therefore a convenient shorthand when constructing pipeline step tuples.
+
+`step` itself remains a general callable object and is not a special pipeline step type. `Pipeline` continues to use its standard `(function, args, kwargs)` step format.
+
 `step` also provides convenience support for file-like objects through `<` and `>`:
 
 ```python
-step = step(process)
+process_step = step(process)
 
-result = step < file
-step > file
+result = process_step < file
+process_step > file
 ```
 
 These operations use the file-like object's `read()` and `write()` methods respectively.
@@ -603,28 +695,30 @@ print(stack.get())
 
 `Stack` is also used internally by `Pipeline` for storing results and errors.
 
+`Stack` raises `StackOverflowError` when pushing to a full stack and `StackUnderflowError` when accessing or removing an item from an empty stack.
+
 For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ## API Overview
 
 ### `Pipeline`
 
-| Member       | Description                                   |
-| ------------ | --------------------------------------------- |
-| `run()`      | Start asynchronous pipeline execution         |
-| `run_step()` | Execute one step synchronously                |
-| `stop()`     | Stop the current execution                    |
-| `skip()`     | Request the next step to be skipped           |
-| `wait()`     | Wait for the current execution                |
-| `rerun()`    | Restart the pipeline                          |
-| `add()`      | Append a step                                 |
-| `insert()`   | Insert a step                                 |
-| `pop()`      | Remove and return a step                      |
-| `clear()`    | Remove all steps                              |
-| `running`    | Whether the worker is running                 |
-| `step`       | Current one-based step index                  |
-| `results`    | Stack of initial value and successful results |
-| `errors`     | Stack of raised exceptions                    |
+| Member        | Description                                   |
+| ------------- | --------------------------------------------- |
+| `run()`       | Start asynchronous pipeline execution         |
+| `run_step()`  | Execute one step synchronously                |
+| `stop()`      | Stop the current execution                    |
+| `skip()`      | Request the next step to be skipped           |
+| `wait()`      | Wait for the current execution                |
+| `rerun()`     | Restart the pipeline                          |
+| `add()`       | Append a step                                 |
+| `insert()`    | Insert a step                                 |
+| `pop()`       | Remove and return a step                      |
+| `clear()`     | Remove all steps                              |
+| `running`     | Whether the worker is running                 |
+| `step`        | Current one-based step index                  |
+| `results`     | Stack of initial value and successful results |
+| `errors`      | Stack of raised exceptions                    |
 
 ### Functional Utilities
 
@@ -632,13 +726,34 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | --------- | ---------------------------------------------- |
 | `compose` | Apply callables sequentially to a value        |
 | `pipe`    | Wrap a callable as a step factory              |
-| `step`    | Represent a callable with configured arguments |
 | `tap`     | Apply a side effect to a deep copy of a value  |
-| `Stack`   | Provide a simple LIFO stack container          |
+
+### `step`
+
+| Member       | Description                                        |
+| ------------ | -------------------------------------------------- |
+| `export()`   | Convert the step to standard pipeline step format  |
+
+### `Stack`
+
+| Member | Description |
+|---|---|
+| `Stack(maxsize=0)` | Create an empty LIFO stack with optional maximum capacity. |
+| `push(value)` | Push a value onto the top of the stack. |
+| `get()` | Return the top value without removing it. |
+| `pop()` | Remove and return the top value. |
+| `clear()` | Remove all values from the stack. |
+| `empty()` | Return whether the stack is empty. |
+| `full()` | Return whether the stack has reached its maximum capacity. |
+| `len(stack)` | Return the number of values currently in the stack. |
+| `bool(stack)` | Return whether the stack contains at least one value. |
+| `value in stack` | Check whether a value exists in the stack. |
+| `iter(stack)` | Iterate over values from bottom to top. |
+| `repr(stack)` | Return a developer-oriented representation of the stack. |
 
 ## Requirements
 
-* Python 3.8 or newer
+- Python 3.8 or newer
 
 ## Changelog
 

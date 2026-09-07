@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3
+- Added context manager support to `Pipeline` for automatically starting and stopping pipeline execution.
+- Added `step.export()` for converting a `step` object to the standard pipeline step format.
+- Added support for unpacking `step` objects into pipeline step tuples.
+
 ## 0.2.2
 - Improved `Pipeline.run()` default handling with an internal sentinel, allowing `None` to be passed explicitly.
 - Added `reraise_exception` support to `Pipeline.wait()` for propagating worker exceptions to the calling thread.
