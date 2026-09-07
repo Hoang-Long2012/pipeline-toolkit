@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.4
+- Documentation-only release: Fix heading level in README.
+
 ## 0.2.3
 - Added context manager support to `Pipeline` for automatically starting and stopping pipeline execution.
 - Added `step.export()` for converting a `step` object to the standard pipeline step format.
