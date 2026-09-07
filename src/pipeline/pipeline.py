@@ -344,3 +344,15 @@ class Pipeline:
 	def __len__(self):
 		"""Return the number of configured pipeline steps."""
 		return len(self.pipeline)
+	def __enter__(self):
+		"""Enter the context manager and start the pipeline if it is not running.
+
+		Returns:
+			This pipeline instance.
+		"""
+		if not self.running:
+			self.run()
+		return self
+	def __exit__(self, exc_type, exc_value, traceback):
+		"""Exit the context manager and stop the pipeline."""
+		self.stop()

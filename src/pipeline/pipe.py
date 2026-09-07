@@ -21,6 +21,25 @@ class step:
 		self.function = function
 		self.args = args
 		self.kwargs = kwargs
+	def export(self):
+		"""Export the step in pipeline step format.
+
+		The returned tuple contains the wrapped callable and, when configured, its positional and keyword arguments.
+
+		Returns:
+			tuple: One of the following forms:
+
+				(function,)
+				(function, args)
+				(function, kwargs)
+				(function, args, kwargs)
+		"""
+		parts = [self.function]
+		if self.args:
+			parts.append(self.args)
+		if self.kwargs:
+			parts.append(self.kwargs)
+		return tuple(parts)
 	def __call__(self, default=None):
 		return self.function(default, *self.args, **self.kwargs)
 	def __ror__(self, other):
@@ -38,6 +57,8 @@ class step:
 		return self.function(other.read(), *self.args, **self.kwargs)
 	def __gt__(self, other):
 		return other.write(self.function(None, *self.args, **self.kwargs))
+	def __iter__(self):
+		yield from self.export() 
 	def __repr__(self):
 		parts = [f"{self.function!r}"]
 		if self.args:
