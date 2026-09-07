@@ -633,7 +633,7 @@ process_step > file
 
 These operations use the file-like object's `read()` and `write()` methods respectively.
 
-## `tap`
+### `tap`
 
 `tap()` applies a side effect to a deep copy of a value and returns the original value unchanged.
 
@@ -674,7 +674,7 @@ pipeline.run(10).wait()
 
 The value printed by `tap()` is still passed unchanged to the next step.
 
-## `Stack`
+### `Stack`
 
 `Stack` is a simple LIFO stack container with optional capacity limits.
 
