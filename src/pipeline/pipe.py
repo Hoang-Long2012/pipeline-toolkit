@@ -87,4 +87,4 @@ class pipe:
 	def __call__(self, *args, **kwargs):
 		return step(self.function, *args, **kwargs)
 	def __repr__(self):
-		return f"{type(self).__name__}({self.__qualname__})"
+		return f"{type(self).__name__}({self.function!r})"
