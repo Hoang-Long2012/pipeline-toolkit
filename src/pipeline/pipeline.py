@@ -324,6 +324,13 @@ class Pipeline:
 	def __len__(self):
 		"""Return the number of configured pipeline steps."""
 		return len(self.pipeline)
+	def __iter__(self):
+		"""Iterate over the configured pipeline steps.
+
+		Yields:
+			Each pipeline step in its configured order.
+		"""
+		yield from self.pipeline
 	def __enter__(self):
 		"""Enter the context manager and start the pipeline if it is not running.
 
