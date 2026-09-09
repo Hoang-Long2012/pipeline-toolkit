@@ -66,3 +66,9 @@ line-ending = "auto"
 [build-system]
 requires = ["setuptools>=80"]
 build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+	"pytest>=8.3.5",
+	"ruff>=0.16.6",
+]
