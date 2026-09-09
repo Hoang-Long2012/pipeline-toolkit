@@ -55,8 +55,6 @@ class Pipeline:
 		iterable = tuple(iterable)
 		self.stop_event = threading.Event()
 		self.skip_event = threading.Event()
-		self.error_event = threading.Event()
-		self.condition = threading.Condition()
 		self.pipeline = []
 		self.thread = None
 		self.step = 0
@@ -123,7 +121,6 @@ class Pipeline:
 			raise RuntimeError("Pipeline is already running.")
 		self.stop_event.clear()
 		self.skip_event.clear()
-		self.error_event.clear()
 		pipeline = tuple(self.pipeline)
 		self.step = 0
 		self.results.clear()
@@ -142,19 +139,14 @@ class Pipeline:
 				try:
 					self.results.push(self._execute_step(step, self.results.get()))
 				except Exception as error:
-					with self.condition:
-						self.errors.push(error)
-						self.error_event.set()
-						self.condition.notify_all()
+					self.errors.push(error)
 					if stop_on_error:
 						break
 				if delay and index < len(pipeline) - 1:
 					self.stop_event.wait(delay)
 			if not self.stop_event.is_set():
 				self.step = 0
-			with self.condition:
-				self.thread = None
-				self.condition.notify_all()
+			self.thread = None
 		self.thread = threading.Thread(target=worker, daemon=daemon)
 		self.thread.start()
 		return self
@@ -211,30 +203,16 @@ class Pipeline:
 		if self.thread is not None and self.running:
 			self.skip_event.set()
 		return self
-	def wait(self, reraise_exception=False):
+	def wait(self):
 		"""Wait until the currently running pipeline finishes.
 
 		This method blocks only while the pipeline is running.
-		If ``reraise_exception`` is enabled and an exception has been raised by the worker, the exception is re-raised in the calling thread as soon as it is detected.
-
-		Args:
-			reraise_exception: Whether to re-raise the most recent worker exception in the calling thread.
-				Defaults to ``False``.
 
 		Returns:
 			This pipeline instance.
-
-		Raises:
-			Exception: The exception raised by a pipeline step if ``reraise_exception`` is ``True`` and an exception has occurred.
 		"""
-		with self.condition:
-			while True:
-				if reraise_exception and self.error_event.is_set():
-					self.error_event.clear()
-					raise self.errors.get()
-				if not self.running:
-					break
-				self.condition.wait()
+		if self.thread is not None and self.running:
+			self.thread.join()
 		return self
 	def rerun(self, *args, **kwargs):
 		"""Stop the current execution and start the pipeline again.
