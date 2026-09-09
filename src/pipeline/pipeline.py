@@ -228,10 +228,12 @@ class Pipeline:
 			Exception: The exception raised by a pipeline step if ``reraise_exception`` is ``True`` and an exception has occurred.
 		"""
 		with self.condition:
-			while self.thread is not None and self.running:
+			while True:
 				if reraise_exception and self.error_event.is_set():
 					self.error_event.clear()
 					raise self.errors.get()
+				if not self.running:
+					break
 				self.condition.wait()
 		return self
 	def rerun(self, *args, **kwargs):
