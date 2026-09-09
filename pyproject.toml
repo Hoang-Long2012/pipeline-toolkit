@@ -51,6 +51,18 @@ where = ["src"]
 [tool.setuptools.package-dir]
 "" = "src"
 
+[tool.ruff]
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+ignore = ["BLE001"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "tab"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
 [build-system]
 requires = ["setuptools>=80"]
 build-backend = "setuptools.build_meta"
