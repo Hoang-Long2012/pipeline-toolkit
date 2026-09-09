@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.5
+- Removed `Pipeline.wait(reraise_exception)` and exception re-raising from `Pipeline.wait()`.
+
 ## 0.2.4
 - Documentation-only release: Fix heading level in README.
 
