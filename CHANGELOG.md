@@ -3,6 +3,8 @@
 ## 0.2.5
 - Removed `Pipeline.wait(reraise_exception)` and exception re-raising from `Pipeline.wait()`.
 - Added iteration support to `Pipeline`, allowing pipeline steps to be iterated in their configured order.
+- Added `Pipeline.result` property to retrieve the most recent pipeline result.
+- Added `Pipeline.error` property to re-raise the most recent exception raised by a pipeline step.
 
 ## 0.2.4
 - Documentation-only release: Fix heading level in README.

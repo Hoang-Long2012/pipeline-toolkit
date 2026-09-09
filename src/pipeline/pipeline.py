@@ -229,6 +229,38 @@ class Pipeline:
 	def running(self):
 		"""Whether the pipeline currently has a running worker thread."""
 		return self.thread is not None and self.thread.is_alive()
+	@property
+	def result(self):
+		"""Return the most recent result of the pipeline.
+
+		The initial value is considered the result when no pipeline step has successfully completed.
+
+		Returns:
+			The initial value or the result produced by the last successfully executed step.
+			``None`` if the pipeline has not been run yet.
+
+		Raises:
+			RuntimeError: If the pipeline is currently running.
+		"""
+		if self.running:
+			raise RuntimeError("Pipeline is already running.")
+		if self.results:
+			return self.results.get()
+	@property
+	def error(self):
+		"""Raise the most recent exception raised by the pipeline, if any.
+
+		Returns:
+			``None`` if no exception was raised by the pipeline.
+
+		Raises:
+			RuntimeError: If the pipeline is currently running.
+			Exception: The most recent exception raised by a pipeline step.
+		"""
+		if self.running:
+			raise RuntimeError("Pipeline is already running.")
+		if self.errors:
+			raise self.errors.get()
 	def add(self, step):
 		"""Append a validated step to the pipeline.
 
