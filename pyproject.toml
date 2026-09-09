@@ -1,6 +1,6 @@
 [project]
 name = "pipeline-toolkit"
-version = "0.2.4"
+version = "0.2.5"
 description = "A small functional pipeline toolkit for Python."
 readme = "README.md"
 authors = [
