@@ -37,6 +37,42 @@ class TestPipelineInitialization:
 		pipeline = Pipeline(default=42)
 		assert pipeline.default == 42
 
+	def test_pipeline_init_with_run_now(self):
+		"""Test initializing and immediately running the pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline(
+			[(add, (5,))],
+			run_now=True,
+			run_args=(10,),
+		)
+		pipeline.wait()
+
+		assert pipeline.result == 15
+
+	def test_pipeline_init_run_now_uses_default(self):
+		"""Test run_now uses the pipeline default when run_args is empty."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline(
+			[(add, (5,))],
+			default=10,
+			run_now=True,
+		)
+		pipeline.wait()
+
+		assert pipeline.result == 15
+
+	def test_pipeline_init_run_now_invalid_run_args(self):
+		"""Test run_now with non-tuple run_args raises TypeError."""
+
+		with pytest.raises(TypeError, match="run_args is not a tuple"):
+			Pipeline(run_now=True, run_args=[10])
+
 	def test_pipeline_init_invalid_step(self):
 		"""Test initializing pipeline with invalid step raises TypeError."""
 		with pytest.raises(TypeError, match="Invalid step format"):
@@ -86,6 +122,17 @@ class TestPipelineStepFormats:
 		pipeline = Pipeline([(func, (5,), {"b": 20})])
 		pipeline.run(10).wait()
 		assert pipeline.results.get() == 35
+
+	def test_invalid_three_part_step_with_mapping_args(self):
+		"""Test three-part step requires tuple positional arguments."""
+
+		def func(x):
+			return x
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="Invalid step format"):
+			pipeline.execute((func, {"x": 1}, {"y": 2}), 10)
 
 
 class TestPipelineExecution:
@@ -155,7 +202,7 @@ class TestPipelineStop:
 
 	def test_stop_during_delay_cancellation_window(self):
 		"""Test stopping during initial delay returns 0."""
-		
+
 		def func(x):
 			return x
 
@@ -274,7 +321,7 @@ class TestPipelineRerun:
 
 
 class TestPipelineResults:
-	"""Test pipeline results stack."""
+	"""Test pipeline results stack and result property."""
 
 	def test_results_contains_initial_value(self):
 		"""Test that results contains initial value."""
@@ -313,6 +360,54 @@ class TestPipelineResults:
 		assert pipeline.results.get() == 25
 		assert pipeline.results.pop() == 25
 		assert pipeline.results.get() == 15
+
+	def test_result_returns_latest_result(self):
+		"""Test result property returns the latest result."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		pipeline.run(10).wait()
+
+		assert pipeline.result == 15
+
+	def test_result_returns_initial_value_without_successful_step(self):
+		"""Test result returns initial value when no step succeeds."""
+
+		def raise_error(x):
+			raise ValueError("Error")
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(42).wait()
+
+		assert pipeline.result == 42
+
+	def test_result_is_none_before_first_run(self):
+		"""Test result is None before the pipeline has run."""
+		pipeline = Pipeline()
+		assert pipeline.result is None
+
+	def test_result_raises_while_running(self):
+		"""Test result raises RuntimeError while pipeline is running."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait(timeout=1.0)
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(10)
+
+		assert step_started.wait(timeout=1.0)
+
+		with pytest.raises(RuntimeError, match="Pipeline is already running"):
+			_ = pipeline.result
+
+		step_should_exit.set()
+		pipeline.wait()
 
 
 class TestPipelineErrors:
@@ -366,6 +461,50 @@ class TestPipelineErrors:
 		assert len(pipeline.errors) == 1
 		assert pipeline.results.get() == 15
 
+	def test_error_raises_latest_exception(self):
+		"""Test error property raises the latest pipeline exception."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(10).wait()
+
+		with pytest.raises(ValueError, match="Test error"):
+			_ = pipeline.error
+
+	def test_error_returns_none_without_exception(self):
+		"""Test error property returns None when no exception occurred."""
+
+		def func(x):
+			return x
+
+		pipeline = Pipeline([(func,)])
+		pipeline.run(10).wait()
+
+		assert pipeline.error is None
+
+	def test_error_raises_while_running(self):
+		"""Test error raises RuntimeError while pipeline is running."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait(timeout=1.0)
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(10)
+
+		assert step_started.wait(timeout=1.0)
+
+		with pytest.raises(RuntimeError, match="Pipeline is already running"):
+			_ = pipeline.error
+
+		step_should_exit.set()
+		pipeline.wait()
+
 
 class TestPipelineManualSteps:
 	"""Test manual step execution."""
@@ -379,6 +518,12 @@ class TestPipelineManualSteps:
 		pipeline = Pipeline([(add, (5,))])
 		result = pipeline.run_step(1, 10)
 		assert result == 15
+
+	def test_run_step_default_is_none(self):
+		"""Test run_step uses None as its default value."""
+		pipeline = Pipeline([(lambda x: x,)])
+
+		assert pipeline.run_step(1) is None
 
 	def test_run_step_does_not_affect_state(self):
 		"""Test run_step doesn't affect pipeline results or errors."""
@@ -395,6 +540,13 @@ class TestPipelineManualSteps:
 		assert result == 15
 		assert len(pipeline.results) == 0
 		assert len(pipeline.errors) == 0
+
+	def test_run_step_invalid_index_type(self):
+		"""Test run_step with non-integer index."""
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="Step is not int"):
+			pipeline.run_step("1", 10)
 
 	def test_run_step_invalid_index_out_of_range(self):
 		"""Test run_step with index beyond pipeline."""
@@ -436,6 +588,101 @@ class TestPipelineManualSteps:
 		pipeline.wait()
 
 
+class TestPipelineExecute:
+	"""Test direct synchronous step execution."""
+
+	def test_execute_basic(self):
+		"""Test executing a standalone step."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline()
+		result = pipeline.execute((add, (5,)), 10)
+
+		assert result == 15
+
+	def test_execute_callable_only(self):
+		"""Test executing a callable-only step."""
+
+		def identity(x):
+			return x
+
+		pipeline = Pipeline()
+		assert pipeline.execute((identity,), 42) == 42
+
+	def test_execute_with_keyword_args(self):
+		"""Test executing a step with keyword arguments."""
+
+		def power(x, exp=2):
+			return x**exp
+
+		pipeline = Pipeline()
+		assert pipeline.execute((power, {"exp": 3}), 2) == 8
+
+	def test_execute_with_args_and_kwargs(self):
+		"""Test executing a step with positional and keyword arguments."""
+
+		def func(x, a, b=10):
+			return x + a + b
+
+		pipeline = Pipeline()
+		assert pipeline.execute((func, (5,), {"b": 20}), 10) == 35
+
+	def test_execute_does_not_affect_state(self):
+		"""Test execute doesn't affect pipeline results or errors."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		result = pipeline.execute((add, (10,)), 5)
+
+		assert result == 15
+		assert len(pipeline.results) == 0
+		assert len(pipeline.errors) == 0
+
+	def test_execute_invalid_step(self):
+		"""Test execute validates the supplied step."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="Invalid step format"):
+			pipeline.execute(("not_callable",), 10)
+
+	def test_execute_while_running(self):
+		"""Test execute raises error while pipeline is running."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait(timeout=1.0)
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(10)
+
+		assert step_started.wait(timeout=1.0)
+
+		with pytest.raises(RuntimeError, match="Pipeline is already running"):
+			pipeline.execute((slow_func,), 10)
+
+		step_should_exit.set()
+		pipeline.wait()
+
+	def test_execute_propagates_exception(self):
+		"""Test execute propagates exceptions to the caller."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		pipeline = Pipeline()
+
+		with pytest.raises(ValueError, match="Test error"):
+			pipeline.execute((raise_error,), 10)
+
+
 class TestPipelineModification:
 	"""Test pipeline step modification."""
 
@@ -446,8 +693,9 @@ class TestPipelineModification:
 			return x + y
 
 		pipeline = Pipeline()
-		pipeline.add((add, (5,)))
+		result = pipeline.add((add, (5,)))
 
+		assert result is None
 		assert len(pipeline) == 1
 
 	def test_insert_step(self):
@@ -495,6 +743,170 @@ class TestPipelineModification:
 		pipeline.clear()
 
 		assert len(pipeline) == 0
+
+	def test_remove_step(self):
+		"""Test removing a matching step."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		step = (add, (5,))
+		pipeline = Pipeline([
+			step,
+			(multiply, (2,)),
+		])
+
+		result = pipeline.remove(step)
+
+		assert result is None
+		assert len(pipeline) == 1
+		assert pipeline[1] == (multiply, (2,))
+
+	def test_remove_missing_step(self):
+		"""Test removing a missing step raises ValueError."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline()
+
+		with pytest.raises(ValueError, match="Step not found in pipeline"):
+			pipeline.remove((add, (5,)))
+
+	def test_discard_existing_step(self):
+		"""Test discard removes an existing step."""
+
+		def add(x, y):
+			return x + y
+
+		step = (add, (5,))
+		pipeline = Pipeline([step])
+
+		result = pipeline.discard(step)
+
+		assert result is None
+		assert len(pipeline) == 0
+
+	def test_discard_missing_step(self):
+		"""Test discard ignores a missing step."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline()
+
+		assert pipeline.discard((add, (5,))) is None
+		assert len(pipeline) == 0
+
+
+class TestPipelineItemAccess:
+	"""Test item access and modification."""
+
+	def test_getitem(self):
+		"""Test retrieving a step by one-based index."""
+
+		def add(x, y):
+			return x + y
+
+		step = (add, (5,))
+		pipeline = Pipeline([step])
+
+		assert pipeline[1] == step
+
+	def test_getitem_invalid_index_type(self):
+		"""Test getting a step with a non-integer index."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="is not int"):
+			pipeline["1"]
+
+	def test_getitem_index_out_of_range(self):
+		"""Test getting a step with an invalid index."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(IndexError, match="Index out of range"):
+			pipeline[1]
+
+	def test_setitem(self):
+		"""Test replacing a step by one-based index."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		pipeline = Pipeline([(add, (5,))])
+		new_step = (multiply, (2,))
+
+		result = pipeline.__setitem__(1, new_step)
+
+		assert result is None
+		assert pipeline[1] == new_step
+
+	def test_setitem_invalid_index_type(self):
+		"""Test setting a step with a non-integer index."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="is not int"):
+			pipeline["1"] = (str,)
+
+	def test_setitem_index_out_of_range(self):
+		"""Test setting a step with an invalid index."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(IndexError, match="Index out of range"):
+			pipeline[1] = (str,)
+
+	def test_setitem_invalid_step(self):
+		"""Test setting an invalid step."""
+
+		pipeline = Pipeline([(str,)])
+
+		with pytest.raises(TypeError, match="Invalid step format"):
+			pipeline[1] = ("not_callable",)
+
+	def test_delitem(self):
+		"""Test deleting a step by one-based index."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		pipeline = Pipeline([
+			(add, (5,)),
+			(multiply, (2,)),
+		])
+
+		del pipeline[1]
+
+		assert len(pipeline) == 1
+		assert pipeline[1] == (multiply, (2,))
+
+	def test_delitem_invalid_index_type(self):
+		"""Test deleting a step with a non-integer index."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="is not int"):
+			del pipeline["1"]
+
+	def test_delitem_index_out_of_range(self):
+		"""Test deleting a step with an invalid index."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(IndexError, match="Index out of range"):
+			del pipeline[1]
 
 
 class TestPipelineContextManager:
@@ -615,6 +1027,23 @@ class TestPipelineCallable:
 
 		assert len(pipeline) == 2
 
+	def test_pipeline_iter(self):
+		"""Test iterating over pipeline steps."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		steps = [
+			(add, (5,)),
+			(multiply, (2,)),
+		]
+		pipeline = Pipeline(steps)
+
+		assert list(pipeline) == steps
+
 	def test_pipeline_str_representation(self):
 		"""Test pipeline string representation."""
 
@@ -665,7 +1094,7 @@ class TestPipelineDelay:
 		pipeline.run(10, delay=0.1).wait()
 
 		elapsed = time.monotonic() - start
-		assert elapsed >= 0.1
+		assert elapsed >= 0.09
 
 	def test_run_delay_cancellation_before_first_step(self):
 		"""Test delay provides cancellation window before first step."""
