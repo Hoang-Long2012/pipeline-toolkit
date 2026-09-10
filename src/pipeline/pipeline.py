@@ -320,6 +320,56 @@ class Pipeline:
 	def clear(self):
 		"""Remove all steps from the pipeline."""
 		self.pipeline.clear()
+	def __getitem__(self, index):
+		"""Return the pipeline step at the specified index.
+
+		Args:
+			index: One-based index of the pipeline step to retrieve.
+
+		Returns:
+			The pipeline step at the specified index.
+
+		Raises:
+			TypeError: If ``index`` is not an integer.
+			IndexError: If ``index`` is outside the pipeline.
+		"""
+		if not isinstance(index, int):
+			raise TypeError(f"{index} is not int.")
+		if not 1 <= index <= len(self.pipeline):
+			raise IndexError("Index out of range.")
+		return self.pipeline[index - 1]
+	def __setitem__(self, index, step):
+		"""Replace the pipeline step at the specified index.
+
+		Args:
+			index: One-based index of the pipeline step to replace.
+			step: The new pipeline step.
+
+		Raises:
+			TypeError: If ``index`` is not an integer or ``step`` is invalid.
+			IndexError: If ``index`` is outside the pipeline.
+		"""
+		if not isinstance(index, int):
+			raise TypeError(f"{index} is not int.")
+		if not 1 <= index <= len(self.pipeline):
+			raise IndexError("Index out of range.")
+		self._validate_step(step)
+		self.pipeline[index - 1] = step
+	def __delitem__(self, index):
+		"""Remove the pipeline step at the specified index.
+
+		Args:
+			index: One-based index of the pipeline step to remove.
+
+		Raises:
+			TypeError: If ``index`` is not an integer.
+			IndexError: If ``index`` is outside the pipeline.
+		"""
+		if not isinstance(index, int):
+			raise TypeError(f"{index} is not int.")
+		if not 1 <= index <= len(self.pipeline):
+			raise IndexError("Index out of range.")
+		del self.pipeline[index - 1]
 	def _format_step(self, step):
 		func = step[0]
 		if len(step) >= 2:
