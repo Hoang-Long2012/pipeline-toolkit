@@ -8,6 +8,7 @@ It also provides small utilities for composing functions, configuring callable s
 
 ## Features
 
+- Zero dependencies.
 - Sequential functional pipeline execution.
 - Asynchronous execution using a worker thread.
 - Positional and keyword arguments for pipeline steps.
