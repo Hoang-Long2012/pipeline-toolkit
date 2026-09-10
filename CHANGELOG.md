@@ -6,6 +6,7 @@
 - Added `Pipeline.result` property to retrieve the most recent pipeline result.
 - Added `Pipeline.error` property to re-raise the most recent exception raised by a pipeline step.
 - Added `run_now` and `run_args` parameters to `Pipeline` to support automatically starting the pipeline with custom `run()` arguments during initialization.
+- Added `Pipeline.__getitem__()`, `Pipeline.__setitem__()`, and `Pipeline.__delitem__()` for indexed access, replacement, and removal of pipeline steps.
 
 ## 0.2.4
 - Documentation-only release: Fix heading level in README.
