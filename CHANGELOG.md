@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.1
+- Documentation-only release: Edited features list in readme.
+
 ## 0.3.0
 - Removed `Pipeline.wait(reraise_exception)` and exception re-raising from `Pipeline.wait()`.
 - Added iteration support to `Pipeline`, allowing pipeline steps to be iterated in their configured order.
