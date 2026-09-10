@@ -12,7 +12,7 @@ It also provides small utilities for composing functions, configuring callable s
 - Asynchronous execution using a worker thread.
 - Positional and keyword arguments for pipeline steps.
 - Configurable pipeline defaults.
-- Optional pipeline execution during initialization.
+- Optional automatic pipeline execution during initialization.
 - Stop, skip, wait, and rerun execution.
 - Context manager support for automatic pipeline execution and cleanup.
 - Manual synchronous step execution.
@@ -186,9 +186,7 @@ Start the pipeline asynchronously.
 pipeline.run(default, delay=0, daemon=False, stop_on_error=True)
 ```
 
-The initial result is determined by the supplied `default` value.
-
-If `default` is omitted, the value configured when creating the pipeline is used.
+The initial `result` is determined by the supplied `default` value, or by the pipeline's `default` value when `default` is omitted.
 
 `None` can be passed explicitly as the initial value:
 
@@ -237,7 +235,7 @@ pipeline = Pipeline([
 ], default=10, run_now=True)
 ```
 
-When `run_now=True`, `run_args` specifies the positional arguments passed to `run()`:
+When `run_now=True`, `run_args` must be a tuple containing the positional arguments passed to `run()` when the pipeline starts automatically.
 
 ```python
 pipeline = Pipeline([
@@ -254,10 +252,6 @@ pipeline = Pipeline([
 
 pipeline.run(20)
 ```
-
-`run_args` must be a tuple.
-
-It is intended for positional arguments to `run()`, including values such as the initial `default`, `delay`, `daemon`, and `stop_on_error`.
 
 For example:
 
@@ -455,7 +449,7 @@ Accessing `result` while the pipeline is running raises `RuntimeError`.
 
 ### `error`
 
-The `error` property raises the most recent exception raised by the pipeline.
+The `error` property raises the most recent exception raised by the pipeline when accessed.
 
 ```python
 pipeline.run(10).wait()
@@ -927,7 +921,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `step`           | Current one-based step index.                               |
 | `default`        | Default initial value used by `run()`.                      |
 | `result`         | Most recent result.                                         |
-| `error`          | Most recent pipeline exception.                             |
+| `error`          | Raise the most recent pipeline exception when accessed.  |
 | `results`        | Stack of initial value and successful results.              |
 | `errors`         | Stack of raised exceptions.                                 |
 | `__getitem__()`  | Retrieve a step using one-based indexing.                   |
@@ -940,6 +934,8 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `__bool__()`     | Return whether the pipeline is running.                     |
 | `__str__()`      | Return a human-readable pipeline representation.            |
 | `__repr__()`     | Return a developer-oriented pipeline representation.        |
+| `__enter__()`   | Enter the context manager and start the pipeline if needed. |
+| `__exit__()`    | Exit the context manager and stop the pipeline.             |
 
 ### Functional Utilities
 
