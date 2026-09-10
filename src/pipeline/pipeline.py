@@ -42,15 +42,21 @@ class Pipeline:
 		>>> pipeline.results.get()
 		15
 	"""
-	def __init__(self, iterable=(), default=None):
+	def __init__(self, iterable=(), default=None, run_now=False, run_args=()):
 		"""Initialize a pipeline.
 
 		Args:
 			iterable: An iterable containing pipeline steps.
+				Defaults to an empty pipeline.
 			default: The value used for the first step when ``run()`` is called without an explicit ``default``.
+				Default to ``None``.
+			run_now: Whether to start the pipeline immediately after initialization.
+				Defaults to ``False``.
+			run_args: A tuple of positional arguments passed to ``run()`` when ``run_now`` is enabled.
+				Defaults to ``()``.
 
 		Raises:
-			TypeError: If any item in ``iterable`` is not a valid step.
+			TypeError: If any item in ``iterable`` is not a valid step, or if ``run_args`` is not a tuple.
 		"""
 		iterable = tuple(iterable)
 		self.stop_event = threading.Event()
@@ -64,6 +70,10 @@ class Pipeline:
 		for step in iterable:
 			self._validate_step(step)
 			self.pipeline.append(step)
+		if run_now:
+			if not isinstance(run_args, tuple):
+				raise TypeError("run_args is not a tuple.")
+			self.run(*run_args)
 	def _validate_step(self, step):
 		if not step or not isinstance(step, tuple):
 			raise TypeError("Invalid step format.")
