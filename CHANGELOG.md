@@ -4,7 +4,7 @@
 - Removed `Pipeline.wait(reraise_exception)` and exception re-raising from `Pipeline.wait()`.
 - Added iteration support to `Pipeline`, allowing pipeline steps to be iterated in their configured order.
 - Added `Pipeline.result` property to retrieve the most recent pipeline result.
-- Added `Pipeline.error` property to re-raise the most recent exception raised by a pipeline step.
+- Added Pipeline.error property to raise the most recent exception raised by a pipeline step when accessed.
 - Added `run_now` and `run_args` parameters to `Pipeline` to support automatically starting the pipeline with custom `run()` arguments during initialization.
 - Added one-based indexed access, replacement, and removal of pipeline steps through `Pipeline.__getitem__()`, `Pipeline.__setitem__()`, and `Pipeline.__delitem__()`.
 - Added `Pipeline.remove()` to remove the first matching step.
