@@ -299,6 +299,37 @@ class Pipeline:
 			raise IndexError("Index out of range.")
 		self._validate_step(step)
 		self.pipeline.insert(index - 1, step)
+	def remove(self, step):
+		"""Remove the first matching step from the pipeline.
+
+		Args:
+			step: The pipeline step to remove.
+
+		Raises:
+			TypeError: If ``step`` has an invalid format.
+			ValueError: If ``step`` is not found in the pipeline.
+		"""
+		self._validate_step(step)
+		for index, pipeline_step in enumerate(self.pipeline):
+			if pipeline_step == step:
+				del self.pipeline[index]
+				return None
+		raise ValueError("Step not found in pipeline.")
+	def discard(self, step):
+		"""Remove the first matching step from the pipeline if present.
+
+		If the step is not found, the pipeline is left unchanged.
+
+		Args:
+			step: The pipeline step to remove.
+
+		Raises:
+			TypeError: If ``step`` has an invalid format.
+		"""
+		try:
+			self.remove(step)
+		except ValueError:
+			pass
 	def pop(self, index):
 		"""Remove and return the step at the specified index.
 
