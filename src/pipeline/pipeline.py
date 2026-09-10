@@ -160,7 +160,7 @@ class Pipeline:
 		self.thread = threading.Thread(target=worker, daemon=daemon)
 		self.thread.start()
 		return self
-	def run_step(self, step, default):
+	def run_step(self, step, default=None):
 		"""Execute a single pipeline step synchronously.
 
 		This method does not create or modify the worker thread and does not store the result or exception in the pipeline's ``results`` or ``errors`` stacks.
@@ -169,6 +169,7 @@ class Pipeline:
 		Args:
 			step: One-based index of the pipeline step to execute.
 			default: Value passed to the selected step as its first argument.
+				Default to ``None``.
 
 		Returns:
 			The value returned by the selected step.
@@ -188,6 +189,29 @@ class Pipeline:
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
 		step = self.pipeline[step - 1]
+		return self._execute_step(step, default)
+	def execute(self, step, default=None):
+		"""Execute a pipeline step synchronously.
+
+		This method validates and executes the specified step directly.
+		It does not create or modify the worker thread and does not store the result or exception in the pipeline's ``results`` or ``errors`` stacks.
+		Exceptions are allowed to propagate to the caller.
+
+		Args:
+			step: The pipeline step to execute.
+			default: Value passed to the step as its first argument.
+				Default to ``None``.
+
+		Returns:
+			The value returned by the step.
+
+		Raises:
+			TypeError: If ``step`` has an invalid format.
+			RuntimeError: If the pipeline is currently running.
+		"""
+		self._validate_step(step)
+		if self.running:
+			raise RuntimeError("Pipeline is already running.")
 		return self._execute_step(step, default)
 	def stop(self):
 		"""Request the running pipeline to stop and wait for termination.

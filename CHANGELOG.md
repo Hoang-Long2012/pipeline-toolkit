@@ -9,6 +9,7 @@
 - Added one-based indexed access, replacement, and removal of pipeline steps through `Pipeline.__getitem__()`, `Pipeline.__setitem__()`, and `Pipeline.__delitem__()`.
 - Added `Pipeline.remove()` to remove the first matching step.
 - Added `Pipeline.discard()` to remove the first matching step without raising `ValueError` when absent.
+- Added `Pipeline.execute()` for synchronously executing an individual pipeline step without starting the worker thread or modifying execution results and errors.
 
 ## 0.2.4
 - Documentation-only release: Fix heading level in README.
