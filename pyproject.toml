@@ -55,7 +55,7 @@ where = ["src"]
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-ignore = ["BLE001"]
+ignore = ["BLE001", "RET501"]
 
 [tool.ruff.format]
 quote-style = "double"
