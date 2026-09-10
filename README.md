@@ -12,6 +12,7 @@ It also provides small utilities for composing functions, configuring callable s
 - Asynchronous execution using a worker thread.
 - Positional and keyword arguments for pipeline steps.
 - Configurable pipeline defaults.
+- Optional pipeline execution during initialization.
 - Stop, skip, wait, and rerun execution.
 - Context manager support for automatic pipeline execution and cleanup.
 - Manual synchronous step execution.
@@ -19,9 +20,13 @@ It also provides small utilities for composing functions, configuring callable s
 - Initial cancellation window before the first step when a delay is enabled.
 - Configurable daemon worker threads.
 - Optional stop-on-error behavior.
-- Optional exception re-raising from worker threads.
 - Result and error history using a stack.
-- Pipeline modification with `add()`, `insert()`, `pop()`, and `clear()`.
+- Convenient access to the most recent result or error.
+- Pipeline modification with `add()`, `insert()`, `remove()`, `discard()`, `pop()`, and `clear()`.
+- One-based step indexing and item assignment.
+- Step deletion with `del`.
+- Iteration over configured pipeline steps.
+- Human-readable and developer-oriented pipeline representations.
 - Sequential callable composition with `compose()`.
 - Configurable callable steps with `pipe` and `step`.
 - Step export and unpacking support.
@@ -63,7 +68,7 @@ pipeline = Pipeline([
 
 pipeline.run(10).wait()
 
-print(pipeline.results.get())
+print(pipeline.result)
 ```
 
 The execution flow is:
@@ -221,6 +226,57 @@ pipeline.run(10).wait()
 
 The pipeline is snapshotted when execution starts. Changes made to `pipeline.pipeline` after `run()` begins do not affect the current execution.
 
+### `run_now`
+
+A pipeline can optionally start execution immediately when it is created.
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+	(multiply, (2,)),
+], default=10, run_now=True)
+```
+
+When `run_now=True`, `run_args` specifies the positional arguments passed to `run()`:
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+], default=10, run_now=True, run_args=(20,))
+```
+
+This is equivalent to:
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+], default=10)
+
+pipeline.run(20)
+```
+
+`run_args` must be a tuple.
+
+It is intended for positional arguments to `run()`, including values such as the initial `default`, `delay`, `daemon`, and `stop_on_error`.
+
+For example:
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+], run_now=True, run_args=(10, 1, True, False))
+```
+
+is equivalent to:
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+])
+
+pipeline.run(10, 1, True, False)
+```
+
 ### `wait()`
 
 Wait for the current execution to finish.
@@ -231,18 +287,9 @@ pipeline.wait()
 
 It returns the pipeline instance.
 
-By default, exceptions raised by pipeline steps are stored in `errors` and are not raised by `wait()`.
+`wait()` only blocks while the pipeline is running.
 
-To re-raise the most recent worker exception in the calling thread, use `reraise_exception=True`:
-
-```python
-try:
-	pipeline.wait(reraise_exception=True)
-except Exception as error:
-	print(error)
-```
-
-This allows an exception raised by a worker step to be re-raised in the thread waiting for the pipeline.
+Exceptions raised by pipeline steps are stored in `errors`. They are not re-raised by `wait()`.
 
 ### `stop()`
 
@@ -276,7 +323,7 @@ pipeline.rerun(10)
 
 Arguments are passed directly to `run()`.
 
-### Context Manager
+## Context Manager
 
 `Pipeline` can be used as a context manager.
 
@@ -289,7 +336,7 @@ with Pipeline([
 ]) as pipeline:
 	print("Pipeline started")
 
-pipeline.results.get()
+print(pipeline.result)
 ```
 
 This is useful when the lifetime of the pipeline should be tied to a `with` block.
@@ -308,11 +355,17 @@ When leaving the context, `stop()` is called regardless of whether the block exi
 
 ## Manual Step Execution
 
-`run_step()` executes one configured step synchronously.
+Pipeline steps can be executed synchronously without starting the worker thread.
+
+### `run_step()`
+
+`run_step()` executes one configured pipeline step synchronously.
 
 ```python
 result = pipeline.run_step(2, 10)
 ```
+
+The first argument is the one-based index of the configured step.
 
 Unlike `run()`, this method:
 
@@ -321,8 +374,41 @@ Unlike `run()`, this method:
 - Does not store the result in `results`.
 - Does not store exceptions in `errors`.
 - Allows exceptions to propagate to the caller.
+- Cannot be used while the pipeline is running.
 
-This makes it useful when a single pipeline step needs to be executed manually.
+The selected step is executed with the supplied `default` value as its first argument.
+
+### `execute()`
+
+`execute()` executes a pipeline step directly and synchronously.
+
+```python
+result = pipeline.execute((add, (5,)), 10)
+```
+
+Unlike `run_step()`, `execute()` receives the pipeline step itself rather than a one-based index.
+
+It:
+
+- Validates the supplied step.
+- Does not create a worker thread.
+- Does not modify the pipeline's worker-thread state.
+- Does not store the result in `results`.
+- Does not store exceptions in `errors`.
+- Allows exceptions to propagate to the caller.
+- Cannot be used while the pipeline is running.
+
+For example:
+
+```python
+step = (add, (5,))
+
+result = pipeline.execute(step, 10)
+
+print(result)  # 15
+```
+
+`execute()` is useful when a step needs to be executed independently of the configured pipeline.
 
 ## Results and Errors
 
@@ -351,6 +437,40 @@ When `stop_on_error=False`, the exception is stored in `errors` and execution co
 
 If multiple exceptions occur, they are stored in `errors` in execution order, with the most recent exception at the top of the stack.
 
+### `result`
+
+The `result` property returns the most recent result of the pipeline.
+
+The initial value is considered the result when no pipeline step has successfully completed.
+
+```python
+pipeline.run(10).wait()
+
+print(pipeline.result)
+```
+
+If the pipeline has not been run yet, `result` is `None`.
+
+Accessing `result` while the pipeline is running raises `RuntimeError`.
+
+### `error`
+
+The `error` property raises the most recent exception raised by the pipeline.
+
+```python
+pipeline.run(10).wait()
+
+if pipeline.errors:
+	try:
+		pipeline.error
+	except Exception as error:
+		print(error)
+```
+
+If no exception has occurred, `error` returns `None`.
+
+Accessing `error` while the pipeline is running raises `RuntimeError`.
+
 ## Managing Pipeline Steps
 
 Pipeline steps can be modified before or between executions.
@@ -373,6 +493,26 @@ pipeline.insert(2, (str.strip,))
 
 Positions range from `1` to `len(pipeline) + 1`.
 
+### `remove()`
+
+Remove the first matching step:
+
+```python
+pipeline.remove((str.upper,))
+```
+
+If the step is not found, `ValueError` is raised.
+
+### `discard()`
+
+Remove the first matching step if present:
+
+```python
+pipeline.discard((str.upper,))
+```
+
+Unlike `remove()`, `discard()` does nothing if the step is not found.
+
 ### `pop()`
 
 Remove and return a step:
@@ -391,7 +531,41 @@ Remove all configured steps:
 pipeline.clear()
 ```
 
-## Pipeline State
+## Item Access
+
+Pipeline steps can also be accessed and modified using one-based indexing.
+
+### `__getitem__`
+
+Retrieve a step:
+
+```python
+step = pipeline[1]
+```
+
+### `__setitem__`
+
+Replace a step:
+
+```python
+pipeline[1] = (str.upper,)
+```
+
+The replacement step is validated before it is stored.
+
+### `__delitem__`
+
+Delete a step:
+
+```python
+del pipeline[1]
+```
+
+All pipeline indexes are one-based.
+
+Unlike normal Python sequences, index `0` is invalid.
+
+## Pipeline State and Protocols
 
 The `running` property indicates whether the worker thread is currently running:
 
@@ -435,6 +609,37 @@ if add in pipeline:
 ```
 
 Callable membership uses identity comparison.
+
+A pipeline can be iterated over in its configured order:
+
+```python
+for step in pipeline:
+	print(step)
+```
+
+The string representation displays the configured steps as a functional chain:
+
+```python
+print(pipeline)
+```
+
+For example:
+
+```text
+add(5) | multiply(2)
+```
+
+The developer-oriented representation contains the total number of steps, current step, and running state:
+
+```python
+print(repr(pipeline))
+```
+
+For example:
+
+```text
+Pipeline(total_steps=2, current_step=0, running=False)
+```
 
 ## Functional Utilities
 
@@ -703,57 +908,73 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ### `Pipeline`
 
-| Member        | Description                                   |
-| ------------- | --------------------------------------------- |
-| `run()`       | Start asynchronous pipeline execution         |
-| `run_step()`  | Execute one step synchronously                |
-| `stop()`      | Stop the current execution                    |
-| `skip()`      | Request the next step to be skipped           |
-| `wait()`      | Wait for the current execution                |
-| `rerun()`     | Restart the pipeline                          |
-| `add()`       | Append a step                                 |
-| `insert()`    | Insert a step                                 |
-| `pop()`       | Remove and return a step                      |
-| `clear()`     | Remove all steps                              |
-| `running`     | Whether the worker is running                 |
-| `step`        | Current one-based step index                  |
-| `results`     | Stack of initial value and successful results |
-| `errors`      | Stack of raised exceptions                    |
+| Member           | Description                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| `run()`          | Start asynchronous pipeline execution.                      |
+| `run_step()`     | Execute a configured step synchronously by one-based index. |
+| `execute()`      | Execute a supplied pipeline step synchronously.             |
+| `stop()`         | Stop the current execution.                                 |
+| `skip()`         | Request the next step to be skipped.                        |
+| `wait()`         | Wait for the current execution.                             |
+| `rerun()`        | Restart the pipeline.                                       |
+| `add()`          | Append a step.                                              |
+| `insert()`       | Insert a step.                                              |
+| `remove()`       | Remove the first matching step.                             |
+| `discard()`      | Remove the first matching step if present.                  |
+| `pop()`          | Remove and return a step.                                   |
+| `clear()`        | Remove all steps.                                           |
+| `running`        | Whether the worker is running.                              |
+| `step`           | Current one-based step index.                               |
+| `default`        | Default initial value used by `run()`.                      |
+| `result`         | Most recent result.                                         |
+| `error`          | Most recent pipeline exception.                             |
+| `results`        | Stack of initial value and successful results.              |
+| `errors`         | Stack of raised exceptions.                                 |
+| `__getitem__()`  | Retrieve a step using one-based indexing.                   |
+| `__setitem__()`  | Replace a step using one-based indexing.                    |
+| `__delitem__()`  | Delete a step using one-based indexing.                     |
+| `__iter__()`     | Iterate over configured steps.                              |
+| `__len__()`      | Return the number of configured steps.                      |
+| `__contains__()` | Check callable membership by identity.                      |
+| `__call__()`     | Run the pipeline.                                           |
+| `__bool__()`     | Return whether the pipeline is running.                     |
+| `__str__()`      | Return a human-readable pipeline representation.            |
+| `__repr__()`     | Return a developer-oriented pipeline representation.        |
 
 ### Functional Utilities
 
 | Member    | Description                                    |
 | --------- | ---------------------------------------------- |
-| `compose` | Apply callables sequentially to a value        |
-| `pipe`    | Wrap a callable as a step factory              |
-| `tap`     | Apply a side effect to a deep copy of a value  |
+| `compose` | Apply callables sequentially to a value.       |
+| `pipe`    | Wrap a callable as a step factory.             |
+| `tap`     | Apply a side effect to a deep copy of a value. |
 
 ### `step`
 
-| Member       | Description                                        |
-| ------------ | -------------------------------------------------- |
-| `export()`   | Convert the step to standard pipeline step format  |
+| Member     | Description                                        |
+| ---------- | -------------------------------------------------- |
+| `export()` | Convert the step to standard pipeline step format. |
 
 ### `Stack`
 
-| Member | Description |
-|---|---|
+| Member             | Description                                                |
+| ------------------ | ---------------------------------------------------------- |
 | `Stack(maxsize=0)` | Create an empty LIFO stack with optional maximum capacity. |
-| `push(value)` | Push a value onto the top of the stack. |
-| `get()` | Return the top value without removing it. |
-| `pop()` | Remove and return the top value. |
-| `clear()` | Remove all values from the stack. |
-| `empty()` | Return whether the stack is empty. |
-| `full()` | Return whether the stack has reached its maximum capacity. |
-| `len(stack)` | Return the number of values currently in the stack. |
-| `bool(stack)` | Return whether the stack contains at least one value. |
-| `value in stack` | Check whether a value exists in the stack. |
-| `iter(stack)` | Iterate over values from bottom to top. |
-| `repr(stack)` | Return a developer-oriented representation of the stack. |
+| `push(value)`      | Push a value onto the top of the stack.                    |
+| `get()`            | Return the top value without removing it.                  |
+| `pop()`            | Remove and return the top value.                           |
+| `clear()`          | Remove all values from the stack.                          |
+| `empty()`          | Return whether the stack is empty.                         |
+| `full()`           | Return whether the stack has reached its maximum capacity. |
+| `len(stack)`       | Return the number of values currently in the stack.        |
+| `bool(stack)`      | Return whether the stack contains at least one value.      |
+| `value in stack`   | Check whether a value exists in the stack.                 |
+| `iter(stack)`      | Iterate over values from bottom to top.                    |
+| `repr(stack)`      | Return a developer-oriented representation of the stack.   |
 
 ## Requirements
 
-- Python 3.8 or newer
+* Python 3.8 or newer
 
 ## Changelog
 
