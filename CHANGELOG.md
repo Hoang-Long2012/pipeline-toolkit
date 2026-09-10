@@ -7,6 +7,8 @@
 - Added `Pipeline.error` property to re-raise the most recent exception raised by a pipeline step.
 - Added `run_now` and `run_args` parameters to `Pipeline` to support automatically starting the pipeline with custom `run()` arguments during initialization.
 - Added one-based indexed access, replacement, and removal of pipeline steps through `Pipeline.__getitem__()`, `Pipeline.__setitem__()`, and `Pipeline.__delitem__()`.
+- Added `Pipeline.remove()` to remove the first matching step.
+- Added `Pipeline.discard()` to remove the first matching step without raising `ValueError` when absent.
 
 ## 0.2.4
 - Documentation-only release: Fix heading level in README.
