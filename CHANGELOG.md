@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.5
+## 0.3.0
 - Removed `Pipeline.wait(reraise_exception)` and exception re-raising from `Pipeline.wait()`.
 - Added iteration support to `Pipeline`, allowing pipeline steps to be iterated in their configured order.
 - Added `Pipeline.result` property to retrieve the most recent pipeline result.
@@ -10,6 +10,7 @@
 - Added `Pipeline.remove()` to remove the first matching step.
 - Added `Pipeline.discard()` to remove the first matching step without raising `ValueError` when absent.
 - Added `Pipeline.execute()` for synchronously executing an individual pipeline step without starting the worker thread or modifying execution results and errors.
+- Changed `Pipeline.run_step()` signature to make the `default` argument optional, defaulting to `None`.
 
 ## 0.2.4
 - Documentation-only release: Fix heading level in README.
