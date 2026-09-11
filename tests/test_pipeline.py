@@ -1,5 +1,6 @@
 """Tests for the Pipeline class."""
 
+import copy
 import threading
 import time
 
@@ -973,6 +974,182 @@ class TestPipelineContextManager:
 		assert not pipeline.running
 
 		step_should_exit.set()
+
+
+class TestPipelineCopy:
+	"""Test pipeline copying behavior."""
+
+	def test_copy_returns_pipeline(self):
+		"""Test copy returns a new pipeline instance."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default=10)
+		copied = pipeline.copy()
+
+		assert isinstance(copied, Pipeline)
+		assert copied is not pipeline
+
+	def test_copy_copies_configuration_shallowly(self):
+		"""Test copy creates a shallow copy of the pipeline configuration."""
+
+		def add(x, y):
+			return x + y
+
+		args = ([5],)
+		pipeline = Pipeline([(add, args)], default={"value": 10})
+		copied = pipeline.copy()
+
+		assert copied.pipeline is not pipeline.pipeline
+		assert copied.pipeline == pipeline.pipeline
+		assert copied.pipeline[0] is pipeline.pipeline[0]
+		assert copied.pipeline[0][1] is args
+		assert copied.default is not pipeline.default
+		assert copied.default == pipeline.default
+
+	def test_copy_resets_execution_state(self):
+		"""Test copy does not copy execution state."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		pipeline.run(10).wait()
+
+		copied = pipeline.copy()
+
+		assert copied.step == 0
+		assert not copied.running
+		assert len(copied.results) == 0
+		assert len(copied.errors) == 0
+		assert copied.thread is None
+
+	def test_copy_method_matches_copy_protocol(self):
+		"""Test copy method returns the same result as copy.copy."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default=10)
+
+		copied = pipeline.copy()
+		protocol_copy = copy.copy(pipeline)
+
+		assert copied.pipeline == protocol_copy.pipeline
+		assert copied.default == protocol_copy.default
+		assert copied is not protocol_copy
+
+	def test_copy_while_running_raises(self):
+		"""Test copying a running pipeline raises RuntimeError."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait(timeout=1.0)
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(10)
+
+		assert step_started.wait(timeout=1.0)
+
+		with pytest.raises(RuntimeError, match="Pipeline is already running"):
+			pipeline.copy()
+
+		with pytest.raises(RuntimeError, match="Pipeline is already running"):
+			copy.copy(pipeline)
+
+		step_should_exit.set()
+		pipeline.wait()
+
+	def test_deepcopy_returns_pipeline(self):
+		"""Test deepcopy returns a new pipeline instance."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default={"value": 10})
+		copied = copy.deepcopy(pipeline)
+
+		assert isinstance(copied, Pipeline)
+		assert copied is not pipeline
+
+	def test_deepcopy_copies_configuration_deeply(self):
+		"""Test deepcopy creates an independent copy of the configuration."""
+
+		def add(x, values):
+			values.append(x)
+			return values
+
+		args = ([5],)
+		default = {"values": [10]}
+		pipeline = Pipeline([(add, args)], default=default)
+
+		copied = copy.deepcopy(pipeline)
+
+		assert copied.pipeline is not pipeline.pipeline
+		assert copied.pipeline[0] is not pipeline.pipeline[0]
+		assert copied.pipeline[0][1] is not pipeline.pipeline[0][1]
+		assert copied.pipeline[0][1][0] is not pipeline.pipeline[0][1][0]
+		assert copied.default is not pipeline.default
+		assert copied.default["values"] is not pipeline.default["values"]
+
+	def test_deepcopy_resets_execution_state(self):
+		"""Test deepcopy does not copy execution state."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		pipeline.run(10).wait()
+
+		copied = copy.deepcopy(pipeline)
+
+		assert copied.step == 0
+		assert not copied.running
+		assert len(copied.results) == 0
+		assert len(copied.errors) == 0
+		assert copied.thread is None
+
+	def test_deepcopy_is_independent(self):
+		"""Test modifying a deep copy does not affect the original pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		args = ([5],)
+		default = {"value": [10]}
+		pipeline = Pipeline([(add, args)], default=default)
+		copied = copy.deepcopy(pipeline)
+
+		copied.pipeline[0][1][0].append(15)
+		copied.default["value"].append(20)
+
+		assert pipeline.pipeline[0][1] == ([5],)
+		assert pipeline.default == {"value": [10]}
+
+	def test_deepcopy_while_running_raises(self):
+		"""Test deep copying a running pipeline raises RuntimeError."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait(timeout=1.0)
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(10)
+
+		assert step_started.wait(timeout=1.0)
+
+		with pytest.raises(RuntimeError, match="Pipeline is already running"):
+			copy.deepcopy(pipeline)
+
+		step_should_exit.set()
+		pipeline.wait()
 
 
 class TestPipelineCallable:

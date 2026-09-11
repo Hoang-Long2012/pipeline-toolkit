@@ -1,3 +1,4 @@
+import copy
 import threading
 from collections.abc import Mapping
 
@@ -425,6 +426,19 @@ class Pipeline:
 		if not 1 <= index <= len(self.pipeline):
 			raise IndexError("Index out of range.")
 		del self.pipeline[index - 1]
+	def copy(self):
+		"""Return a shallow copy of the pipeline.
+
+		The pipeline configuration and default value are shallow-copied.
+		Execution state, including results, errors, the current step, and the worker thread, is not copied.
+
+		Returns:
+			A new pipeline instance with a shallow copy of the configuration.
+
+		Raises:
+			RuntimeError: If the pipeline is currently running.
+		"""
+		return self.__copy__()
 	def _format_step(self, step):
 		func = step[0]
 		if len(step) >= 2:
@@ -490,3 +504,37 @@ class Pipeline:
 	def __exit__(self, exc_type, exc_value, traceback):
 		"""Exit the context manager and stop the pipeline."""
 		self.stop()
+	def __copy__(self):
+		"""Create a shallow copy of the pipeline.
+
+		Only the pipeline configuration and default value are copied.
+		Execution state, including results, errors, the current step, and the worker thread, is reset in the new pipeline.
+
+		Returns:
+			A new pipeline instance with a shallow copy of the configuration.
+
+		Raises:
+			RuntimeError: If the pipeline is currently running.
+		"""
+		if self.running:
+			raise RuntimeError("Pipeline is already running.")
+		pipeline = copy.copy(self.pipeline)
+		default = copy.copy(self.default)
+		return type(self)(pipeline, default)
+	def __deepcopy__(self, memo):
+		"""Create a deep copy of the pipeline.
+
+		The pipeline configuration and default value are deep-copied.
+		Execution state, including results, errors, the current step, and the worker thread, is reset in the new pipeline.
+
+		Returns:
+			A new pipeline instance with a deep copy of the configuration.
+
+		Raises:
+			RuntimeError: If the pipeline is currently running.
+		"""
+		if self.running:
+			raise RuntimeError("Pipeline is already running.")
+		pipeline = copy.deepcopy(self.pipeline, memo)
+		default = copy.deepcopy(self.default, memo)
+		return type(self)(pipeline, default)
