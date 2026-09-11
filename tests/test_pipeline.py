@@ -343,7 +343,7 @@ class TestPipelineResults:
 		pipeline.run(10).wait()
 
 		results = list(pipeline.results)
-		assert results == [10, 15, 25]
+		assert results == [25, 15, 10]
 
 	def test_results_stack_lifo(self):
 		"""Test results follow LIFO order."""

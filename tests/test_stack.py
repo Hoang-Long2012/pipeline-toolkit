@@ -198,13 +198,13 @@ class TestStackUtilities:
 		assert "c" not in stack
 
 	def test_iter(self):
-		"""Test iteration over stack."""
+		"""Test iteration over stack from top to bottom."""
 		stack = Stack()
 		stack.push("a")
 		stack.push("b")
 		stack.push("c")
-		items = list(stack)
-		assert items == ["a", "b", "c"]
+		assert list(stack) == ["c", "b", "a"]
+		assert len(stack) == 3
 
 	def test_repr(self):
 		"""Test repr output."""
