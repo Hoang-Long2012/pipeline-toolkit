@@ -3,7 +3,7 @@
 ## 0.3.2
 - Changed `Stack` iteration order to iterate from top to bottom, yielding the most recently pushed item first.
 - Added `Pipeline.copy()`, `__copy__()`, and `__deepcopy__()` to support shallow and deep copying of pipeline configuration without copying execution state.
-- First stable release.
+- First stable API release.
 
 ## 0.3.1
 - Documentation-only release: Edited features list in readme.
