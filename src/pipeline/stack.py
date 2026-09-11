@@ -118,12 +118,14 @@ class Stack:
 		"""
 		return value in self._stack
 	def __iter__(self):
-		"""Iterate over the items in the stack from bottom to top.
+		"""Iterate over the items in the stack from top to bottom.
+
+		The most recently pushed item is yielded first, followed by the remaining items in reverse order of insertion.
 
 		Returns:
 			An iterator over the stack's items.
 		"""
-		yield from self._stack
+		yield from reversed(self._stack)
 	def __repr__(self):
 		"""Return the developer-oriented representation of the stack."""
 		return f"{type(self).__name__}({self._stack!r}, maxsize={self._maxsize})"

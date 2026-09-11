@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.2
+- Changed `Stack` iteration order to iterate from top to bottom, yielding the most recently pushed item first.
+
 ## 0.3.1
 - Documentation-only release: Edited features list in readme.
 
