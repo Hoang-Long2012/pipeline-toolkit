@@ -27,6 +27,7 @@ It also provides small utilities for composing functions, configuring callable s
 - One-based step indexing and item assignment.
 - Step deletion with `del`.
 - Iteration over configured pipeline steps.
+- Shallow and deep pipeline copying.
 - Human-readable and developer-oriented pipeline representations.
 - Sequential callable composition with `compose()`.
 - Configurable callable steps with `pipe` and `step`.
@@ -223,7 +224,9 @@ When disabled, exceptions are stored in `errors` and execution continues with th
 pipeline.run(10).wait()
 ```
 
-The pipeline is snapshotted when execution starts. Changes made to `pipeline.pipeline` after `run()` begins do not affect the current execution.
+The configured steps are snapshotted when execution starts.
+
+Changes made to the pipeline configuration after `run()` begins do not affect the current execution.
 
 ### `run_now`
 
@@ -404,6 +407,96 @@ print(result)  # 15
 ```
 
 `execute()` is useful when a step needs to be executed independently of the configured pipeline.
+
+## Copying a Pipeline
+
+A `Pipeline` can be copied using the standard Python copy protocol or the convenience `copy()` method.
+
+### `copy()`
+
+`copy()` returns a new pipeline with a shallow-copied configuration and default value.
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+], default=10)
+
+copied = pipeline.copy()
+```
+
+The pipeline configuration and `default` value are shallow-copied.
+
+Execution state is not copied. The new pipeline has its own:
+
+- Worker thread state.
+- `results` stack.
+- `errors` stack.
+- Current `step` state.
+- Stop and skip events.
+
+For example:
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+], default=10)
+
+copied = pipeline.copy()
+
+print(copied.default)  # 10
+print(copied.results)  # empty
+print(copied.running)  # False
+```
+
+The original pipeline remains independent from the copy.
+
+A pipeline cannot be copied while it is running:
+
+```python
+pipeline.run(10)
+
+pipeline.copy()  # raises RuntimeError
+```
+
+### `copy.copy()`
+
+`Pipeline` implements the standard `__copy__()` protocol.
+
+```python
+import copy
+
+copied = copy.copy(pipeline)
+```
+
+This has the same behavior as `pipeline.copy()`.
+
+Only the pipeline configuration and `default` value are shallow-copied. Execution state is reset in the new pipeline.
+
+### `copy.deepcopy()`
+
+`Pipeline` also implements the standard `__deepcopy__()` protocol.
+
+```python
+import copy
+
+copied = copy.deepcopy(pipeline)
+```
+
+The pipeline configuration and `default` value are deep-copied.
+
+Execution state is still not copied.
+
+This means nested mutable values contained in the pipeline configuration or `default` value are independently copied:
+
+```python
+pipeline = Pipeline([
+	(my_function, ({"value": 10},)),
+], default={"count": 1})
+
+copied = copy.deepcopy(pipeline)
+```
+
+As with shallow copying, a pipeline cannot be deep-copied while it is running.
 
 ## Results and Errors
 
@@ -897,6 +990,8 @@ print(stack.get())
 
 `Stack` raises `StackOverflowError` when pushing to a full stack and `StackUnderflowError` when accessing or removing an item from an empty stack.
 
+Iterating over a stack yields values from the top of the stack to the bottom.
+
 For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ## API Overview
@@ -912,6 +1007,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `skip()`         | Request the next step to be skipped.                        |
 | `wait()`         | Wait for the current execution.                             |
 | `rerun()`        | Restart the pipeline.                                       |
+| `copy()`         | Return a new pipeline with a shallow-copied configuration and default value. |
 | `add()`          | Append a step.                                              |
 | `insert()`       | Insert a step.                                              |
 | `remove()`       | Remove the first matching step.                             |
@@ -922,7 +1018,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `step`           | Current one-based step index.                               |
 | `default`        | Default initial value used by `run()`.                      |
 | `result`         | Most recent result.                                         |
-| `error`          | Raise the most recent pipeline exception when accessed.  |
+| `error`          | Raise the most recent pipeline exception when accessed.     |
 | `results`        | Stack of initial value and successful results.              |
 | `errors`         | Stack of raised exceptions.                                 |
 | `__getitem__()`  | Retrieve a step using one-based indexing.                   |
@@ -935,8 +1031,10 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `__bool__()`     | Return whether the pipeline is running.                     |
 | `__str__()`      | Return a human-readable pipeline representation.            |
 | `__repr__()`     | Return a developer-oriented pipeline representation.        |
-| `__enter__()`   | Enter the context manager and start the pipeline if needed. |
-| `__exit__()`    | Exit the context manager and stop the pipeline.             |
+| `__enter__()`    | Enter the context manager and start the pipeline if needed. |
+| `__exit__()`     | Exit the context manager and stop the pipeline.             |
+| `__copy__()`     | Create a shallow copy using Python's copy protocol.         |
+| `__deepcopy__()` | Create a deep copy using Python's copy protocol.            |
 
 ### Functional Utilities
 
@@ -966,7 +1064,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `len(stack)`       | Return the number of values currently in the stack.        |
 | `bool(stack)`      | Return whether the stack contains at least one value.      |
 | `value in stack`   | Check whether a value exists in the stack.                 |
-| `iter(stack)`      | Iterate over values from bottom to top.                    |
+| `iter(stack)`      | Iterate over values from top to bottom.                    |
 | `repr(stack)`      | Return a developer-oriented representation of the stack.   |
 
 ## Requirements
@@ -975,11 +1073,13 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/CHANGELOG.md).
+See [changelog](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/CHANGELOG.md).
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/LICENSE) for details.
+This project is licensed under the MIT License.
+
+See [license](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/LICENSE) for details.
 
 ## Contribution
 
