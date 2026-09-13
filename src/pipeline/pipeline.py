@@ -569,3 +569,84 @@ class Pipeline:
 		pipeline = copy.deepcopy(self.pipeline, memo)
 		default = copy.deepcopy(self.default, memo)
 		return type(self)(pipeline, default)
+	def __iadd__(self, step):
+		"""Append a pipeline step in place.
+
+		This is equivalent to calling :meth:`add` with the specified step.
+
+		Args:
+			step: The pipeline step to append.
+
+		Returns:
+			This pipeline instance.
+
+		Raises:
+			TypeError: If ``step`` has an invalid format.
+		"""
+		self.add(step)
+		return self
+	def __add__(self, other):
+		"""Return a new pipeline by concatenating pipeline steps.
+
+		The original pipeline and the iterable are not modified.
+
+		Args:
+			other: An iterable containing pipeline steps to append.
+
+		Returns:
+			A new pipeline containing the steps from this pipeline followed by the steps from ``other``.
+
+		Raises:
+			TypeError: If any item in ``other`` has an invalid step format.
+		"""
+		other = tuple(other)
+		return type(self)([*self, *other], self.default)
+	def __radd__(self, other):
+		"""Return a new pipeline by prepending iterable steps.
+
+		The original pipeline and the iterable are not modified.
+
+		Args:
+			other: An iterable containing pipeline steps to prepend.
+
+		Returns:
+			A new pipeline containing the steps from ``other`` followed by the steps from this pipeline.
+
+		Raises:
+			TypeError: If any item in ``other`` has an invalid step format.
+		"""
+		other = tuple(other)
+		return type(self)([*other, *self], self.default)
+	def __eq__(self, other):
+		"""Return whether two pipelines have equal configurations.
+
+		Two pipelines are considered equal when they have the same pipeline steps and default value.
+		Execution state is not considered.
+
+		Args:
+			other: The object to compare with.
+
+		Returns:
+			``True`` if ``other`` is a pipeline with the same steps and default value, otherwise ``False``.
+		"""
+		return isinstance(other, type(self)) and self.pipeline == other.pipeline and self.default == other.default
+	def __mul__(self, count):
+		"""Return a new pipeline with its steps repeated.
+
+		The original pipeline is not modified.
+
+		Args:
+			count: Number of times to repeat the pipeline steps.
+				Must be a non-negative integer.
+
+		Returns:
+			A new pipeline containing the repeated steps.
+
+		Raises:
+			ValueError: If ``count`` is negative.
+		"""
+		if not isinstance(count, int):
+			return NotImplemented
+		if count < 0:
+			raise ValueError("Count cannot be negative.")
+		return type(self)(self.pipeline * count, self.default)
