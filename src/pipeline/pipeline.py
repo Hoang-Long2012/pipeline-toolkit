@@ -21,8 +21,10 @@ class Pipeline:
 	The pipeline is snapshotted when execution starts, so modifications to the pipeline after ``run()`` has started do not affect the current execution.
 
 	Args:
-		iterable: An iterable of pipeline steps. Defaults to an empty pipeline.
+		iterable: An iterable of pipeline steps.
+			Defaults to an empty pipeline.
 		default: The value used for the first step when ``run()`` is called without an explicit ``default``.
+			Defaults to ``None``.
 
 	Attributes:
 		step: The one-based index of the currently executing step, or ``0`` when the pipeline is not running.
@@ -50,7 +52,7 @@ class Pipeline:
 			iterable: An iterable containing pipeline steps.
 				Defaults to an empty pipeline.
 			default: The value used for the first step when ``run()`` is called without an explicit ``default``.
-				Default to ``None``.
+				Defaults to ``None``.
 			run_now: Whether to start the pipeline immediately after initialization.
 				Defaults to ``False``.
 			run_args: A tuple of positional arguments passed to ``run()`` when ``run_now`` is enabled.
@@ -170,7 +172,7 @@ class Pipeline:
 		Args:
 			step: One-based index of the pipeline step to execute.
 			default: Value passed to the selected step as its first argument.
-				Default to ``None``.
+				Defaults to ``None``.
 
 		Returns:
 			The value returned by the selected step.
@@ -201,7 +203,7 @@ class Pipeline:
 		Args:
 			step: The pipeline step to execute.
 			default: Value passed to the step as its first argument.
-				Default to ``None``.
+				Defaults to ``None``.
 
 		Returns:
 			The value returned by the step.
@@ -324,6 +326,21 @@ class Pipeline:
 			raise IndexError("Index out of range.")
 		self._validate_step(step)
 		self.pipeline.insert(index - 1, step)
+	def update(self, iterable):
+		"""Append multiple validated steps to the pipeline.
+
+		All steps are validated before being added, so the pipeline is left unchanged if any step is invalid.
+
+		Args:
+			iterable: An iterable of pipeline steps.
+
+		Raises:
+			TypeError: If any item in ``iterable`` has an invalid step format.
+		"""
+		steps = tuple(iterable)
+		for step in steps:
+			self._validate_step(step)
+		self.pipeline.extend(steps)
 	def remove(self, step):
 		"""Remove the first matching step from the pipeline.
 
