@@ -5,6 +5,11 @@
 - Added `Pipeline.reverse()` for in-place reversal of pipeline steps.
 - Added `reversed()` support for iterating over pipeline steps in reverse order.
 - Added `Pipeline.update()` for adding multiple pipeline steps at once with full validation before insertion.
+- Added support  appending a single step with the `+=` operator.
+- Added support creating a new pipeline by concatenating steps with the `+` operator.
+- Added support prepending pipeline steps with the `+` operator.
+- Added support comparing pipeline configurations with the `==` operator.
+- Added support repeating pipeline steps with the `*` operator.
 
 ## 0.3.2
 - Changed `Stack` iteration order to iterate from top to bottom, yielding the most recently pushed item first.
