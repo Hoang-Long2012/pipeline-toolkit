@@ -16,7 +16,7 @@ class Pipeline:
 		(function, kwargs)
 		(function, args, kwargs)
 
-	Where ``args`` must be a tuple or mapping, and ``kwargs`` must be a mapping.
+	Where ``args`` may be a tuple or mapping when used alone, but must be a tuple when ``kwargs`` is provided.
 	The pipeline always passes the result of the previous step as the first positional argument to the next step.
 	The pipeline is snapshotted when execution starts, so modifications to the pipeline after ``run()`` has started do not affect the current execution.
 
@@ -78,18 +78,22 @@ class Pipeline:
 				raise TypeError("run_args is not a tuple.")
 			self.run(*run_args)
 	def _validate_step(self, step):
-		if not step or not isinstance(step, tuple):
-			raise TypeError("Invalid step format.")
+		if not isinstance(step, tuple):
+			raise TypeError(f"Step must be a tuple, not {type(step).__name__}.")
+		if not step:
+			raise TypeError("Step cannot be empty.")
 		if not callable(step[0]):
-			raise TypeError("Invalid step format.")
+			raise TypeError(f"Step function must be callable, not {type(step[0]).__name__}.")
 		if len(step) > 3:
-			raise TypeError("Invalid step format.")
-		if len(step) >= 2 and not isinstance(step[1], (tuple, Mapping)):
-			raise TypeError("Invalid step format.")
-		if len(step) == 3 and not isinstance(step[1], tuple):
-			raise TypeError("Invalid step format.")
+			raise TypeError(f"Step must contain at most 3 items, got {len(step)}.")
+		if len(step) >= 2:
+			if not isinstance(step[1], (tuple, Mapping)):
+				raise TypeError(f"Step arguments must be a tuple or mapping, not {type(step[1]).__name__}.")
+		if len(step) == 3:
+			if not isinstance(step[1], tuple):
+				raise TypeError("Step positional arguments must be a tuple when keyword arguments are provided.")
 		if len(step) == 3 and not isinstance(step[2], Mapping):
-			raise TypeError("Invalid step format.")
+			raise TypeError(f"Step keyword arguments must be a mapping, not {type(step[2]).__name__}.")
 	def _execute_step(self, step, default):
 		if len(step) == 1:
 			return step[0](default)

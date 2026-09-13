@@ -11,6 +11,7 @@
 - Added support prepending pipeline steps with the `+` operator.
 - Added support comparing pipeline configurations with the `==` operator.
 - Added support repeating pipeline steps with the `*` operator.
+- Improved error messages for invalid pipeline steps to provide more specific validation details.
 
 ## 0.3.2
 - Changed `Stack` iteration order to iterate from top to bottom, yielding the most recently pushed item first.
