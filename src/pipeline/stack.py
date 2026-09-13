@@ -129,3 +129,4 @@ class Stack:
 	def __repr__(self):
 		"""Return the developer-oriented representation of the stack."""
 		return f"{type(self).__name__}({self._stack!r}, maxsize={self._maxsize})"
+	put = push
