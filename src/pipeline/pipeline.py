@@ -483,8 +483,12 @@ class Pipeline:
 		"""Return the developer-oriented representation of the pipeline."""
 		return f"{type(self).__name__}(total_steps={len(self.pipeline)}, current_step={self.step}, running={self.running})"
 	def __bool__(self):
-		"""Return whether the pipeline is currently running."""
-		return self.running
+		"""Return whether the pipeline contains any configured steps.
+
+		Returns:
+			``True`` if the pipeline contains at least one step, otherwise ``False``.
+		"""
+		return bool(self.pipeline)
 	def __call__(self, *args, **kwargs):
 		"""Run the pipeline.
 
