@@ -376,6 +376,13 @@ class Pipeline:
 	def clear(self):
 		"""Remove all steps from the pipeline."""
 		self.pipeline.clear()
+	def reverse(self):
+		"""Reverse the order of pipeline steps in place.
+
+		Returns:
+			``None``.
+		"""
+		return self.pipeline.reverse()
 	def __getitem__(self, index):
 		"""Return the pipeline step at the specified index.
 
@@ -492,6 +499,13 @@ class Pipeline:
 			Each pipeline step in its configured order.
 		"""
 		yield from self.pipeline
+	def __reversed__(self):
+		"""Return an iterator that yields pipeline steps in reverse order.
+
+		Returns:
+			An iterator over the pipeline steps in reverse order.
+		"""
+		return reversed(self.pipeline)
 	def __enter__(self):
 		"""Enter the context manager and start the pipeline if it is not running.
 

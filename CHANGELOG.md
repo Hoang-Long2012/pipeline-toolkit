@@ -2,6 +2,8 @@
 
 ## 0.3.3
 - Added `Stack.put()` as a compatibility for `Stack.push()`.
+- Added `Pipeline.reverse()` for in-place reversal of pipeline steps.
+- Added `reversed()` support for iterating over pipeline steps in reverse order.
 
 ## 0.3.2
 - Changed `Stack` iteration order to iterate from top to bottom, yielding the most recently pushed item first.
