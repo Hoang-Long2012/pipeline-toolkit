@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.3.3
+- Changed `Pipeline.__bool__()` to return whether the pipeline contains configured steps instead of whether it is currently running.
 - Added `Stack.put()` as a compatibility for `Stack.push()`.
 - Added `Pipeline.reverse()` for in-place reversal of pipeline steps.
 - Added `reversed()` support for iterating over pipeline steps in reverse order.
