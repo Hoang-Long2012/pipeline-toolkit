@@ -76,12 +76,14 @@ class TestPipelineInitialization:
 
 	def test_pipeline_init_invalid_step(self):
 		"""Test initializing pipeline with invalid step raises TypeError."""
-		with pytest.raises(TypeError, match="Invalid step format"):
+
+		with pytest.raises(TypeError, match="Step must be a tuple"):
 			Pipeline(["not_a_tuple"])
 
 	def test_pipeline_init_non_callable_step(self):
 		"""Test initializing pipeline with non-callable step raises TypeError."""
-		with pytest.raises(TypeError, match="Invalid step format"):
+
+		with pytest.raises(TypeError, match="Step function must be callable"):
 			Pipeline([("not_callable",)])
 
 
@@ -124,6 +126,39 @@ class TestPipelineStepFormats:
 		pipeline.run(10).wait()
 		assert pipeline.results.get() == 35
 
+	def test_invalid_empty_step(self):
+		"""Test empty step raises TypeError."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="Step cannot be empty"):
+			pipeline.execute((), 10)
+
+	def test_invalid_too_many_step_items(self):
+		"""Test a step with more than three items raises TypeError."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(
+			TypeError,
+			match="Step must contain at most 3 items",
+		):
+			pipeline.execute((str, (), {}, "extra"), 10)
+
+	def test_invalid_positional_arguments_type(self):
+		"""Test invalid positional argument container raises TypeError."""
+
+		def func(x):
+			return x
+
+		pipeline = Pipeline()
+
+		with pytest.raises(
+			TypeError,
+			match="Step arguments must be a tuple or mapping",
+		):
+			pipeline.execute((func, [1, 2]), 10)
+
 	def test_invalid_three_part_step_with_mapping_args(self):
 		"""Test three-part step requires tuple positional arguments."""
 
@@ -132,8 +167,25 @@ class TestPipelineStepFormats:
 
 		pipeline = Pipeline()
 
-		with pytest.raises(TypeError, match="Invalid step format"):
+		with pytest.raises(
+			TypeError,
+			match="Step positional arguments must be a tuple when keyword arguments are provided",
+		):
 			pipeline.execute((func, {"x": 1}, {"y": 2}), 10)
+
+	def test_invalid_keyword_arguments_type(self):
+		"""Test invalid keyword argument container raises TypeError."""
+
+		def func(x, y):
+			return x + y
+
+		pipeline = Pipeline()
+
+		with pytest.raises(
+			TypeError,
+			match="Step keyword arguments must be a mapping",
+		):
+			pipeline.execute((func, (1,), [("y", 2)]), 10)
 
 
 class TestPipelineExecution:
@@ -196,7 +248,7 @@ class TestPipelineStop:
 	"""Test pipeline stop functionality."""
 
 	def test_stop_when_not_running(self):
-		"""Test stop when pipeline is not running returns 0."""
+		"""Test stop when not running returns 0."""
 		pipeline = Pipeline()
 		result = pipeline.stop()
 		assert result == 0
@@ -427,7 +479,7 @@ class TestPipelineErrors:
 		assert isinstance(pipeline.errors.get(), ValueError)
 
 	def test_stop_on_error_true(self):
-		"""Test that pipeline stops on first error when stop_on_error=True."""
+		"""Test pipeline stops on first error when stop_on_error=True."""
 
 		def raise_error(x):
 			raise ValueError("Error")
@@ -445,7 +497,7 @@ class TestPipelineErrors:
 		assert pipeline.step == 0
 
 	def test_stop_on_error_false(self):
-		"""Test that pipeline continues on error when stop_on_error=False."""
+		"""Test pipeline continues on error when stop_on_error=False."""
 
 		def raise_error(x):
 			raise ValueError("Error")
@@ -648,7 +700,7 @@ class TestPipelineExecute:
 
 		pipeline = Pipeline()
 
-		with pytest.raises(TypeError, match="Invalid step format"):
+		with pytest.raises(TypeError, match="Step function must be callable"):
 			pipeline.execute(("not_callable",), 10)
 
 	def test_execute_while_running(self):
@@ -803,6 +855,98 @@ class TestPipelineModification:
 		assert len(pipeline) == 0
 
 
+class TestPipelineUpdate:
+	"""Test updating multiple pipeline steps."""
+
+	def test_update_adds_multiple_steps(self):
+		"""Test update appends multiple steps."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		result = pipeline.update([
+			(add, (10,)),
+			(add, (20,)),
+		])
+
+		assert result is None
+		assert len(pipeline) == 3
+		assert pipeline[1] == (add, (5,))
+		assert pipeline[2] == (add, (10,))
+		assert pipeline[3] == (add, (20,))
+
+	def test_update_empty_iterable(self):
+		"""Test update with an empty iterable leaves the pipeline unchanged."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+
+		result = pipeline.update([])
+
+		assert result is None
+		assert len(pipeline) == 1
+		assert pipeline[1] == (add, (5,))
+
+	def test_update_validates_all_steps_before_modifying(self):
+		"""Test update is atomic when a step is invalid."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+
+		with pytest.raises(TypeError, match="Step function must be callable"):
+			pipeline.update([
+				(add, (10,)),
+				("not_callable",),
+				(add, (20,)),
+			])
+
+		assert len(pipeline) == 1
+		assert pipeline[1] == (add, (5,))
+
+	def test_update_invalid_step_format(self):
+		"""Test update rejects invalid step formats."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="Step must be a tuple"):
+			pipeline.update(["not_a_tuple"])
+
+		assert len(pipeline) == 0
+
+	def test_update_invalid_callable(self):
+		"""Test update rejects non-callable step functions."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="Step function must be callable"):
+			pipeline.update([
+				("not_callable",),
+			])
+
+		assert len(pipeline) == 0
+
+	def test_update_accepts_generator(self):
+		"""Test update accepts any iterable of steps."""
+
+		def identity(x):
+			return x
+
+		pipeline = Pipeline()
+
+		def steps():
+			yield (identity,)
+			yield (identity,)
+
+		pipeline.update(steps())
+
+		assert len(pipeline) == 2
+
+
 class TestPipelineItemAccess:
 	"""Test item access and modification."""
 
@@ -871,7 +1015,7 @@ class TestPipelineItemAccess:
 
 		pipeline = Pipeline([(str,)])
 
-		with pytest.raises(TypeError, match="Invalid step format"):
+		with pytest.raises(TypeError, match="Step function must be callable"):
 			pipeline[1] = ("not_callable",)
 
 	def test_delitem(self):
@@ -908,6 +1052,74 @@ class TestPipelineItemAccess:
 
 		with pytest.raises(IndexError, match="Index out of range"):
 			del pipeline[1]
+
+
+class TestPipelineReversal:
+	"""Test pipeline reversal."""
+
+	def test_reverse_reverses_pipeline_in_place(self):
+		"""Test reverse reverses the pipeline in place."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		pipeline = Pipeline([
+			(add, (5,)),
+			(multiply, (2,)),
+		])
+
+		result = pipeline.reverse()
+
+		assert result is None
+		assert pipeline[1] == (multiply, (2,))
+		assert pipeline[2] == (add, (5,))
+
+	def test_reverse_empty_pipeline(self):
+		"""Test reversing an empty pipeline."""
+
+		pipeline = Pipeline()
+
+		assert pipeline.reverse() is None
+		assert len(pipeline) == 0
+
+	def test_reversed_returns_reverse_iterator(self):
+		"""Test reversed returns steps in reverse order."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		steps = [
+			(add, (5,)),
+			(multiply, (2,)),
+		]
+		pipeline = Pipeline(steps)
+
+		assert list(reversed(pipeline)) == list(reversed(steps))
+
+	def test_reversed_does_not_modify_pipeline(self):
+		"""Test reversed does not modify the pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		steps = [
+			(add, (5,)),
+			(multiply, (2,)),
+		]
+		pipeline = Pipeline(steps)
+
+		list(reversed(pipeline))
+
+		assert list(pipeline) == steps
 
 
 class TestPipelineContextManager:
@@ -1167,15 +1379,18 @@ class TestPipelineCallable:
 
 		assert pipeline.results.get() == 15
 
-	def test_pipeline_bool_reflects_running_state(self):
-		"""Test pipeline bool reflects running state."""
+	def test_pipeline_bool_reflects_whether_steps_are_configured(self):
+		"""Test pipeline bool reflects whether steps are configured."""
+
+		def identity(x):
+			return x
+
 		pipeline = Pipeline()
-		assert not bool(pipeline)
+		assert not pipeline
 
-		pipeline.run(10)
-		pipeline.wait()
+		pipeline.add((identity,))
 
-		assert not bool(pipeline)
+		assert pipeline
 
 	def test_pipeline_contains_callable(self):
 		"""Test checking if callable is in pipeline."""
@@ -1247,6 +1462,26 @@ class TestPipelineCallable:
 
 		assert str(pipeline) == "add(5) | multiply(2)"
 
+	def test_pipeline_str_keyword_arguments(self):
+		"""Test pipeline string representation with keyword arguments."""
+
+		def power(x, exp=2):
+			return x**exp
+
+		pipeline = Pipeline([(power, {"exp": 3})])
+
+		assert str(pipeline) == "power(exp=3)"
+
+	def test_pipeline_str_positional_and_keyword_arguments(self):
+		"""Test pipeline string representation with positional and keyword arguments."""
+
+		def func(x, a, b=10):
+			return x + a + b
+
+		pipeline = Pipeline([(func, (5,), {"b": 20})])
+
+		assert str(pipeline) == "func(5, b=20)"
+
 	def test_pipeline_repr(self):
 		"""Test pipeline repr."""
 		pipeline = Pipeline()
@@ -1254,6 +1489,216 @@ class TestPipelineCallable:
 
 		assert "Pipeline" in repr_str
 		assert "total_steps=0" in repr_str
+
+
+class TestPipelineOperators:
+	"""Test Pipeline operator overloads."""
+
+	def test_iadd_appends_step(self):
+		"""Test += appends a step in place."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		original = pipeline
+
+		result = pipeline.__iadd__((add, (10,)))
+
+		assert result is original
+		assert pipeline is original
+		assert len(pipeline) == 2
+		assert pipeline[2] == (add, (10,))
+
+	def test_iadd_operator(self):
+		"""Test += syntax."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		pipeline += (add, (10,))
+
+		assert len(pipeline) == 2
+		assert pipeline[2] == (add, (10,))
+
+	def test_add_returns_new_pipeline(self):
+		"""Test + returns a new pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default=10)
+		result = pipeline + [(add, (10,))]
+
+		assert isinstance(result, Pipeline)
+		assert result is not pipeline
+		assert list(result) == [
+			(add, (5,)),
+			(add, (10,)),
+		]
+		assert result.default == 10
+		assert list(pipeline) == [(add, (5,))]
+
+	def test_add_accepts_iterable(self):
+		"""Test + accepts a general iterable."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		result = pipeline + iter([(add, (10,))])
+
+		assert list(result) == [
+			(add, (5,)),
+			(add, (10,)),
+		]
+
+	def test_add_invalid_step(self):
+		"""Test + validates appended steps."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+
+		with pytest.raises(TypeError, match="Step function must be callable"):
+			pipeline + [("not_callable",)]
+
+		assert list(pipeline) == [(add, (5,))]
+
+	def test_radd_prepends_steps(self):
+		"""Test reflected addition prepends steps."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (10,))], default=42)
+		result = [(add, (5,))] + pipeline
+
+		assert isinstance(result, Pipeline)
+		assert result is not pipeline
+		assert list(result) == [
+			(add, (5,)),
+			(add, (10,)),
+		]
+		assert result.default == 42
+		assert list(pipeline) == [(add, (10,))]
+
+	def test_radd_invalid_step(self):
+		"""Test reflected addition validates prepended steps."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (10,))])
+
+		with pytest.raises(TypeError, match="Step function must be callable"):
+			[("not_callable",)] + pipeline
+
+	def test_mul_repeats_steps(self):
+		"""Test * repeats pipeline steps."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default=10)
+		result = pipeline * 3
+
+		assert isinstance(result, Pipeline)
+		assert result is not pipeline
+		assert len(result) == 3
+		assert list(result) == [
+			(add, (5,)),
+			(add, (5,)),
+			(add, (5,)),
+		]
+		assert result.default == 10
+		assert len(pipeline) == 1
+
+	def test_mul_zero_returns_empty_pipeline(self):
+		"""Test multiplying by zero returns an empty pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default=10)
+		result = pipeline * 0
+
+		assert isinstance(result, Pipeline)
+		assert not result
+		assert result.default == 10
+
+	def test_mul_negative_count(self):
+		"""Test multiplying by a negative count raises ValueError."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(ValueError, match="Count cannot be negative"):
+			pipeline * -1
+
+	def test_mul_invalid_count_returns_not_implemented(self):
+		"""Test multiplication with unsupported count returns NotImplemented."""
+
+		pipeline = Pipeline()
+
+		assert pipeline.__mul__("2") is NotImplemented
+
+	def test_eq_same_configuration(self):
+		"""Test equal pipelines compare equal."""
+
+		def add(x, y):
+			return x + y
+
+		first = Pipeline([(add, (5,))], default=10)
+		second = Pipeline([(add, (5,))], default=10)
+
+		assert first == second
+
+	def test_eq_different_steps(self):
+		"""Test pipelines with different steps are not equal."""
+
+		def add(x, y):
+			return x + y
+
+		first = Pipeline([(add, (5,))])
+		second = Pipeline([(add, (10,))])
+
+		assert first != second
+
+	def test_eq_different_default(self):
+		"""Test pipelines with different defaults are not equal."""
+
+		def add(x, y):
+			return x + y
+
+		first = Pipeline([(add, (5,))], default=10)
+		second = Pipeline([(add, (5,))], default=20)
+
+		assert first != second
+
+	def test_eq_ignores_execution_state(self):
+		"""Test equality ignores execution state."""
+
+		def add(x, y):
+			return x + y
+
+		first = Pipeline([(add, (5,))])
+		second = Pipeline([(add, (5,))])
+
+		first.run(10).wait()
+
+		assert first == second
+
+	def test_eq_different_types(self):
+		"""Test comparison with another type returns False."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+
+		assert pipeline != [(add, (5,))]
 
 
 class TestPipelineDelay:
@@ -1332,6 +1777,50 @@ class TestPipelineThreading:
 		pipeline.wait()
 
 
+class TestPipelineSnapshot:
+	"""Test pipeline execution snapshots."""
+
+	def test_pipeline_snapshot_at_run_time(self):
+		"""Test pipeline is snapshotted when run() is called."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		pipeline.run(10)
+
+		pipeline.clear()
+		pipeline.wait()
+
+		assert pipeline.results.get() == 15
+
+	def test_pipeline_snapshot_ignores_added_steps(self):
+		"""Test steps added after run() do not affect current execution."""
+
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def first(x):
+			step_started.set()
+			step_should_exit.wait(timeout=1.0)
+			return x + 5
+
+		def second(x):
+			return x * 2
+
+		pipeline = Pipeline([(first,)])
+
+		pipeline.run(10)
+
+		assert step_started.wait(timeout=1.0)
+
+		pipeline.add((second,))
+		step_should_exit.set()
+		pipeline.wait()
+
+		assert pipeline.result == 15
+
+
 class TestPipelineEdgeCases:
 	"""Test pipeline edge cases."""
 
@@ -1353,20 +1842,6 @@ class TestPipelineEdgeCases:
 
 		assert pipeline.results.get() == 42
 		assert pipeline.step == 0
-
-	def test_pipeline_snapshot_at_run_time(self):
-		"""Test that pipeline is snapshotted when run() is called."""
-
-		def add(x, y):
-			return x + y
-
-		pipeline = Pipeline([(add, (5,))])
-		pipeline.run(10)
-
-		pipeline.clear()
-		pipeline.wait()
-
-		assert pipeline.results.get() == 15
 
 
 class TestPipelineInvalidParameters:
