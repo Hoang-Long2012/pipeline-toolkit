@@ -2,7 +2,8 @@
 
 ## 0.4.0
 - Changed `Pipeline.__bool__()` to return whether the pipeline contains configured steps instead of whether it is currently running.
-- Added `Stack.put()` and `Stack.peek()` as a compatibility for `Stack.push()` and `Stack.get()`.
+- Changed `Pipeline.init()` parameters `run_now` and `run_args` to be keyword-only.
+- Added `Stack.put()` and `Stack.peek()` as compatibility aliases for `Stack.push()` and `Stack.get()`.
 - Added a `maxsize` property to `Stack` for getting and setting the maximum stack capacity.
 - Added support for `reversed(Stack)`, iterating from bottom to top.
 - Added `Pipeline.reverse()` for in-place reversal of pipeline steps.
