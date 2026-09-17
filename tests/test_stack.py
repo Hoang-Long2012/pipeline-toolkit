@@ -31,6 +31,68 @@ class TestStackInitialization:
 			Stack(maxsize=-1)
 
 
+class TestStackMaxsize:
+	"""Test Stack maxsize property."""
+
+	def test_get_maxsize(self):
+		"""Test getting the maximum stack size."""
+		stack = Stack(maxsize=5)
+		assert stack.maxsize == 5
+
+	def test_set_maxsize(self):
+		"""Test setting the maximum stack size."""
+		stack = Stack(maxsize=5)
+		stack.maxsize = 10
+		assert stack.maxsize == 10
+
+	def test_set_maxsize_unlimited(self):
+		"""Test setting maxsize to zero for unlimited capacity."""
+		stack = Stack(maxsize=5)
+		stack.maxsize = 0
+		assert stack.maxsize == 0
+		assert not stack.full()
+
+	def test_set_negative_maxsize(self):
+		"""Test setting a negative maxsize raises ValueError."""
+		stack = Stack()
+		with pytest.raises(ValueError, match="maxsize < 0"):
+			stack.maxsize = -1
+
+	def test_set_invalid_maxsize_type(self):
+		"""Test setting an invalid maxsize type raises TypeError."""
+		stack = Stack()
+		with pytest.raises(TypeError, match="maxsize is not int"):
+			stack.maxsize = "5"
+
+	def test_set_maxsize_smaller_than_stack_size(self):
+		"""Test setting maxsize below the current stack size raises ValueError."""
+		stack = Stack(maxsize=5)
+		stack.push("a")
+		stack.push("b")
+		stack.push("c")
+		with pytest.raises(ValueError, match="Current stack size"):
+			stack.maxsize = 2
+
+	def test_set_maxsize_equal_to_stack_size(self):
+		"""Test setting maxsize equal to the current stack size."""
+		stack = Stack(maxsize=5)
+		stack.push("a")
+		stack.push("b")
+		stack.push("c")
+		stack.maxsize = 3
+		assert stack.maxsize == 3
+		assert stack.full()
+
+	def test_set_maxsize_greater_than_stack_size(self):
+		"""Test setting maxsize greater than the current stack size."""
+		stack = Stack(maxsize=5)
+		stack.push("a")
+		stack.push("b")
+		stack.maxsize = 3
+		assert stack.maxsize == 3
+		assert not stack.full()
+
+
 class TestStackPush:
 	"""Test Stack push operation."""
 
@@ -167,6 +229,16 @@ class TestStackUtilities:
 		for _ in range(100):
 			stack.push("item")
 		assert not stack.full()
+
+	def test_full_after_changing_maxsize(self):
+		"""Test full after changing maxsize."""
+		stack = Stack(maxsize=3)
+		stack.push("a")
+		stack.push("b")
+		assert not stack.full()
+
+		stack.maxsize = 2
+		assert stack.full()
 
 	def test_len(self):
 		"""Test len function."""
