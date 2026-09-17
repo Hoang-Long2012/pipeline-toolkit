@@ -126,6 +126,9 @@ class Stack:
 			An iterator over the stack's items.
 		"""
 		yield from reversed(self._stack)
+	def __reversed__(self):
+		"""Iterate over the items in the stack from bottom to top."""
+		yield from self._stack
 	def __repr__(self):
 		"""Return the developer-oriented representation of the stack."""
 		return f"{type(self).__name__}({self._stack!r}, maxsize={self._maxsize})"
@@ -158,4 +161,5 @@ class Stack:
 		if maxsize and maxsize < len(self._stack):
 			raise ValueError(f"{maxsize} < Current stack size.")
 		self._maxsize = maxsize
+	peek = get
 	put = push
