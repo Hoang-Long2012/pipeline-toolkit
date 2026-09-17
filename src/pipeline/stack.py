@@ -129,4 +129,33 @@ class Stack:
 	def __repr__(self):
 		"""Return the developer-oriented representation of the stack."""
 		return f"{type(self).__name__}({self._stack!r}, maxsize={self._maxsize})"
+	@property
+	def maxsize(self):
+		"""Return the maximum number of items allowed in the stack.
+
+		Returns:
+			Maximum stack capacity. ``0`` means unlimited capacity.
+		"""
+		return self._maxsize
+	@maxsize.setter
+	def maxsize(self, maxsize):
+		"""Set the maximum number of items allowed in the stack.
+
+		A value of ``0`` means that the stack has no size limit.
+		The new maximum size cannot be smaller than the current stack size.
+
+		Args:
+			maxsize: Maximum number of items allowed in the stack.
+
+		Raises:
+			TypeError: If ``maxsize`` is not an integer.
+			ValueError: If ``maxsize`` is negative or smaller than the current stack size.
+		"""
+		if not isinstance(maxsize, int):
+			raise TypeError("maxsize is not int.")
+		if maxsize < 0:
+			raise ValueError("maxsize < 0.")
+		if maxsize and maxsize < len(self._stack):
+			raise ValueError(f"{maxsize} < Current stack size.")
+		self._maxsize = maxsize
 	put = push
