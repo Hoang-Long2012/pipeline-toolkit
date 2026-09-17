@@ -1,3 +1,4 @@
+"""Utility for applying side effects to a deep copy of a value."""
 import copy
 
 

@@ -1,3 +1,4 @@
+"""Tools for creating reusable pipeline steps from callables."""
 from functools import update_wrapper
 
 

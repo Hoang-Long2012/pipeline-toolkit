@@ -1,3 +1,4 @@
+"""Utilities for composing functions sequentially."""
 def compose(*args, default=None):
 	"""Apply callables sequentially to a value.
 

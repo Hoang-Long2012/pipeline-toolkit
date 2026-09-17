@@ -1,3 +1,4 @@
+"""Asynchronous pipeline for sequentially executing callable steps."""
 import copy
 import threading
 from collections.abc import Mapping
