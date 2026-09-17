@@ -278,6 +278,15 @@ class TestStackUtilities:
 		assert list(stack) == ["c", "b", "a"]
 		assert len(stack) == 3
 
+	def test_reversed(self):
+		"""Test reversed iteration over stack from bottom to top."""
+		stack = Stack()
+		stack.push("a")
+		stack.push("b")
+		stack.push("c")
+		assert list(reversed(stack)) == ["a", "b", "c"]
+		assert len(stack) == 3
+
 	def test_repr(self):
 		"""Test repr output."""
 		stack = Stack(maxsize=5)
