@@ -46,7 +46,7 @@ class Pipeline:
 		>>> pipeline.results.get()
 		15
 	"""
-	def __init__(self, iterable=(), default=None, run_now=False, run_args=()):
+	def __init__(self, iterable=(), default=None, *, run_now=False, run_args=()):
 		"""Initialize a pipeline.
 
 		Args:
