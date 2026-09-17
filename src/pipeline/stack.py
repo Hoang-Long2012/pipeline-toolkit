@@ -1,3 +1,4 @@
+"""A simple LIFO stack container with optional maximum capacity."""
 class StackOverflowError(Exception):
 	"""Raised when attempting to push an item onto a full stack."""
 class StackUnderflowError(Exception):
