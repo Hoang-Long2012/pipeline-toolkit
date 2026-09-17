@@ -13,6 +13,7 @@
 - Added support prepending pipeline steps with the `+` operator.
 - Added support comparing pipeline configurations with the `==` operator.
 - Added support repeating pipeline steps with the `*` operator.
+- Added module-level docstrings describing the purpose of each module.
 - Improved error messages for invalid pipeline steps to provide more specific validation details.
 
 ## 0.3.2
