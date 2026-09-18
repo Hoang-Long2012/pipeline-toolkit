@@ -15,6 +15,7 @@ class TestStepBasic:
 		assert s.function is add
 		assert s.args == (5,)
 		assert s.kwargs == {}
+		assert s.default is None
 
 	def test_step_call(self):
 		"""Test calling a step."""
@@ -58,7 +59,16 @@ class TestStepOperators:
 			return (x or 0) + amount
 		s = step(add, 5)
 		result = s * 3
-		assert result == 15	 # Starts with None: None->5, 5->10, 10->15
+		assert result == 15	 # default=None: None->5, 5->10, 10->15
+
+	def test_step_multiplication_with_default(self):
+		"""Test step multiplication with a custom default."""
+		def add(x, amount):
+			return x + amount
+		s = step(add, 5)
+		s.default = 10
+		result = s * 3
+		assert result == 25	 # 10->15->20->25
 
 	def test_step_multiplication_with_zero(self):
 		"""Test step multiplication with 0."""
@@ -88,6 +98,20 @@ class TestStepOperators:
 
 		result = 10 | s1 | s2
 		assert result == 30	 # 10 + 5 = 15, then 15 * 2 = 30
+
+	def test_step_greater_than_with_default(self):
+		"""Test writing a step result with a custom default."""
+		class Writer:
+			def write(self, value):
+				return value
+
+		def add(x, amount):
+			return x + amount
+
+		s = step(add, 5)
+		s.default = 10
+		result = s > Writer()
+		assert result == 15
 
 
 class TestStepExport:
