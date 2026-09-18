@@ -5,8 +5,16 @@ from functools import update_wrapper
 class step:
 	"""Represent a callable with preconfigured arguments.
 
-	The wrapped callable is invoked with a value as its first argument,
-	followed by the stored positional and keyword arguments.
+	The wrapped callable is invoked with a value as its first argument, followed by the stored positional and keyword arguments.
+
+	The ``default`` attribute provides the initial value used by operations such as ``step * n`` and ``pipeline > step``.
+
+	Attributes:
+		function: The callable to execute.
+		args: Positional arguments passed to ``function``.
+		kwargs: Keyword arguments passed to ``function``.
+		default: The initial value used by operations that require one.
+			Defaults to ``None``.
 
 	Args:
 		function: The callable to execute.
@@ -22,6 +30,7 @@ class step:
 		self.function = function
 		self.args = args
 		self.kwargs = kwargs
+		self.default = None
 	def export(self):
 		"""Export the step in pipeline step format.
 
@@ -50,14 +59,14 @@ class step:
 			return NotImplemented
 		if other < 1:
 			raise ValueError("other < 1.")
-		result = None
+		result = self.default
 		for _ in range(other):
 			result = self.function(result, *self.args, **self.kwargs)
 		return result
 	def __lt__(self, other):
 		return self.function(other.read(), *self.args, **self.kwargs)
 	def __gt__(self, other):
-		return other.write(self.function(None, *self.args, **self.kwargs))
+		return other.write(self.function(self.default, *self.args, **self.kwargs))
 	def __iter__(self):
 		yield from self.export() 
 	def __repr__(self):
