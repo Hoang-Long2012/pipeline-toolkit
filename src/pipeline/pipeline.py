@@ -481,7 +481,7 @@ class Pipeline:
 		return " | ".join(self._format_step(step) for step in self.pipeline)
 	def __repr__(self):
 		"""Return the developer-oriented representation of the pipeline."""
-		return f"{type(self).__name__}(total_steps={len(self.pipeline)}, current_step={self.step}, running={self.running})"
+		return f"{type(self).__name__}(name={self._name!r}, default={self.default!r}, total_steps={len(self.pipeline)}, current_step={self.step}, running={self.running})"
 	def __bool__(self):
 		"""Return whether the pipeline contains any configured steps.
 

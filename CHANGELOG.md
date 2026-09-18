@@ -3,6 +3,7 @@
 ## 0.4.1
 - Added `Pipeline.__init__()` parameter `run_kwargs` for passing keyword arguments to `run()` when `run_now` is enabled.
 - Added `name` parameter to `Pipeline` for assigning a name to worker threads.
+- Improved `Pipeline.__repr__()` to include the pipeline name and default value.
 
 ## 0.4.0
 - Changed `Pipeline.__bool__()` to return whether the pipeline contains configured steps instead of whether it is currently running.
