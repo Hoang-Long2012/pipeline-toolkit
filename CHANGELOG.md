@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.1
+- Added `Pipeline.__init__()` parameter `run_kwargs` for passing keyword arguments to `run()` when `run_now` is enabled.
+
 ## 0.4.0
 - Changed `Pipeline.__bool__()` to return whether the pipeline contains configured steps instead of whether it is currently running.
 - Changed `Pipeline.init()` parameters `run_now` and `run_args` to be keyword-only.

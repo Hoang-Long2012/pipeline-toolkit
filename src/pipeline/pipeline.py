@@ -46,21 +46,23 @@ class Pipeline:
 		>>> pipeline.results.get()
 		15
 	"""
-	def __init__(self, iterable=(), default=None, *, run_now=False, run_args=()):
+	def __init__(self, iterable=(), default=None, *, run_now=False, run_args=(), run_kwargs=None):
 		"""Initialize a pipeline.
 
 		Args:
 			iterable: An iterable containing pipeline steps.
 				Defaults to an empty pipeline.
-			default: The value used for the first step when ``run()`` is called without an explicit ``default``.
-				Defaults to ``None``.
+			default: The value used for the first step when `run()` is called without an explicit `default`.
+				Defaults to `None`.
 			run_now: Whether to start the pipeline immediately after initialization.
-				Defaults to ``False``.
-			run_args: A tuple of positional arguments passed to ``run()`` when ``run_now`` is enabled.
-				Defaults to ``()``.
+				Defaults to `False`.
+			run_args: A tuple of positional arguments passed to `run()` when `run_now` is enabled.
+				Defaults to `()`.
+			run_kwargs: A mapping of keyword arguments passed to `run()` when `run_now` is enabled.
+				Defaults to `None`.
 
 		Raises:
-			TypeError: If any item in ``iterable`` is not a valid step, or if ``run_args`` is not a tuple.
+			TypeError: If any item in `iterable` is not a valid step, if `run_args` is not a tuple, or if `run_kwargs` is not a mapping.
 		"""
 		iterable = tuple(iterable)
 		self.stop_event = threading.Event()
@@ -77,7 +79,11 @@ class Pipeline:
 		if run_now:
 			if not isinstance(run_args, tuple):
 				raise TypeError("run_args is not a tuple.")
-			self.run(*run_args)
+			if run_kwargs is None:
+				run_kwargs = {}
+			elif not isinstance(run_kwargs, Mapping):
+				raise TypeError("run_kwargs is not a Mapping.")
+			self.run(*run_args, **run_kwargs)
 	def _validate_step(self, step):
 		if not isinstance(step, tuple):
 			raise TypeError(f"Step must be a tuple, not {type(step).__name__}.")

@@ -86,6 +86,26 @@ class TestPipelineInitialization:
 		with pytest.raises(TypeError, match="Step function must be callable"):
 			Pipeline([("not_callable",)])
 
+	def test_pipeline_init_run_now_with_keyword_args(self):
+		"""Test run_now passes keyword arguments to run()."""
+
+		def identity(x):
+			return x
+
+		pipeline = Pipeline(
+			[(identity,)],
+			run_now=True,
+			run_kwargs={"default": 42},
+		)
+		pipeline.wait()
+
+		assert pipeline.result == 42
+
+	def test_pipeline_init_run_now_invalid_run_kwargs(self):
+		"""Test run_now with non-mapping run_kwargs raises TypeError."""
+
+		with pytest.raises(TypeError, match="run_kwargs is not a Mapping"):
+			Pipeline(run_now=True, run_kwargs=[])
 
 class TestPipelineStepFormats:
 	"""Test different step formats."""
