@@ -21,18 +21,6 @@ class Pipeline:
 	The pipeline always passes the result of the previous step as the first positional argument to the next step.
 	The pipeline is snapshotted when execution starts, so modifications to the pipeline after ``run()`` has started do not affect the current execution.
 
-	Args:
-		iterable: An iterable of pipeline steps.
-			Defaults to an empty pipeline.
-		default: The value used for the first step when ``run()`` is called without an explicit ``default``.
-			Defaults to ``None``.
-
-	Attributes:
-		step: The one-based index of the currently executing step, or ``0`` when the pipeline is not running.
-		default: The value used for the first step when ``run()`` is called without an explicit ``default``.
-		results: Stack containing the initial value and results produced by executed steps.
-		errors: Stack containing exceptions raised by executed steps.
-
 	Example:
 		>>> def add(value, amount):
 			...     return value + amount
@@ -46,23 +34,25 @@ class Pipeline:
 		>>> pipeline.results.get()
 		15
 	"""
-	def __init__(self, iterable=(), default=None, *, run_now=False, run_args=(), run_kwargs=None):
+	def __init__(self, iterable=(), default=None, name=None, *, run_now=False, run_args=(), run_kwargs=None):
 		"""Initialize a pipeline.
 
 		Args:
 			iterable: An iterable containing pipeline steps.
 				Defaults to an empty pipeline.
 			default: The value used for the first step when `run()` is called without an explicit `default`.
-				Defaults to `None`.
+				Defaults to ``None``.
+			name: The name assigned to the worker thread.
+				Defaults to ``None``.
 			run_now: Whether to start the pipeline immediately after initialization.
-				Defaults to `False`.
+				Defaults to ``False``.
 			run_args: A tuple of positional arguments passed to `run()` when `run_now` is enabled.
-				Defaults to `()`.
+				Defaults to ``()``.
 			run_kwargs: A mapping of keyword arguments passed to `run()` when `run_now` is enabled.
-				Defaults to `None`.
+				Defaults to ``None``.
 
 		Raises:
-			TypeError: If any item in `iterable` is not a valid step, if `run_args` is not a tuple, or if `run_kwargs` is not a mapping.
+			TypeError: If any item in `iterable` is not a valid step, if `name` is not a str, if `run_args` is not a tuple, or if `run_kwargs` is not a mapping.
 		"""
 		iterable = tuple(iterable)
 		self.stop_event = threading.Event()
@@ -73,6 +63,9 @@ class Pipeline:
 		self.results = Stack()
 		self.errors = Stack()
 		self.default = default
+		if name is not None and not isinstance(name, str):
+			raise TypeError("name is not a str.")
+		self._name = name
 		for step in iterable:
 			self._validate_step(step)
 			self.pipeline.append(step)
@@ -171,7 +164,7 @@ class Pipeline:
 			if not self.stop_event.is_set():
 				self.step = 0
 			self.thread = None
-		self.thread = threading.Thread(target=worker, daemon=daemon)
+		self.thread = threading.Thread(target=worker, name=self._name, daemon=daemon)
 		self.thread.start()
 		return self
 	def run_step(self, step, default=None):
@@ -405,12 +398,8 @@ class Pipeline:
 		"""Remove all steps from the pipeline."""
 		self.pipeline.clear()
 	def reverse(self):
-		"""Reverse the order of pipeline steps in place.
-
-		Returns:
-			``None``.
-		"""
-		return self.pipeline.reverse()
+		"""Reverse the order of pipeline steps in place."""
+		self.pipeline.reverse()
 	def __getitem__(self, index):
 		"""Return the pipeline step at the specified index.
 
@@ -464,7 +453,7 @@ class Pipeline:
 	def copy(self):
 		"""Return a shallow copy of the pipeline.
 
-		The pipeline configuration and default value are shallow-copied.
+		The pipeline configuration, default value, and name are shallow-copied.
 		Execution state, including results, errors, the current step, and the worker thread, is not copied.
 
 		Returns:
@@ -553,7 +542,7 @@ class Pipeline:
 	def __copy__(self):
 		"""Create a shallow copy of the pipeline.
 
-		Only the pipeline configuration and default value are copied.
+		Only the pipeline configuration, default value, and name are copied.
 		Execution state, including results, errors, the current step, and the worker thread, is reset in the new pipeline.
 
 		Returns:
@@ -566,11 +555,12 @@ class Pipeline:
 			raise RuntimeError("Pipeline is already running.")
 		pipeline = copy.copy(self.pipeline)
 		default = copy.copy(self.default)
-		return type(self)(pipeline, default)
+		name = copy.copy(self._name)
+		return type(self)(pipeline, default, name)
 	def __deepcopy__(self, memo):
 		"""Create a deep copy of the pipeline.
 
-		The pipeline configuration and default value are deep-copied.
+		The pipeline configuration, default value, and name are deep-copied.
 		Execution state, including results, errors, the current step, and the worker thread, is reset in the new pipeline.
 
 		Returns:
@@ -583,7 +573,8 @@ class Pipeline:
 			raise RuntimeError("Pipeline is already running.")
 		pipeline = copy.deepcopy(self.pipeline, memo)
 		default = copy.deepcopy(self.default, memo)
-		return type(self)(pipeline, default)
+		name = copy.deepcopy(self._name, memo)
+		return type(self)(pipeline, default, name)
 	def __iadd__(self, step):
 		"""Append a pipeline step in place.
 
@@ -615,7 +606,7 @@ class Pipeline:
 			TypeError: If any item in ``other`` has an invalid step format.
 		"""
 		other = tuple(other)
-		return type(self)([*self, *other], self.default)
+		return type(self)([*self, *other], self.default, self._name)
 	def __radd__(self, other):
 		"""Return a new pipeline by prepending iterable steps.
 
@@ -631,20 +622,22 @@ class Pipeline:
 			TypeError: If any item in ``other`` has an invalid step format.
 		"""
 		other = tuple(other)
-		return type(self)([*other, *self], self.default)
+		return type(self)([*other, *self], self.default, self._name)
 	def __eq__(self, other):
 		"""Return whether two pipelines have equal configurations.
 
-		Two pipelines are considered equal when they have the same pipeline steps and default value.
+		Two pipelines are considered equal when they have the same pipeline steps, default value, and name.
 		Execution state is not considered.
 
 		Args:
 			other: The object to compare with.
 
 		Returns:
-			``True`` if ``other`` is a pipeline with the same steps and default value, otherwise ``False``.
+			``True`` if ``other`` is a pipeline with the same steps, default value, and name, otherwise ``False``.
 		"""
-		return isinstance(other, type(self)) and self.pipeline == other.pipeline and self.default == other.default
+		if not isinstance(other, type(self)):
+			return NotImplemented
+		return isinstance(other, type(self)) and self.pipeline == other.pipeline and self.default == other.default and self._name == other._name
 	def __mul__(self, count):
 		"""Return a new pipeline with its steps repeated.
 
@@ -664,4 +657,22 @@ class Pipeline:
 			return NotImplemented
 		if count < 0:
 			raise ValueError("Count cannot be negative.")
-		return type(self)(self.pipeline * count, self.default)
+		return type(self)(self.pipeline * count, self.default, self._name)
+	@property
+	def name(self):
+		"""Return the name of the worker thread."""
+		return self._name
+	@name.setter
+	def name(self, name):
+		"""Set the name of the worker thread.
+
+		Args:
+			name: The name to assign to the worker thread.
+				``None`` clears the name.
+
+		Raises:
+			TypeError: If ``name`` is not a string or ``None``.
+		"""
+		if name is not None and not isinstance(name, str):
+			raise TypeError("name is not a str.")
+		self._name = name

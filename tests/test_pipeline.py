@@ -38,6 +38,40 @@ class TestPipelineInitialization:
 		pipeline = Pipeline(default=42)
 		assert pipeline.default == 42
 
+	def test_pipeline_init_with_name(self):
+		"""Test initializing pipeline with a name."""
+		pipeline = Pipeline(name="test-pipeline")
+
+		assert pipeline.name == "test-pipeline"
+
+	def test_pipeline_init_with_invalid_name(self):
+		"""Test initializing pipeline with a non-string name raises TypeError."""
+		with pytest.raises(TypeError, match="name is not a str"):
+			Pipeline(name=123)
+
+	def test_name_setter(self):
+		"""Test setting the pipeline name."""
+		pipeline = Pipeline()
+
+		pipeline.name = "test-pipeline"
+
+		assert pipeline.name == "test-pipeline"
+
+	def test_name_setter_allows_none(self):
+		"""Test setting the pipeline name to None."""
+		pipeline = Pipeline(name="test-pipeline")
+
+		pipeline.name = None
+
+		assert pipeline.name is None
+
+	def test_name_setter_invalid_type(self):
+		"""Test setting a non-string name raises TypeError."""
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="name is not a str"):
+			pipeline.name = 123
+
 	def test_pipeline_init_with_run_now(self):
 		"""Test initializing and immediately running the pipeline."""
 
@@ -106,6 +140,23 @@ class TestPipelineInitialization:
 
 		with pytest.raises(TypeError, match="run_kwargs is not a Mapping"):
 			Pipeline(run_now=True, run_kwargs=[])
+
+	def test_pipeline_init_run_now_with_none_run_kwargs(self):
+		"""Test run_now accepts None as run_kwargs."""
+
+		def identity(x):
+			return x
+
+		pipeline = Pipeline(
+			[(identity,)],
+			run_now=True,
+			run_args=(42,),
+			run_kwargs=None,
+		)
+		pipeline.wait()
+
+		assert pipeline.result == 42
+
 
 class TestPipelineStepFormats:
 	"""Test different step formats."""
@@ -1230,7 +1281,7 @@ class TestPipelineCopy:
 			return x + y
 
 		args = ([5],)
-		pipeline = Pipeline([(add, args)], default={"value": 10})
+		pipeline = Pipeline([(add, args)], default={"value": 10}, name="original")
 		copied = pipeline.copy()
 
 		assert copied.pipeline is not pipeline.pipeline
@@ -1239,6 +1290,7 @@ class TestPipelineCopy:
 		assert copied.pipeline[0][1] is args
 		assert copied.default is not pipeline.default
 		assert copied.default == pipeline.default
+		assert copied.name == pipeline.name
 
 	def test_copy_resets_execution_state(self):
 		"""Test copy does not copy execution state."""
@@ -1317,7 +1369,7 @@ class TestPipelineCopy:
 
 		args = ([5],)
 		default = {"values": [10]}
-		pipeline = Pipeline([(add, args)], default=default)
+		pipeline = Pipeline([(add, args)], default=default, name="original")
 
 		copied = copy.deepcopy(pipeline)
 
@@ -1327,6 +1379,7 @@ class TestPipelineCopy:
 		assert copied.pipeline[0][1][0] is not pipeline.pipeline[0][1][0]
 		assert copied.default is not pipeline.default
 		assert copied.default["values"] is not pipeline.default["values"]
+		assert copied.name == pipeline.name
 
 	def test_deepcopy_resets_execution_state(self):
 		"""Test deepcopy does not copy execution state."""
@@ -1670,8 +1723,8 @@ class TestPipelineOperators:
 		def add(x, y):
 			return x + y
 
-		first = Pipeline([(add, (5,))], default=10)
-		second = Pipeline([(add, (5,))], default=10)
+		first = Pipeline([(add, (5,))], default=10, name="original")
+		second = Pipeline([(add, (5,))], default=10, name="original")
 
 		assert first == second
 
@@ -1694,6 +1747,17 @@ class TestPipelineOperators:
 
 		first = Pipeline([(add, (5,))], default=10)
 		second = Pipeline([(add, (5,))], default=20)
+
+		assert first != second
+
+	def test_eq_different_name(self):
+		"""Test pipelines with different names are not equal."""
+
+		def add(x, y):
+			return x + y
+
+		first = Pipeline([(add, (5,))], name="first")
+		second = Pipeline([(add, (5,))], name="second")
 
 		assert first != second
 
@@ -1792,6 +1856,26 @@ class TestPipelineThreading:
 
 		with pytest.raises(RuntimeError, match="Pipeline is already running"):
 			pipeline.run(20)
+
+		step_should_exit.set()
+		pipeline.wait()
+
+	def test_name_is_used_for_worker_thread(self):
+		"""Test pipeline name is assigned to the worker thread."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def identity(x):
+			step_started.set()
+			step_should_exit.wait()
+			return x
+
+		pipeline = Pipeline([(identity,)], name="test-pipeline")
+		pipeline.run(42)
+
+		assert step_started.wait(timeout=1.0)
+		assert pipeline.thread is not None
+		assert pipeline.thread.name == "test-pipeline"
 
 		step_should_exit.set()
 		pipeline.wait()
