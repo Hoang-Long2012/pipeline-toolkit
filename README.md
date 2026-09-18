@@ -13,7 +13,9 @@ It also provides small utilities for composing functions, configuring callable s
 - Asynchronous execution using a worker thread.
 - Positional and keyword arguments for pipeline steps.
 - Configurable pipeline defaults.
+- Configurable worker thread names.
 - Optional automatic pipeline execution during initialization.
+- Positional and keyword arguments for automatic pipeline execution.
 - Stop, skip, wait, and rerun execution.
 - Context manager support for automatic pipeline execution and cleanup.
 - Manual synchronous step execution.
@@ -189,7 +191,12 @@ When both positional and keyword arguments are provided, `args` must be a tuple.
 Start the pipeline asynchronously.
 
 ```python
-pipeline.run(default, delay=0, daemon=False, stop_on_error=True)
+pipeline.run(
+	default,
+	delay=0,
+	daemon=False,
+	stop_on_error=True,
+)
 ```
 
 The initial `result` is determined by the supplied `default` value, or by the pipeline's `default` value when `default` is omitted.
@@ -232,6 +239,41 @@ The configured steps are snapshotted when execution starts.
 
 Changes made to the pipeline configuration after `run()` begins do not affect the current execution.
 
+### `name`
+
+A pipeline can optionally assign a name to its worker thread.
+
+When omitted, `name` defaults to `None`.
+
+```python
+pipeline = Pipeline(
+	[
+		(add, (5,)),
+	],
+	name="my-pipeline",
+)
+```
+
+The name is passed to `threading.Thread` when the worker thread is created.
+
+It can be read and changed through the `name` property:
+
+```python
+print(pipeline.name)
+
+pipeline.name = "updated-pipeline"
+```
+
+The name can also be cleared:
+
+```python
+pipeline.name = None
+```
+
+`name` must be a string or `None`.
+
+Changing the name affects subsequently created worker threads. It does not rename an already running worker thread.
+
 ### `run_now`
 
 A pipeline can optionally start execution immediately when it is created.
@@ -272,6 +314,42 @@ pipeline = Pipeline([
 pipeline.run(20)
 ```
 
+`run_kwargs` provides keyword arguments passed to `run()`:
+
+```python
+pipeline = Pipeline(
+	[
+		(add, (5,)),
+	],
+	run_now=True,
+	run_args=(10,),
+	run_kwargs={
+		"delay": 1,
+		"daemon": True,
+		"stop_on_error": False,
+	},
+)
+```
+
+This is equivalent to:
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+])
+
+pipeline.run(
+	10,
+	delay=1,
+	daemon=True,
+	stop_on_error=False,
+)
+```
+
+`run_kwargs` must be a mapping when provided.
+
+When `run_kwargs` is omitted or set to `None`, it defaults to an empty mapping.
+
 For example:
 
 ```python
@@ -280,7 +358,8 @@ pipeline = Pipeline(
 		(add, (5,)),
 	],
 	run_now=True,
-	run_args=(10, 1, True, False),
+	run_args=(10,),
+	run_kwargs={"delay": 1},
 )
 ```
 
@@ -291,7 +370,7 @@ pipeline = Pipeline([
 	(add, (5,)),
 ])
 
-pipeline.run(10, 1, True, False)
+pipeline.run(10, delay=1)
 ```
 
 ### `wait()`
@@ -433,36 +512,37 @@ A `Pipeline` can be copied using the standard Python copy protocol or the conven
 
 ### `copy()`
 
-`copy()` returns a new pipeline with a shallow-copied configuration and default value.
+`copy()` returns a new pipeline with a shallow-copied configuration, default value, and name.
 
 ```python
 pipeline = Pipeline([
 	(add, (5,)),
-], default=10)
+], default=10, name="original")
 
 copied = pipeline.copy()
 ```
 
-The pipeline configuration and `default` value are shallow-copied.
+The pipeline configuration, `default`, and `name` are shallow-copied.
 
 Execution state is not copied. The new pipeline has its own:
 
-- Worker thread state.
-- `results` stack.
-- `errors` stack.
-- Current `step` state.
-- Stop and skip events.
+* Worker thread state.
+* `results` stack.
+* `errors` stack.
+* Current `step` state.
+* Stop and skip events.
 
 For example:
 
 ```python
 pipeline = Pipeline([
 	(add, (5,)),
-], default=10)
+], default=10, name="original")
 
 copied = pipeline.copy()
 
 print(copied.default)  # 10
+print(copied.name)     # original
 print(copied.results)  # empty
 print(copied.running)  # False
 ```
@@ -489,7 +569,7 @@ copied = copy.copy(pipeline)
 
 This has the same behavior as `pipeline.copy()`.
 
-Only the pipeline configuration and `default` value are shallow-copied. Execution state is reset in the new pipeline.
+The pipeline configuration, `default`, and `name` are shallow-copied. Execution state is reset in the new pipeline.
 
 ### `copy.deepcopy()`
 
@@ -501,7 +581,7 @@ import copy
 copied = copy.deepcopy(pipeline)
 ```
 
-The pipeline configuration and `default` value are deep-copied.
+The pipeline configuration, `default`, and `name` are deep-copied.
 
 Execution state is still not copied.
 
@@ -510,7 +590,7 @@ This means nested mutable values contained in the pipeline configuration or `def
 ```python
 pipeline = Pipeline([
 	(my_function, ({"value": 10},)),
-], default={"count": 1})
+], default={"count": 1}, name="original")
 
 copied = copy.deepcopy(pipeline)
 ```
@@ -770,16 +850,25 @@ For example:
 add(5) | multiply(2)
 ```
 
-The developer-oriented representation contains the total number of steps, current step, and running state:
+The developer-oriented representation contains the pipeline name, default value, total number of steps, current step, and running state:
 
 ```python
+pipeline = Pipeline(
+	[
+		(add, (5,)),
+		(multiply, (2,)),
+	],
+	default=10,
+	name="example",
+)
+
 print(repr(pipeline))
 ```
 
 For example:
 
 ```text
-Pipeline(total_steps=2, current_step=0, running=False)
+Pipeline(name='example', default=10, total_steps=2, current_step=0, running=False)
 ```
 
 ## Pipeline Operators
@@ -833,18 +922,26 @@ The original pipeline is not modified.
 Pipelines can be compared by configuration:
 
 ```python
-first = Pipeline([
-	(str.strip,),
-], default="hello")
+first = Pipeline(
+	[
+		(str.strip,),
+	],
+	default="hello",
+	name="example",
+)
 
-second = Pipeline([
-	(str.strip,),
-], default="hello")
+second = Pipeline(
+	[
+		(str.strip,),
+	],
+	default="hello",
+	name="example",
+)
 
 print(first == second)  # True
 ```
 
-Two pipelines are equal when they have the same configured steps and `default` value.
+Two pipelines are equal when they have the same configured steps, `default` value, and `name`.
 
 Execution state is not considered.
 
@@ -966,10 +1063,22 @@ print(add_five(10))
 
 A `step` passes its supplied value as the first argument to the wrapped callable, followed by its configured positional and keyword arguments.
 
+Each `step` also has a `default` attribute containing the initial value used by operations that require one. It defaults to `None`.
+
+```python
+add_five.default = 10
+```
+
 It can also be used with the pipe operator:
 
 ```python
 result = 10 | add_five
+```
+
+or:
+
+```python
+result = 10 | add(5)
 ```
 
 This is equivalent to:
@@ -984,14 +1093,19 @@ A step can be repeated with the multiplication operator:
 def add(value, amount):
 	return (value or 0) + amount
 
-result = step(add, 5) * 3
+add_five = step(add, 5)
+add_five.default = 0
+
+result = add_five * 3
 
 print(result)  # 15
 ```
 
 The wrapped callable is executed once for each repetition, with each result passed to the next execution.
 
-Repeated execution starts with `None`; each result is passed to the next execution.
+Repeated execution starts with `step.default`.
+
+The repetition count must be an integer greater than or equal to `1`.
 
 #### Exporting a step
 
@@ -1030,7 +1144,7 @@ Empty positional or keyword arguments are omitted from the exported tuple.
 
 #### Unpacking a step
 
-A `step` can also be unpacked directly with the `*` operator:
+A `step` can be unpacked directly because it is iterable:
 
 ```python
 add_five = step(add, 5)
@@ -1139,7 +1253,9 @@ stack.put("value")
 print(stack.peek())
 ```
 
-These aliases are provided for convenience and compatibility.
+These aliases are provided primarily for compatibility with existing code and systems that use different method names for LIFO containers.
+
+For new code, `push()` and `get()` are the recommended `Stack` methods.
 
 ### Stack capacity
 
@@ -1171,51 +1287,52 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ### `Pipeline`
 
-| Member           | Description                                                                  |
-| ---------------- | ---------------------------------------------------------------------------- |
-| `run()`          | Start asynchronous pipeline execution.                                       |
-| `run_step()`     | Execute a configured step synchronously by one-based index.                  |
-| `execute()`      | Execute a supplied pipeline step synchronously.                              |
-| `stop()`         | Stop the current execution.                                                  |
-| `skip()`         | Request the next step to be skipped.                                         |
-| `wait()`         | Wait for the current execution.                                              |
-| `rerun()`        | Restart the pipeline.                                                        |
-| `copy()`         | Return a new pipeline with a shallow-copied configuration and default value. |
-| `add()`          | Append a step.                                                               |
-| `insert()`       | Insert a step.                                                               |
-| `update()`       | Append multiple validated steps atomically.                                  |
-| `remove()`       | Remove the first matching step.                                              |
-| `discard()`      | Remove the first matching step if present.                                   |
-| `pop()`          | Remove and return a step.                                                    |
-| `clear()`        | Remove all steps.                                                            |
-| `reverse()`      | Reverse the configured steps in place.                                       |
-| `running`        | Whether the worker is running.                                               |
-| `step`           | Current one-based step index.                                                |
-| `default`        | Default initial value used by `run()`.                                       |
-| `result`         | Most recent result.                                                          |
-| `error`          | Raise the most recent pipeline exception when accessed.                      |
-| `results`        | Stack of initial value and successful results.                               |
-| `errors`         | Stack of raised exceptions.                                                  |
-| `__getitem__()`  | Retrieve a step using one-based indexing.                                    |
-| `__setitem__()`  | Replace a step using one-based indexing.                                     |
-| `__delitem__()`  | Delete a step using one-based indexing.                                      |
-| `__iter__()`     | Iterate over configured steps.                                               |
-| `__reversed__()` | Iterate over configured steps in reverse order.                              |
-| `__len__()`      | Return the number of configured steps.                                       |
-| `__contains__()` | Check callable membership by identity.                                       |
-| `__call__()`     | Run the pipeline.                                                            |
-| `__bool__()`     | Return whether the pipeline contains configured steps.                       |
-| `__str__()`      | Return a human-readable pipeline representation.                             |
-| `__repr__()`     | Return a developer-oriented pipeline representation.                         |
-| `__enter__()`    | Enter the context manager and start the pipeline if needed.                  |
-| `__exit__()`     | Exit the context manager and stop the pipeline.                              |
-| `__copy__()`     | Create a shallow copy using Python's copy protocol.                          |
-| `__deepcopy__()` | Create a deep copy using Python's copy protocol.                             |
-| `__iadd__()`     | Append a step in place.                                                      |
-| `__add__()`      | Create a new pipeline with additional steps appended.                        |
-| `__radd__()`     | Create a new pipeline with steps prepended.                                  |
-| `__eq__()`       | Compare pipeline configurations.                                             |
-| `__mul__()`      | Create a new pipeline with repeated steps.                                   |
+| Member           | Description                                                                   |
+| ---------------- | ----------------------------------------------------------------------------- |
+| `run()`          | Start asynchronous pipeline execution.                                        |
+| `run_step()`     | Execute a configured step synchronously by one-based index.                   |
+| `execute()`      | Execute a supplied pipeline step synchronously.                               |
+| `stop()`         | Stop the current execution.                                                   |
+| `skip()`         | Request the next step to be skipped.                                          |
+| `wait()`         | Wait for the current execution.                                               |
+| `rerun()`        | Restart the pipeline.                                                         |
+| `copy()`         | Return a new pipeline with a shallow-copied configuration, default, and name. |
+| `add()`          | Append a step.                                                                |
+| `insert()`       | Insert a step.                                                                |
+| `update()`       | Append multiple validated steps atomically.                                   |
+| `remove()`       | Remove the first matching step.                                               |
+| `discard()`      | Remove the first matching step if present.                                    |
+| `pop()`          | Remove and return a step.                                                     |
+| `clear()`        | Remove all steps.                                                             |
+| `reverse()`      | Reverse the configured steps in place.                                        |
+| `running`        | Whether the worker is running.                                                |
+| `step`           | Current one-based step index.                                                 |
+| `default`        | Default initial value used by `run()`.                                        |
+| `name`           | Name assigned to the worker thread.                                           |
+| `result`         | Most recent result.                                                           |
+| `error`          | Raise the most recent pipeline exception when accessed.                       |
+| `results`        | Stack of initial value and successful results.                                |
+| `errors`         | Stack of raised exceptions.                                                   |
+| `__getitem__()`  | Retrieve a step using one-based indexing.                                     |
+| `__setitem__()`  | Replace a step using one-based indexing.                                      |
+| `__delitem__()`  | Delete a step using one-based indexing.                                       |
+| `__iter__()`     | Iterate over configured steps.                                                |
+| `__reversed__()` | Iterate over configured steps in reverse order.                               |
+| `__len__()`      | Return the number of configured steps.                                        |
+| `__contains__()` | Check callable membership by identity.                                        |
+| `__call__()`     | Run the pipeline.                                                             |
+| `__bool__()`     | Return whether the pipeline contains configured steps.                        |
+| `__str__()`      | Return a human-readable pipeline representation.                              |
+| `__repr__()`     | Return a developer-oriented pipeline representation.                          |
+| `__enter__()`    | Enter the context manager and start the pipeline if needed.                   |
+| `__exit__()`     | Exit the context manager and stop the pipeline.                               |
+| `__copy__()`     | Create a shallow copy using Python's copy protocol.                           |
+| `__deepcopy__()` | Create a deep copy using Python's copy protocol.                              |
+| `__iadd__()`     | Append a step in place.                                                       |
+| `__add__()`      | Create a new pipeline with additional steps appended.                         |
+| `__radd__()`     | Create a new pipeline with steps prepended.                                   |
+| `__eq__()`       | Compare pipeline configurations, including `name`.                            |
+| `__mul__()`      | Create a new pipeline with repeated steps.                                    |
 
 ### Functional Utilities
 
@@ -1227,9 +1344,17 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ### `step`
 
-| Member     | Description                                        |
-| ---------- | -------------------------------------------------- |
-| `export()` | Convert the step to standard pipeline step format. |
+| Member       | Description                                              |
+| ------------ | -------------------------------------------------------- |
+| `default`    | Initial value used by operations such as `step * n`.    |
+| `export()`   | Convert the step to standard pipeline step format.       |
+| `__call__()` | Execute the step with a supplied value.                  |
+| `__ror__()`  | Apply the step using the right-hand pipe operator `|`.   |
+| `__mul__()`  | Execute the step repeatedly from `default`.              |
+| `__lt__()`  | Read from a file-like object and apply the step.         |
+| `__gt__()`  | Apply the step and write the result to a file-like object. |
+| `__iter__()` | Iterate over the exported pipeline step format.          |
+| `__repr__()` | Return a developer-oriented representation of the step.  |
 
 ### `Stack`
 

@@ -7,7 +7,7 @@ class step:
 
 	The wrapped callable is invoked with a value as its first argument, followed by the stored positional and keyword arguments.
 
-	The ``default`` attribute provides the initial value used by operations such as ``step * n`` and ``pipeline > step``.
+	The ``default`` attribute provides the initial value used by operations such as ``step * n`` and ``step > file``.
 
 	Attributes:
 		function: The callable to execute.
