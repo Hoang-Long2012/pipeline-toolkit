@@ -586,7 +586,7 @@ class TestPipelineErrors:
 		assert pipeline.results.get() == 15
 
 	def test_error_raises_latest_exception(self):
-		"""Test error property raises the latest pipeline exception."""
+		"""Test error raises the latest pipeline exception."""
 
 		def raise_error(x):
 			raise ValueError("Test error")
@@ -595,10 +595,24 @@ class TestPipelineErrors:
 		pipeline.run(10).wait()
 
 		with pytest.raises(ValueError, match="Test error"):
-			_ = pipeline.error
+			_ = pipeline.error()
+
+	def test_error_returns_latest_exception_when_reraise_disabled(self):
+		"""Test error returns the latest exception when reraise is disabled."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(10).wait()
+
+		error = pipeline.error(reraise=False)
+
+		assert isinstance(error, ValueError)
+		assert str(error) == "Test error"
 
 	def test_error_returns_none_without_exception(self):
-		"""Test error property returns None when no exception occurred."""
+		"""Test error returns None when no exception occurred."""
 
 		def func(x):
 			return x
@@ -606,7 +620,7 @@ class TestPipelineErrors:
 		pipeline = Pipeline([(func,)])
 		pipeline.run(10).wait()
 
-		assert pipeline.error is None
+		assert pipeline.error() is None
 
 	def test_error_raises_while_running(self):
 		"""Test error raises RuntimeError while pipeline is running."""
@@ -624,7 +638,7 @@ class TestPipelineErrors:
 		assert step_started.wait(timeout=1.0)
 
 		with pytest.raises(RuntimeError, match="Pipeline is already running"):
-			_ = pipeline.error
+			_ = pipeline.error()
 
 		step_should_exit.set()
 		pipeline.wait()
@@ -1557,10 +1571,12 @@ class TestPipelineCallable:
 
 	def test_pipeline_repr(self):
 		"""Test pipeline repr."""
-		pipeline = Pipeline()
+		pipeline = Pipeline(default=42, name="test-pipeline")
 		repr_str = repr(pipeline)
 
 		assert "Pipeline" in repr_str
+		assert "name='test-pipeline'" in repr_str
+		assert "default=42" in repr_str
 		assert "total_steps=0" in repr_str
 
 
