@@ -640,23 +640,32 @@ If the pipeline has not been run yet, `result` is `None`.
 
 Accessing `result` while the pipeline is running raises `RuntimeError`.
 
-### `error`
+### `error()`
 
-The `error` property raises the most recent exception raised by the pipeline when accessed.
+The `error()` method returns or raises the most recent exception raised by the pipeline.
+
+By default, `error()` re-raises the most recent exception:
 
 ```python
 pipeline.run(10).wait()
 
-if pipeline.errors:
-	try:
-		pipeline.error
-	except Exception as error:
-		print(error)
+pipeline.error()
 ```
 
-If no exception has occurred, `error` returns `None`.
+To retrieve the exception without raising it, pass `reraise=False`:
 
-Accessing `error` while the pipeline is running raises `RuntimeError`.
+```python
+pipeline.run(10).wait()
+
+error = pipeline.error(reraise=False)
+
+if error is not None:
+	print(error)
+```
+
+If no exception has occurred, `error()` returns `None`.
+
+Accessing `error()` while the pipeline is running raises `RuntimeError`.
 
 ## Managing Pipeline Steps
 
@@ -1310,7 +1319,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `default`        | Default initial value used by `run()`.                                        |
 | `name`           | Name assigned to the worker thread.                                           |
 | `result`         | Most recent result.                                                           |
-| `error`          | Raise the most recent pipeline exception when accessed.                       |
+| `error()`        | Return or raise the most recent pipeline exception.                           |
 | `results`        | Stack of initial value and successful results.                                |
 | `errors`         | Stack of raised exceptions.                                                   |
 | `__getitem__()`  | Retrieve a step using one-based indexing.                                     |
@@ -1344,17 +1353,17 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ### `step`
 
-| Member       | Description                                              |
-| ------------ | -------------------------------------------------------- |
-| `default`    | Initial value used by operations such as `step * n`.    |
-| `export()`   | Convert the step to standard pipeline step format.       |
-| `__call__()` | Execute the step with a supplied value.                  |
-| `__ror__()`  | Apply the step using the right-hand pipe operator `|`.   |
-| `__mul__()`  | Execute the step repeatedly from `default`.              |
-| `__lt__()`  | Read from a file-like object and apply the step.         |
-| `__gt__()`  | Apply the step and write the result to a file-like object. |
-| `__iter__()` | Iterate over the exported pipeline step format.          |
-| `__repr__()` | Return a developer-oriented representation of the step.  |
+| Member       | Description                                                |
+| ------------ | ---------------------------------------------------------- |
+| `default`    | Initial value used by operations such as `step * n`.       |
+| `export()`   | Convert the step to standard pipeline step format.         |
+| `__call__()` | Execute the step with a supplied value.                    |
+| `__ror__()`  | Apply the step using the right-hand pipe operator `\|`.    |
+| `__mul__()`  | Execute the step repeatedly from `default`.                |
+| `__lt__()`   | Read from a file-like object and apply the step.           |
+| `__gt__()`   | Apply the step and write the result to a file-like object. |
+| `__iter__()` | Iterate over the exported pipeline step format.            |
+| `__repr__()` | Return a developer-oriented representation of the step.    |
 
 ### `Stack`
 
@@ -1379,7 +1388,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ## Requirements
 
-* Python 3.8 or newer
+- Python 3.8 or newer
 
 ## Changelog
 
@@ -1393,8 +1402,8 @@ See [license](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/LICEN
 
 ## Contribution
 
-If you'd like to contribute, feel free to submit a pull request.
+- If you'd like to contribute, feel free to submit a pull request.
 
-If you'd like to report a bug or request a feature, please open an issue.
+- If you'd like to report a bug or request a feature, please open an issue.
 
 Copyright (C) 2026 Hoàng Long
