@@ -287,21 +287,30 @@ class Pipeline:
 			raise RuntimeError("Pipeline is already running.")
 		if self.results:
 			return self.results.get()
-	@property
-	def error(self):
-		"""Raise the most recent exception raised by the pipeline, if any.
+	def error(self, reraise=True):
+		"""Return or raise the most recent exception raised by the pipeline.
+
+		By default, the exception is raised.
+		If ``reraise`` is ``False``, the exception is returned instead.
+
+		Args:
+			reraise: Whether to raise the most recent exception.
+				Defaults to ``True``.
 
 		Returns:
-			``None`` if no exception was raised by the pipeline.
+			The most recent exception if ``reraise`` is ``False``.
+			``None`` if no exception was raised.
 
 		Raises:
 			RuntimeError: If the pipeline is currently running.
-			Exception: The most recent exception raised by a pipeline step.
+			Exception: The most recent exception raised by a pipeline step when ``reraise`` is ``True``.
 		"""
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
 		if self.errors:
-			raise self.errors.get()
+			if reraise:
+				raise self.errors.get()
+			return self.errors.get()
 	def add(self, step):
 		"""Append a validated step to the pipeline.
 
