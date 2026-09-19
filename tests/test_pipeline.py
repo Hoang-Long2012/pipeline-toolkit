@@ -683,14 +683,14 @@ class TestPipelineManualSteps:
 		"""Test run_step with non-integer index."""
 		pipeline = Pipeline()
 
-		with pytest.raises(TypeError, match="Step is not int"):
+		with pytest.raises(TypeError, match="index is not int"):
 			pipeline.run_step("1", 10)
 
 	def test_run_step_invalid_index_out_of_range(self):
 		"""Test run_step with index beyond pipeline."""
 		pipeline = Pipeline()
 
-		with pytest.raises(IndexError, match="Step out of pipeline"):
+		with pytest.raises(IndexError, match="index out of pipeline"):
 			pipeline.run_step(1, 10)
 
 	def test_run_step_invalid_index_zero(self):
@@ -701,7 +701,7 @@ class TestPipelineManualSteps:
 
 		pipeline = Pipeline([(func,)])
 
-		with pytest.raises(ValueError, match="Step < 1"):
+		with pytest.raises(ValueError, match="index < 1"):
 			pipeline.run_step(0, 10)
 
 	def test_run_step_while_running(self):

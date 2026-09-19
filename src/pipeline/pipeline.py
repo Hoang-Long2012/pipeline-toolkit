@@ -167,14 +167,14 @@ class Pipeline:
 		self.thread = threading.Thread(target=worker, name=self._name, daemon=daemon)
 		self.thread.start()
 		return self
-	def run_step(self, step, default=None):
+	def run_step(self, index, default=None):
 		"""Execute a single pipeline step synchronously.
 
 		This method does not create or modify the worker thread and does not store the result or exception in the pipeline's ``results`` or ``errors`` stacks.
 		Exceptions are allowed to propagate to the caller.
 
 		Args:
-			step: One-based index of the pipeline step to execute.
+			index: One-based index of the pipeline step to execute.
 			default: Value passed to the selected step as its first argument.
 				Defaults to ``None``.
 
@@ -182,20 +182,20 @@ class Pipeline:
 			The value returned by the selected step.
 
 		Raises:
-			TypeError: If ``step`` is not an integer.
-			ValueError: If ``step`` is less than ``1``.
-			IndexError: If ``step`` is outside the pipeline.
+			TypeError: If ``index`` is not an integer.
+			ValueError: If ``index`` is less than ``1``.
+			IndexError: If ``index`` is outside the pipeline.
 			RuntimeError: If the pipeline is currently running.
 		"""
-		if not isinstance(step, int):
-			raise TypeError("Step is not int.")
-		if step < 1:
-			raise ValueError("Step < 1.")
-		if not 1 <= step <= len(self.pipeline):
-			raise IndexError("Step out of pipeline.")
+		if not isinstance(index, int):
+			raise TypeError("index is not int.")
+		if index < 1:
+			raise ValueError("index < 1.")
+		if not 1 <= index <= len(self.pipeline):
+			raise IndexError("index out of pipeline.")
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
-		step = self.pipeline[step - 1]
+		step = self.pipeline[index - 1]
 		return self._execute_step(step, default)
 	def execute(self, step, default=None):
 		"""Execute a pipeline step synchronously.
