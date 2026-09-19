@@ -2,6 +2,7 @@
 
 ## 0.5.0
 - Changed `Pipeline.error` from a property to a method. Call `error()` to re-raise the latest exception, or `error(reraise=False)` to retrieve it without re-raising.
+- Renamed the `run_step()` parameter from `step` to `index` to clarify that it refers to the one-based position of the pipeline step.
 
 ## 0.4.1
 - Added `Pipeline.__init__()` parameter `run_kwargs` for passing keyword arguments to `run()` when `run_now` is enabled.
