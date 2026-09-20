@@ -42,7 +42,8 @@ class Pipeline:
 				Defaults to an empty pipeline.
 			default: The value used for the first step when `run()` is called without an explicit `default`.
 				Defaults to ``None``.
-			name: The name assigned to the worker thread.
+			name: The name assigned to the worker thread and pipeline.
+				Must be a non-empty string or ``None``.
 				Defaults to ``None``.
 			run_now: Whether to start the pipeline immediately after initialization.
 				Defaults to ``False``.
@@ -52,7 +53,8 @@ class Pipeline:
 				Defaults to ``None``.
 
 		Raises:
-			TypeError: If any item in `iterable` is not a valid step, if `name` is not a str, if `run_args` is not a tuple, or if `run_kwargs` is not a mapping.
+			TypeError: If any item in `iterable` is not a valid step, if ``name`` is not a string or ``None``, if ``run_args`` is not a tuple, or if ``run_kwargs`` is not a mapping.
+			ValueError: If ``name`` is an empty string.
 		"""
 		iterable = tuple(iterable)
 		self.stop_event = threading.Event()
@@ -65,6 +67,8 @@ class Pipeline:
 		self.default = default
 		if name is not None and not isinstance(name, str):
 			raise TypeError("name is not a str.")
+		if name is not None and not name:
+			raise ValueError("name cannot be an empty string.")
 		self._name = name
 		for step in iterable:
 			self._validate_step(step)
@@ -487,7 +491,11 @@ class Pipeline:
 		return f"{func.__name__}({', '.join(parts)})"
 	def __str__(self):
 		"""Return a human-readable representation of the pipeline."""
-		return " | ".join(self._format_step(step) for step in self.pipeline)
+		pipeline = [f"{self.default!r}"]
+		pipeline.extend(self._format_step(step) for step in self.pipeline)
+		if self._name:
+			return f"{self._name}: {' | '.join(pipeline)}"
+		return " | ".join(pipeline)
 	def __repr__(self):
 		"""Return the developer-oriented representation of the pipeline."""
 		return f"{type(self).__name__}(name={self._name!r}, default={self.default!r}, total_steps={len(self.pipeline)}, current_step={self.step}, running={self.running})"
@@ -669,19 +677,23 @@ class Pipeline:
 		return type(self)(self.pipeline * count, self.default, self._name)
 	@property
 	def name(self):
-		"""Return the name of the worker thread."""
+		"""Return the name of the worker thread and pipeline."""
 		return self._name
 	@name.setter
 	def name(self, name):
-		"""Set the name of the worker thread.
+		"""Set the name of the worker thread and pipeline.
 
 		Args:
-			name: The name to assign to the worker thread.
+			name: The name to assign to the worker thread and pipeline.
+				Must be a non-empty string or ``None``.
 				``None`` clears the name.
 
 		Raises:
 			TypeError: If ``name`` is not a string or ``None``.
+			ValueError: If ``name`` is an empty string.
 		"""
 		if name is not None and not isinstance(name, str):
 			raise TypeError("name is not a str.")
+		if name is not None and not name:
+			raise ValueError("name cannot be an empty string.")
 		self._name = name
