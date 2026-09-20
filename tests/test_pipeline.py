@@ -72,6 +72,20 @@ class TestPipelineInitialization:
 		with pytest.raises(TypeError, match="name is not a str"):
 			pipeline.name = 123
 
+	def test_pipeline_name_rejects_empty_string(self):
+		"""Test pipeline rejects an empty name."""
+
+		with pytest.raises(ValueError):
+			Pipeline(name="")
+
+	def test_pipeline_name_setter_rejects_empty_string(self):
+		"""Test pipeline name setter rejects an empty name."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(ValueError):
+			pipeline.name = ""
+
 	def test_pipeline_init_with_run_now(self):
 		"""Test initializing and immediately running the pipeline."""
 
@@ -1531,7 +1545,7 @@ class TestPipelineCallable:
 
 		pipeline = Pipeline([(add, (5,))])
 
-		assert str(pipeline) == "add(5)"
+		assert str(pipeline) == "None | add(5)"
 
 	def test_pipeline_str_multiple_steps(self):
 		"""Test pipeline string with multiple steps."""
@@ -1547,7 +1561,41 @@ class TestPipelineCallable:
 			(multiply, (2,)),
 		])
 
-		assert str(pipeline) == "add(5) | multiply(2)"
+		assert str(pipeline) == "None | add(5) | multiply(2)"
+
+	def test_pipeline_str_with_default(self):
+		"""Test pipeline string includes the default value."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default=10)
+
+		assert str(pipeline) == "10 | add(5)"
+
+	def test_pipeline_str_with_name(self):
+		"""Test pipeline string includes the pipeline name."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], name="test-pipeline")
+
+		assert str(pipeline) == "test-pipeline: None | add(5)"
+
+	def test_pipeline_str_with_name_and_default(self):
+		"""Test pipeline string includes both name and default."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline(
+			[(add, (5,))],
+			default=10,
+			name="test-pipeline",
+		)
+
+		assert str(pipeline) == "test-pipeline: 10 | add(5)"
 
 	def test_pipeline_str_keyword_arguments(self):
 		"""Test pipeline string representation with keyword arguments."""
@@ -1557,7 +1605,7 @@ class TestPipelineCallable:
 
 		pipeline = Pipeline([(power, {"exp": 3})])
 
-		assert str(pipeline) == "power(exp=3)"
+		assert str(pipeline) == "None | power(exp=3)"
 
 	def test_pipeline_str_positional_and_keyword_arguments(self):
 		"""Test pipeline string representation with positional and keyword arguments."""
@@ -1567,7 +1615,7 @@ class TestPipelineCallable:
 
 		pipeline = Pipeline([(func, (5,), {"b": 20})])
 
-		assert str(pipeline) == "func(5, b=20)"
+		assert str(pipeline) == "None | func(5, b=20)"
 
 	def test_pipeline_repr(self):
 		"""Test pipeline repr."""

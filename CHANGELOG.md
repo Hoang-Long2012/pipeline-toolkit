@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1
+- Improved `Pipeline.__str__()` to include the pipeline's `name` and `default` value at the beginning of the representation.
+- Fixed `Pipeline.name` accepting empty strings. The `name` parameter and setter now raise `ValueError` when given an empty string.
+
 ## 0.5.0
 - Changed `Pipeline.error` from a property to a method. Call `error()` to re-raise the latest exception, or `error(reraise=False)` to retrieve it without re-raising.
 - Renamed the `run_step()` parameter from `step` to `index` to clarify that it refers to the one-based position of the pipeline step.
