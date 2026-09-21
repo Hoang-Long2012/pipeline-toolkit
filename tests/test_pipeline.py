@@ -1216,6 +1216,60 @@ class TestPipelineIndex:
 		assert list(pipeline) == steps
 
 
+class TestPipelineCount:
+	"""Test the Pipeline count method."""
+
+	def test_count_matching_step(self):
+		"""Test counting occurrences of a matching step."""
+		def add(value, amount):
+			return value + amount
+
+		step = (add, (1,))
+		pipeline = Pipeline([
+			step,
+			(lambda value: value * 2,),
+			step,
+		])
+
+		assert pipeline.count(step) == 2
+
+	def test_count_missing_step(self):
+		"""Test counting a step that is not present."""
+		def add(value, amount):
+			return value + amount
+
+		step = (add, (1,))
+		other = (add, (2,))
+		pipeline = Pipeline([step])
+
+		assert pipeline.count(other) == 0
+
+	def test_count_single_occurrence(self):
+		"""Test counting a step occurring once."""
+		step = (lambda value: value + 1,)
+		pipeline = Pipeline([step])
+
+		assert pipeline.count(step) == 1
+
+	def test_count_does_not_modify_pipeline(self):
+		"""Test counting a step does not modify the pipeline."""
+		step = (lambda value: value + 1,)
+		pipeline = Pipeline([step, step])
+
+		pipeline.count(step)
+
+		assert len(pipeline) == 2
+		assert pipeline[1] == step
+		assert pipeline[2] == step
+
+	def test_count_invalid_step(self):
+		"""Test counting an invalid step raises TypeError."""
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError):
+			pipeline.count("invalid")
+
+
 class TestPipelineReversal:
 	"""Test pipeline reversal."""
 

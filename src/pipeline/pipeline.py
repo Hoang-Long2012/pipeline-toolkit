@@ -494,6 +494,24 @@ class Pipeline:
 			if pipeline_step == step:
 				return index + 1
 		raise ValueError("Step not found in pipeline.")
+	def count(self, step):
+		"""Return the number of occurrences of a pipeline step.
+
+		Args:
+			step: The pipeline step to count.
+
+		Returns:
+			The number of times ``step`` occurs in the pipeline.
+
+		Raises:
+			TypeError: If ``step`` has an invalid format.
+		"""
+		self._validate_step(step)
+		total = 0
+		for pipeline_step in self.pipeline:
+			if pipeline_step == step:
+				total += 1
+		return total
 	def _format_step(self, step):
 		func = step[0]
 		if len(step) >= 2:
