@@ -4,6 +4,7 @@
 - Added `Pipeline.index()` to return the one-based index of the first matching pipeline step.
 - Added `Pipeline.count()` to return the number of occurrences of a pipeline step.
 - Improved `Pipeline.__str__()` to include the pipeline's `name` and `default` value at the beginning of the representation.
+- Fixed `Pipeline.__str__()` raising an `AttributeError` when the pipeline contains a callable object without a `__name__` attribute.
 - Fixed `Pipeline.name` accepting empty strings. The `name` parameter and setter now raise `ValueError` when given an empty string.
 
 ## 0.5.0

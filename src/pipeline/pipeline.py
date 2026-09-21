@@ -524,7 +524,8 @@ class Pipeline:
 				parts.extend(f"{key}={value!r}" for key, value in step[2].items())
 		else:
 			parts = [f"{key}={value!r}" for key, value in args.items()]
-		return f"{func.__name__}({', '.join(parts)})"
+		name = getattr(func, "__name__", type(func).__name__)
+		return f"{name}({', '.join(parts)})"
 	def __str__(self):
 		"""Return a human-readable representation of the pipeline."""
 		pipeline = [f"{self.default!r}"]

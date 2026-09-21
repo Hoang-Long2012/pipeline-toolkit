@@ -1734,6 +1734,17 @@ class TestPipelineCallable:
 
 		assert str(pipeline) == "None | func(5, b=20)"
 
+	def test_pipeline_str_callable_object(self):
+		"""Test pipeline string representation with a callable object."""
+
+		class AddFive:
+			def __call__(self, x):
+				return x + 5
+
+		pipeline = Pipeline([(AddFive(),)])
+
+		assert str(pipeline) == "None | AddFive()"
+
 	def test_pipeline_repr(self):
 		"""Test pipeline repr."""
 		pipeline = Pipeline(default=42, name="test-pipeline")
