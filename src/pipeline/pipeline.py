@@ -476,6 +476,24 @@ class Pipeline:
 			RuntimeError: If the pipeline is currently running.
 		"""
 		return self.__copy__()
+	def index(self, step):
+		"""Return the one-based index of the first matching pipeline step.
+
+		Args:
+			step: The pipeline step to search for.
+
+		Returns:
+			The one-based index of the first matching step.
+
+		Raises:
+			TypeError: If ``step`` has an invalid format.
+			ValueError: If ``step`` is not found in the pipeline.
+		"""
+		self._validate_step(step)
+		for index, pipeline_step in enumerate(self.pipeline):
+			if pipeline_step == step:
+				return index + 1
+		raise ValueError("Step not found in pipeline.")
 	def _format_step(self, step):
 		func = step[0]
 		if len(step) >= 2:
