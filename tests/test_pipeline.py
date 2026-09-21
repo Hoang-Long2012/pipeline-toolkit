@@ -1153,6 +1153,69 @@ class TestPipelineItemAccess:
 			del pipeline[1]
 
 
+class TestPipelineIndex:
+	"""Test finding the index of a pipeline step."""
+
+	def test_index_returns_step_index(self):
+		"""Test index returns the one-based index of a step."""
+
+		def add(x, y):
+			return x + y
+
+		def multiply(x, y):
+			return x * y
+
+		add_step = (add, (5,))
+		multiply_step = (multiply, (2,))
+		pipeline = Pipeline([
+			add_step,
+			multiply_step,
+		])
+
+		assert pipeline.index(add_step) == 1
+		assert pipeline.index(multiply_step) == 2
+
+	def test_index_returns_first_matching_step(self):
+		"""Test index returns the first matching occurrence."""
+
+		def add(x, y):
+			return x + y
+
+		step = (add, (5,))
+		pipeline = Pipeline([
+			step,
+			step,
+		])
+
+		assert pipeline.index(step) == 1
+
+	def test_index_missing_step(self):
+		"""Test index raises ValueError when the step is not found."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline()
+
+		with pytest.raises(ValueError, match="Step not found in pipeline"):
+			pipeline.index((add, (5,)))
+
+	def test_index_does_not_modify_pipeline(self):
+		"""Test index does not modify the pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		steps = [
+			(add, (5,)),
+			(add, (10,)),
+		]
+		pipeline = Pipeline(steps)
+
+		assert pipeline.index(steps[1]) == 2
+		assert list(pipeline) == steps
+
+
 class TestPipelineReversal:
 	"""Test pipeline reversal."""
 
