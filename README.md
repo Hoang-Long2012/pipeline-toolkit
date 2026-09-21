@@ -27,6 +27,7 @@ It also provides small utilities for composing functions, configuring callable s
 - Convenient access to the most recent result or error.
 - Pipeline modification with `add()`, `insert()`, `update()`, `remove()`, `discard()`, `pop()`, `clear()`, and `reverse()`.
 - One-based step indexing and item assignment.
+- One-based step lookup and occurrence counting with `index()` and `count()`.
 - Step deletion with `del`.
 - Iteration over configured pipeline steps in forward or reverse order.
 - Shallow and deep pipeline copying.
@@ -199,7 +200,7 @@ pipeline.run(
 )
 ```
 
-The initial `result` is determined by the supplied `default` value, or by the pipeline's `default` value when `default` is omitted.
+The initial value is determined by the value passed to `default`, or by `Pipeline.default` when the argument is omitted.
 
 `None` can be passed explicitly as the initial value:
 
@@ -215,7 +216,7 @@ In this example, the first step receives `None`, not `10`.
 
 `delay` specifies the delay in seconds before the first step and between subsequent steps.
 
-When `delay` is enabled, the initial delay provides an opportunity to cancel the pipeline before the first step begins.
+When `delay` is enabled, the initial delay provides an opportunity to cancel the pipeline before the first step begins:
 
 ```python
 pipeline.run(10, delay=1)
@@ -227,7 +228,7 @@ pipeline.stop()
 
 `stop_on_error` controls whether execution stops after the first exception.
 
-When disabled, exceptions are stored in `errors` and execution continues with the previous result.
+When disabled, exceptions are stored in `errors` and execution continues with the previous result. The failed step does not add a result to `results`.
 
 `run()` returns the pipeline instance, allowing calls such as:
 
@@ -241,9 +242,9 @@ Changes made to the pipeline configuration after `run()` begins do not affect th
 
 ### `name`
 
-A pipeline can optionally assign a name to its worker thread.
+A pipeline can optionally have a name that is also assigned to subsequently created worker threads.
 
-When omitted, `name` defaults to `None`.
+The name defaults to `None`.
 
 ```python
 pipeline = Pipeline(
@@ -254,9 +255,7 @@ pipeline = Pipeline(
 )
 ```
 
-The name is passed to `threading.Thread` when the worker thread is created.
-
-It can be read and changed through the `name` property:
+The name can be read and changed through the `name` property:
 
 ```python
 print(pipeline.name)
@@ -272,7 +271,11 @@ pipeline.name = None
 
 `name` must be a string or `None`.
 
+An empty string is not allowed.
+
 Changing the name affects subsequently created worker threads. It does not rename an already running worker thread.
+
+The name is part of the pipeline configuration and is preserved by shallow and deep copying.
 
 ### `run_now`
 
@@ -291,7 +294,7 @@ pipeline = Pipeline(
 )
 ```
 
-When `run_now=True`, `run_args` must be a tuple containing the positional arguments passed to `run()` when the pipeline starts automatically.
+When `run_now=True`, `run_args` must be a tuple containing the positional arguments to pass to `run()` during automatic execution.
 
 ```python
 pipeline = Pipeline(
@@ -348,7 +351,7 @@ pipeline.run(
 
 `run_kwargs` must be a mapping when provided.
 
-When `run_kwargs` is omitted or set to `None`, it defaults to an empty mapping.
+When `run_kwargs` is `None`, it is treated as an empty mapping.
 
 For example:
 
@@ -526,11 +529,11 @@ The pipeline configuration, `default`, and `name` are shallow-copied.
 
 Execution state is not copied. The new pipeline has its own:
 
-* Worker thread state.
-* `results` stack.
-* `errors` stack.
-* Current `step` state.
-* Stop and skip events.
+- Worker thread state.
+- `results` stack.
+- `errors` stack.
+- Current `step` state.
+- Stop and skip events.
 
 For example:
 
@@ -752,6 +755,28 @@ pipeline.reverse()
 
 The method returns `None`, like `list.reverse()`.
 
+### `index()`
+
+Return the one-based index of the first matching step:
+
+```python
+index = pipeline.index((str.upper,))
+```
+
+If the step is not found, `ValueError` is raised.
+
+The supplied step must use the standard pipeline step format.
+
+### `count()`
+
+Return the number of occurrences of a step:
+
+```python
+total = pipeline.count((str.upper,))
+```
+
+The supplied step must use the standard pipeline step format.
+
 ## Item Access
 
 Pipeline steps can also be accessed and modified using one-based indexing.
@@ -847,17 +872,43 @@ for step in reversed(pipeline):
 	print(step)
 ```
 
-The string representation displays the configured steps as a functional chain:
+### String representation
+
+The string representation displays the pipeline's default value followed by its configured steps as a functional chain:
 
 ```python
+pipeline = Pipeline([
+	(add, (5,)),
+	(multiply, (2,)),
+], default=10)
+
 print(pipeline)
 ```
 
 For example:
 
 ```text
-add(5) | multiply(2)
+10 | add(5) | multiply(2)
 ```
+
+When the pipeline has a name, the name is displayed at the beginning:
+
+```python
+pipeline = Pipeline([
+	(add, (5,)),
+	(multiply, (2,)),
+], default=10, name="example")
+
+print(pipeline)
+```
+
+For example:
+
+```text
+example: 10 | add(5) | multiply(2)
+```
+
+### Developer representation
 
 The developer-oriented representation contains the pipeline name, default value, total number of steps, current step, and running state:
 
@@ -914,6 +965,8 @@ combined = pipeline + [
 
 The original pipeline is not modified.
 
+The resulting pipeline preserves the original pipeline's `default` and `name`.
+
 ### `+` with a pipeline on the right
 
 Pipeline steps can also be prepended using reflected addition:
@@ -925,6 +978,8 @@ combined = [
 ```
 
 The original pipeline is not modified.
+
+The resulting pipeline preserves the original pipeline's `default` and `name`.
 
 ### `==`
 
@@ -953,6 +1008,8 @@ print(first == second)  # True
 Two pipelines are equal when they have the same configured steps, `default` value, and `name`.
 
 Execution state is not considered.
+
+Comparing a pipeline with an unrelated object returns `NotImplemented`, allowing Python to perform normal reflected comparison behavior.
 
 ### `*`
 
@@ -1227,6 +1284,8 @@ pipeline.run(10).wait()
 
 The value printed by `tap()` is still passed unchanged to the next step.
 
+Because `tap()` uses `copy.deepcopy()`, the value must be compatible with Python's deep-copy protocol.
+
 ### `Stack`
 
 `Stack` is a simple LIFO stack container with optional capacity limits.
@@ -1252,7 +1311,7 @@ print(stack.get())
 
 Iterating over a stack yields values from the top of the stack to the bottom.
 
-### Stack aliases
+## Stack aliases
 
 `Stack` provides `peek` as an alias for `get` and `put` as an alias for `push`:
 
@@ -1266,7 +1325,7 @@ These aliases are provided primarily for compatibility with existing code and sy
 
 For new code, `push()` and `get()` are the recommended `Stack` methods.
 
-### Stack capacity
+## Stack capacity
 
 A stack can be created with a maximum capacity:
 
@@ -1314,10 +1373,12 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `pop()`          | Remove and return a step.                                                     |
 | `clear()`        | Remove all steps.                                                             |
 | `reverse()`      | Reverse the configured steps in place.                                        |
+| `index()`        | Return the one-based index of the first matching step.                        |
+| `count()`        | Return the number of occurrences of a step.                                   |
 | `running`        | Whether the worker is running.                                                |
 | `step`           | Current one-based step index.                                                 |
 | `default`        | Default initial value used by `run()`.                                        |
-| `name`           | Name assigned to the worker thread.                                           |
+| `name`           | Name assigned to the pipeline and subsequently created worker threads.        |
 | `result`         | Most recent result.                                                           |
 | `error()`        | Return or raise the most recent pipeline exception.                           |
 | `results`        | Stack of initial value and successful results.                                |
@@ -1340,7 +1401,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `__iadd__()`     | Append a step in place.                                                       |
 | `__add__()`      | Create a new pipeline with additional steps appended.                         |
 | `__radd__()`     | Create a new pipeline with steps prepended.                                   |
-| `__eq__()`       | Compare pipeline configurations, including `name`.                            |
+| `__eq__()`       | Compare pipeline configurations, including `default` and `name`.              |
 | `__mul__()`      | Create a new pipeline with repeated steps.                                    |
 
 ### Functional Utilities
@@ -1403,7 +1464,6 @@ See [license](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/LICEN
 ## Contribution
 
 - If you'd like to contribute, feel free to submit a pull request.
-
 - If you'd like to report a bug or request a feature, please open an issue.
 
 Copyright (C) 2026 Hoàng Long
