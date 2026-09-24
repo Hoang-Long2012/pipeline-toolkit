@@ -70,7 +70,9 @@ build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [
+	"coverage>=7.6.1",
 	"pytest>=8.3.5",
+	"pytest-cov>=5.0.0",
 	"pytest-metadata>=3.1.1",
 	"pytest-sugar>=1.1.1",
 	"ruff>=0.16.6",
