@@ -4,8 +4,6 @@
 - Changed `Pipeline.__mul__()` so a `count` of `0` raises `ValueError` instead of returning an empty `Pipeline`.
 - Changed `step.__call__()` so omitting `default` uses `step.default`, while explicitly passing `None` uses `None` as the input value.
 - Extended `Pipeline.__contains__()` to match callables by identity or valid step tuples by their full configuration.
-
-### Internal changes
 - Refactored `Pipeline` and `step` internals, including private state attributes and shared step validation and execution helpers.
 - Simplified `step` and `pipe` representations to display the wrapped callable's name.
 
