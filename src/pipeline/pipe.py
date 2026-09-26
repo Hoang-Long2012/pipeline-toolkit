@@ -1,6 +1,8 @@
 """Tools for creating reusable pipeline steps from callables."""
 from functools import update_wrapper
 
+from ._compat import _DEFAULT
+
 
 class step:
 	"""Represent a callable with preconfigured arguments.
@@ -30,7 +32,7 @@ class step:
 		self.function = function
 		self.args = args
 		self.kwargs = kwargs
-		self.default = None
+		self._default = None
 	def export(self):
 		"""Export the step in pipeline step format.
 
@@ -50,8 +52,19 @@ class step:
 		if self.kwargs:
 			parts.append(self.kwargs)
 		return tuple(parts)
-	def __call__(self, default=None):
-		return self.function(default, *self.args, **self.kwargs)
+	def __call__(self, default=_DEFAULT):
+		"""Execute the step with an input value.
+
+		If ``default`` is omitted, the step's configured ``default`` value is used.
+
+		Args:
+			default: The value passed to the wrapped callable. If omitted, use the
+				step's configured default.
+
+		Returns:
+			The value returned by the wrapped callable.
+		"""
+		return self.function(default if default is not _DEFAULT else self.default, *self.args, **self.kwargs)
 	def __ror__(self, other):
 		return self.function(other, *self.args, **self.kwargs)
 	def __mul__(self, other):
@@ -68,14 +81,23 @@ class step:
 	def __gt__(self, other):
 		return other.write(self.function(self.default, *self.args, **self.kwargs))
 	def __iter__(self):
-		yield from self.export() 
+		yield from self.export()
 	def __repr__(self):
-		parts = [f"{self.function!r}"]
+		name = getattr(self.function, "__name__", type(self.function).__name__)
+		parts = [f"{name}"]
 		if self.args:
 			parts.extend(f"{arg!r}" for arg in self.args)
 		if self.kwargs:
 			parts.extend(f"{key}={value!r}" for key, value in self.kwargs.items())
 		return f"{type(self).__name__}({', '.join(parts)})"
+	@property
+	def default(self):
+		"""The initial value used when a step operation needs one."""
+		return self._default
+	@default.setter
+	def default(self, value):
+		"""Set the initial value used when a step operation needs one."""
+		self._default = value
 class pipe:
 	"""Wrap a callable as a step factory.
 
@@ -97,4 +119,5 @@ class pipe:
 	def __call__(self, *args, **kwargs):
 		return step(self.function, *args, **kwargs)
 	def __repr__(self):
-		return f"{type(self).__name__}({self.function!r})"
+		name = getattr(self.function, "__name__", type(self.function).__name__)
+		return f"{type(self).__name__}({name})"
