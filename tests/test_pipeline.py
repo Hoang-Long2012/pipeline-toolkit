@@ -1624,6 +1624,33 @@ class TestPipelineCallable:
 		assert add in pipeline
 		assert multiply not in pipeline
 
+	def test_pipeline_contains_step_configuration(self):
+		"""Test checking full step configurations with the in operator."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+
+		assert (add, (5,)) in pipeline
+		assert (add, (6,)) not in pipeline
+
+	def test_pipeline_contains_invalid_step(self):
+		"""Test checking an invalid step raises TypeError."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="Step function must be callable"):
+			("not_callable",) in pipeline
+
+	def test_pipeline_contains_unsupported_item(self):
+		"""Test checking an unsupported item raises TypeError."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(TypeError, match="item is not a callable or step"):
+			42 in pipeline
+
 	def test_pipeline_len(self):
 		"""Test pipeline length."""
 
