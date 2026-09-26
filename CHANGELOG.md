@@ -2,6 +2,7 @@
 
 ## 0.5.2
 - Changed `Pipeline.__mul__()` so a `count` of `0` raises `ValueError` instead of returning an empty `Pipeline`.
+- Extended `Pipeline.__contains__()` to match callables by identity or valid step tuples by their full configuration.
 
 ## 0.5.1
 - Added `Pipeline.index()` to return the one-based index of the first matching pipeline step.

@@ -553,17 +553,26 @@ class Pipeline:
 		"""
 		return self.run(*args, **kwargs)
 	def __contains__(self, item):
-		"""Return whether a callable exists as a pipeline step.
+		"""Return whether a callable or step configuration exists in the pipeline.
 
-		Identity comparison is used, so the callable must be the exact same object as the callable stored in the step.
+		Callable items are matched by identity.
+		Tuple items must be valid step configurations and are matched against the full configuration.
 
 		Args:
-			item: Callable to search for.
+			item: A callable or a step tuple to search for.
 
 		Returns:
-			``True`` if the callable is present, otherwise ``False``.
+			``True`` if the callable or valid step configuration is present in the pipeline, otherwise ``False``.
+
+		Raises:
+			TypeError: If ``item`` is not callable or a tuple, or if a tuple is not a valid step.
 		"""
-		return any(step[0] is item for step in self.pipeline)
+		if callable(item):
+			return any(step[0] is item for step in self.pipeline)
+		if isinstance(item, tuple):
+			self._validate_step(item)
+			return any(step == item for step in self.pipeline)
+		raise TypeError("item is not a callable or step.")
 	def __len__(self):
 		"""Return the number of configured pipeline steps."""
 		return len(self.pipeline)
