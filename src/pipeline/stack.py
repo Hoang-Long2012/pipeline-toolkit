@@ -1,7 +1,7 @@
 """A simple LIFO stack container with optional maximum capacity."""
-class StackOverflowError(Exception):
+class StackOverflowError(OverflowError):
 	"""Raised when attempting to push an item onto a full stack."""
-class StackUnderflowError(Exception):
+class StackUnderflowError(IndexError):
 	"""Raised when attempting to access or remove an item from an empty stack."""
 class Stack:
 	"""A simple LIFO stack container with optional maximum capacity.
