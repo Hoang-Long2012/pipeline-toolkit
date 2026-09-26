@@ -1131,8 +1131,17 @@ A `step` passes its supplied value as the first argument to the wrapped callable
 
 Each `step` also has a `default` attribute containing the initial value used by operations that require one. It defaults to `None`.
 
+Calling a step without an argument uses its configured `default`. Passing `None` explicitly uses `None` as the input value.
+
 ```python
-add_five.default = 10
+def identity(value):
+	return value
+
+identity_step = step(identity)
+identity_step.default = 10
+
+print(identity_step())       # 10
+print(identity_step(None))   # None
 ```
 
 It can also be used with the pipe operator:
