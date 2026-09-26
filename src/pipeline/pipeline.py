@@ -3,6 +3,7 @@ import copy
 import threading
 from collections.abc import Mapping
 
+from . import core
 from ._compat import _DEFAULT
 from .stack import Stack
 
@@ -82,28 +83,9 @@ class Pipeline:
 				raise TypeError("run_kwargs is not a Mapping.")
 			self.run(*run_args, **run_kwargs)
 	def _validate_step(self, step):
-		if not isinstance(step, tuple):
-			raise TypeError(f"Step must be a tuple, not {type(step).__name__}.")
-		if not step:
-			raise TypeError("Step cannot be empty.")
-		if not callable(step[0]):
-			raise TypeError(f"Step function must be callable, not {type(step[0]).__name__}.")
-		if len(step) > 3:
-			raise TypeError(f"Step must contain at most 3 items, got {len(step)}.")
-		if len(step) >= 2:
-			if not isinstance(step[1], (tuple, Mapping)):
-				raise TypeError(f"Step arguments must be a tuple or mapping, not {type(step[1]).__name__}.")
-		if len(step) == 3:
-			if not isinstance(step[1], tuple):
-				raise TypeError("Step positional arguments must be a tuple when keyword arguments are provided.")
-		if len(step) == 3 and not isinstance(step[2], Mapping):
-			raise TypeError(f"Step keyword arguments must be a mapping, not {type(step[2]).__name__}.")
+		core.validate_step(step)
 	def _execute_step(self, step, default):
-		if len(step) == 1:
-			return step[0](default)
-		if isinstance(step[1], tuple):
-			return step[0](default, *step[1], **step[2]) if len(step) > 2 else step[0](default, *step[1])
-		return step[0](default, **step[1])
+		return core.execute_step(step, default)
 	def run(self, default=_DEFAULT, delay=0, daemon=False, stop_on_error=True):
 		"""Run the pipeline asynchronously in a worker thread.
 
