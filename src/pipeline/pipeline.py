@@ -699,18 +699,18 @@ class Pipeline:
 
 		Args:
 			count: Number of times to repeat the pipeline steps.
-				Must be a non-negative integer.
+				Must be a positive integer. Non-integer values are unsupported.
 
 		Returns:
 			A new pipeline containing the repeated steps.
 
 		Raises:
-			ValueError: If ``count`` is negative.
+			ValueError: If ``count`` is less than one.
 		"""
 		if not isinstance(count, int):
 			return NotImplemented
-		if count < 0:
-			raise ValueError("Count cannot be negative.")
+		if count < 1:
+			raise ValueError("Count < 1.")
 		return type(self)(self.pipeline * count, self.default, self._name)
 	@property
 	def name(self):

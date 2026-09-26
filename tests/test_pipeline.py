@@ -1881,25 +1881,20 @@ class TestPipelineOperators:
 		assert result.default == 10
 		assert len(pipeline) == 1
 
-	def test_mul_zero_returns_empty_pipeline(self):
-		"""Test multiplying by zero returns an empty pipeline."""
+	def test_mul_zero_count(self):
+		"""Test multiplying by zero raises ValueError."""
 
-		def add(x, y):
-			return x + y
+		pipeline = Pipeline()
 
-		pipeline = Pipeline([(add, (5,))], default=10)
-		result = pipeline * 0
-
-		assert isinstance(result, Pipeline)
-		assert not result
-		assert result.default == 10
+		with pytest.raises(ValueError, match="Count < 1"):
+			pipeline * 0
 
 	def test_mul_negative_count(self):
 		"""Test multiplying by a negative count raises ValueError."""
 
 		pipeline = Pipeline()
 
-		with pytest.raises(ValueError, match="Count cannot be negative"):
+		with pytest.raises(ValueError, match="Count < 1"):
 			pipeline * -1
 
 	def test_mul_invalid_count_returns_not_implemented(self):
