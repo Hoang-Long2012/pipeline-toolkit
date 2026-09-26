@@ -425,11 +425,6 @@ wheels = [
 name = "pipeline-toolkit"
 version = "0.5.1"
 source = { editable = "." }
-dependencies = [
-    { name = "coverage", version = "7.6.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
-    { name = "coverage", version = "7.10.7", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
-    { name = "coverage", version = "7.16.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
-]
 
 [package.dev-dependencies]
 dev = [
@@ -447,7 +442,6 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "coverage", specifier = ">=7.6.1" }]
 
 [package.metadata.requires-dev]
 dev = [
