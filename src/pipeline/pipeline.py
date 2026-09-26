@@ -131,6 +131,8 @@ class Pipeline:
 		self.errors.clear()
 		def worker():
 			if not steps:
+				self._step = 0
+				self._thread = None
 				return None
 			if delay:
 				self._stop_event.wait(delay)
@@ -491,11 +493,7 @@ class Pipeline:
 			TypeError: If ``step`` has an invalid format.
 		"""
 		self._validate_step(step)
-		total = 0
-		for pipeline_step in self._steps:
-			if pipeline_step == step:
-				total += 1
-		return total
+		return sum(1 for pipeline_step in self._steps if pipeline_step == step)
 	def _format_step(self, step):
 		func = step[0]
 		if len(step) >= 2:
@@ -684,7 +682,7 @@ class Pipeline:
 		"""
 		if not isinstance(other, type(self)):
 			return NotImplemented
-		return isinstance(other, type(self)) and self._steps == other._steps and self.default == other.default and self._name == other._name
+		return self._steps == other._steps and self.default == other.default and self._name == other._name
 	def __mul__(self, count):
 		"""Return a new pipeline with its steps repeated.
 
