@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.2
+- Changed `Pipeline.__mul__()` so a `count` of `0` raises `ValueError` instead of returning an empty `Pipeline`.
+
 ## 0.5.1
 - Added `Pipeline.index()` to return the one-based index of the first matching pipeline step.
 - Added `Pipeline.count()` to return the number of occurrences of a pipeline step.
