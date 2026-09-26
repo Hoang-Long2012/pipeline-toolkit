@@ -433,7 +433,7 @@ class TestPipelineRerun:
 			first_run_started.set()
 
 			if x == 10:
-				pipeline.stop_event.wait()
+				pipeline._stop_event.wait()
 
 			return x + 5
 
@@ -1368,7 +1368,7 @@ class TestPipelineContextManager:
 
 		def slow_func(x):
 			step_started.set()
-			pipeline.stop_event.wait()
+			pipeline._stop_event.wait()
 			return x + 5
 
 		pipeline = Pipeline([(slow_func,)])
@@ -1429,10 +1429,10 @@ class TestPipelineCopy:
 		pipeline = Pipeline([(add, args)], default={"value": 10}, name="original")
 		copied = pipeline.copy()
 
-		assert copied.pipeline is not pipeline.pipeline
-		assert copied.pipeline == pipeline.pipeline
-		assert copied.pipeline[0] is pipeline.pipeline[0]
-		assert copied.pipeline[0][1] is args
+		assert copied._steps is not pipeline._steps
+		assert copied._steps == pipeline._steps
+		assert copied._steps[0] is pipeline._steps[0]
+		assert copied._steps[0][1] is args
 		assert copied.default is not pipeline.default
 		assert copied.default == pipeline.default
 		assert copied.name == pipeline.name
@@ -1452,7 +1452,7 @@ class TestPipelineCopy:
 		assert not copied.running
 		assert len(copied.results) == 0
 		assert len(copied.errors) == 0
-		assert copied.thread is None
+		assert copied._thread is None
 
 	def test_copy_method_matches_copy_protocol(self):
 		"""Test copy method returns the same result as copy.copy."""
@@ -1465,7 +1465,7 @@ class TestPipelineCopy:
 		copied = pipeline.copy()
 		protocol_copy = copy.copy(pipeline)
 
-		assert copied.pipeline == protocol_copy.pipeline
+		assert copied._steps == protocol_copy._steps
 		assert copied.default == protocol_copy.default
 		assert copied is not protocol_copy
 
@@ -1518,10 +1518,10 @@ class TestPipelineCopy:
 
 		copied = copy.deepcopy(pipeline)
 
-		assert copied.pipeline is not pipeline.pipeline
-		assert copied.pipeline[0] is not pipeline.pipeline[0]
-		assert copied.pipeline[0][1] is not pipeline.pipeline[0][1]
-		assert copied.pipeline[0][1][0] is not pipeline.pipeline[0][1][0]
+		assert copied._steps is not pipeline._steps
+		assert copied._steps[0] is not pipeline._steps[0]
+		assert copied._steps[0][1] is not pipeline._steps[0][1]
+		assert copied._steps[0][1][0] is not pipeline._steps[0][1][0]
 		assert copied.default is not pipeline.default
 		assert copied.default["values"] is not pipeline.default["values"]
 		assert copied.name == pipeline.name
@@ -1541,7 +1541,7 @@ class TestPipelineCopy:
 		assert not copied.running
 		assert len(copied.results) == 0
 		assert len(copied.errors) == 0
-		assert copied.thread is None
+		assert copied._thread is None
 
 	def test_deepcopy_is_independent(self):
 		"""Test modifying a deep copy does not affect the original pipeline."""
@@ -1554,10 +1554,10 @@ class TestPipelineCopy:
 		pipeline = Pipeline([(add, args)], default=default)
 		copied = copy.deepcopy(pipeline)
 
-		copied.pipeline[0][1][0].append(15)
+		copied._steps[0][1][0].append(15)
 		copied.default["value"].append(20)
 
-		assert pipeline.pipeline[0][1] == ([5],)
+		assert pipeline._steps[0][1] == ([5],)
 		assert pipeline.default == {"value": [10]}
 
 	def test_deepcopy_while_running_raises(self):
@@ -2047,8 +2047,8 @@ class TestPipelineThreading:
 		pipeline.run(10, daemon=True)
 
 		assert step_started.wait(timeout=1.0), "Thread never started"
-		assert pipeline.thread is not None
-		assert pipeline.thread.daemon is True
+		assert pipeline._thread is not None
+		assert pipeline._thread.daemon is True
 
 		step_should_exit.set()
 		pipeline.wait()
@@ -2088,8 +2088,8 @@ class TestPipelineThreading:
 		pipeline.run(42)
 
 		assert step_started.wait(timeout=1.0)
-		assert pipeline.thread is not None
-		assert pipeline.thread.name == "test-pipeline"
+		assert pipeline._thread is not None
+		assert pipeline._thread.name == "test-pipeline"
 
 		step_should_exit.set()
 		pipeline.wait()

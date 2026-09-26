@@ -57,14 +57,14 @@ class Pipeline:
 			ValueError: If ``name`` is an empty string.
 		"""
 		iterable = tuple(iterable)
-		self.stop_event = threading.Event()
-		self.skip_event = threading.Event()
-		self.pipeline = []
-		self.thread = None
-		self.step = 0
+		self._stop_event = threading.Event()
+		self._skip_event = threading.Event()
+		self._steps = []
+		self._thread = None
+		self._step = 0
 		self.results = Stack()
 		self.errors = Stack()
-		self.default = default
+		self._default = default
 		if name is not None and not isinstance(name, str):
 			raise TypeError("name is not a str.")
 		if name is not None and not name:
@@ -72,7 +72,7 @@ class Pipeline:
 		self._name = name
 		for step in iterable:
 			self._validate_step(step)
-			self.pipeline.append(step)
+			self._steps.append(step)
 		if run_now:
 			if not isinstance(run_args, tuple):
 				raise TypeError("run_args is not a tuple.")
@@ -110,7 +110,7 @@ class Pipeline:
 		The supplied ``default`` value is stored as the initial result.
 		Each step receives the result of the preceding step as its first positional argument.
 
-		The pipeline is snapshotted when execution starts, so modifications to ``self.pipeline`` do not affect the current execution.
+		The pipeline is snapshotted when execution starts, so modifications to the configured steps do not affect the current execution.
 		Execution stops when all steps have completed, ``stop()`` is called, or an exception is raised while ``stop_on_error`` is enabled.
 
 		Args:
@@ -140,22 +140,24 @@ class Pipeline:
 			raise ValueError("Delay cannot be negative.")
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
-		self.stop_event.clear()
-		self.skip_event.clear()
-		pipeline = tuple(self.pipeline)
-		self.step = 0
+		self._stop_event.clear()
+		self._skip_event.clear()
+		steps = tuple(self._steps)
+		self._step = 0
 		self.results.clear()
-		self.results.push(default if default is not _DEFAULT else self.default)
+		self.results.push(default if default is not _DEFAULT else self._default)
 		self.errors.clear()
 		def worker():
+			if not steps:
+				return None
 			if delay:
-				self.stop_event.wait(delay)
-			for index, step in enumerate(pipeline):
-				if self.stop_event.is_set():
+				self._stop_event.wait(delay)
+			for index, step in enumerate(steps):
+				if self._stop_event.is_set():
 					break
-				self.step = index + 1
-				if self.skip_event.is_set():
-					self.skip_event.clear()
+				self._step = index + 1
+				if self._skip_event.is_set():
+					self._skip_event.clear()
 					continue
 				try:
 					self.results.push(self._execute_step(step, self.results.get()))
@@ -163,13 +165,13 @@ class Pipeline:
 					self.errors.push(error)
 					if stop_on_error:
 						break
-				if delay and index < len(pipeline) - 1:
-					self.stop_event.wait(delay)
-			if not self.stop_event.is_set():
-				self.step = 0
-			self.thread = None
-		self.thread = threading.Thread(target=worker, name=self._name, daemon=daemon)
-		self.thread.start()
+				if delay and index < len(steps) - 1:
+					self._stop_event.wait(delay)
+			if not self._stop_event.is_set():
+				self._step = 0
+			self._thread = None
+		self._thread = threading.Thread(target=worker, name=self._name, daemon=daemon)
+		self._thread.start()
 		return self
 	def run_step(self, index, default=None):
 		"""Execute a single pipeline step synchronously.
@@ -195,11 +197,11 @@ class Pipeline:
 			raise TypeError("index is not int.")
 		if index < 1:
 			raise ValueError("index < 1.")
-		if not 1 <= index <= len(self.pipeline):
+		if not 1 <= index <= len(self._steps):
 			raise IndexError("index out of pipeline.")
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
-		step = self.pipeline[index - 1]
+		step = self._steps[index - 1]
 		return self._execute_step(step, default)
 	def execute(self, step, default=None):
 		"""Execute a pipeline step synchronously.
@@ -230,11 +232,11 @@ class Pipeline:
 		Returns:
 			The one-based index of the step at which execution was stopped, or ``0`` if the pipeline was not running.
 		"""
-		if self.thread is not None and self.running:
-			self.stop_event.set()
-			self.thread.join()
-			step = self.step
-			self.step = 0
+		if self._thread is not None and self.running:
+			self._stop_event.set()
+			self._thread.join()
+			step = self._step
+			self._step = 0
 			return step
 		return 0
 	def skip(self):
@@ -245,8 +247,8 @@ class Pipeline:
 		Returns:
 			This pipeline instance.
 		"""
-		if self.thread is not None and self.running:
-			self.skip_event.set()
+		if self._thread is not None and self.running:
+			self._skip_event.set()
 		return self
 	def wait(self):
 		"""Wait until the currently running pipeline finishes.
@@ -256,8 +258,8 @@ class Pipeline:
 		Returns:
 			This pipeline instance.
 		"""
-		if self.thread is not None and self.running:
-			self.thread.join()
+		if self._thread is not None and self.running:
+			self._thread.join()
 		return self
 	def rerun(self, *args, **kwargs):
 		"""Stop the current execution and start the pipeline again.
@@ -273,7 +275,7 @@ class Pipeline:
 	@property
 	def running(self):
 		"""Whether the pipeline currently has a running worker thread."""
-		return self.thread is not None and self.thread.is_alive()
+		return self._thread is not None and self._thread.is_alive()
 	@property
 	def result(self):
 		"""Return the most recent result of the pipeline.
@@ -325,7 +327,7 @@ class Pipeline:
 			TypeError: If ``step`` has an invalid format.
 		"""
 		self._validate_step(step)
-		self.pipeline.append(step)
+		self._steps.append(step)
 	def insert(self, index, step):
 		"""Insert a validated step at the specified index.
 
@@ -339,10 +341,10 @@ class Pipeline:
 		"""
 		if not isinstance(index, int):
 			raise TypeError(f"{index} is not int.")
-		if not 1 <= index <= len(self.pipeline) + 1:
+		if not 1 <= index <= len(self._steps) + 1:
 			raise IndexError("Index out of range.")
 		self._validate_step(step)
-		self.pipeline.insert(index - 1, step)
+		self._steps.insert(index - 1, step)
 	def update(self, iterable):
 		"""Append multiple validated steps to the pipeline.
 
@@ -357,7 +359,7 @@ class Pipeline:
 		steps = tuple(iterable)
 		for step in steps:
 			self._validate_step(step)
-		self.pipeline.extend(steps)
+		self._steps.extend(steps)
 	def remove(self, step):
 		"""Remove the first matching step from the pipeline.
 
@@ -369,9 +371,9 @@ class Pipeline:
 			ValueError: If ``step`` is not found in the pipeline.
 		"""
 		self._validate_step(step)
-		for index, pipeline_step in enumerate(self.pipeline):
+		for index, pipeline_step in enumerate(self._steps):
 			if pipeline_step == step:
-				del self.pipeline[index]
+				del self._steps[index]
 				return None
 		raise ValueError("Step not found in pipeline.")
 	def discard(self, step):
@@ -404,15 +406,15 @@ class Pipeline:
 		"""
 		if not isinstance(index, int):
 			raise TypeError(f"{index} is not int.")
-		if not 1 <= index <= len(self.pipeline):
+		if not 1 <= index <= len(self._steps):
 			raise IndexError("Index out of range.")
-		return self.pipeline.pop(index - 1)
+		return self._steps.pop(index - 1)
 	def clear(self):
 		"""Remove all steps from the pipeline."""
-		self.pipeline.clear()
+		self._steps.clear()
 	def reverse(self):
 		"""Reverse the order of pipeline steps in place."""
-		self.pipeline.reverse()
+		self._steps.reverse()
 	def __getitem__(self, index):
 		"""Return the pipeline step at the specified index.
 
@@ -428,9 +430,9 @@ class Pipeline:
 		"""
 		if not isinstance(index, int):
 			raise TypeError(f"{index} is not int.")
-		if not 1 <= index <= len(self.pipeline):
+		if not 1 <= index <= len(self._steps):
 			raise IndexError("Index out of range.")
-		return self.pipeline[index - 1]
+		return self._steps[index - 1]
 	def __setitem__(self, index, step):
 		"""Replace the pipeline step at the specified index.
 
@@ -444,10 +446,10 @@ class Pipeline:
 		"""
 		if not isinstance(index, int):
 			raise TypeError(f"{index} is not int.")
-		if not 1 <= index <= len(self.pipeline):
+		if not 1 <= index <= len(self._steps):
 			raise IndexError("Index out of range.")
 		self._validate_step(step)
-		self.pipeline[index - 1] = step
+		self._steps[index - 1] = step
 	def __delitem__(self, index):
 		"""Remove the pipeline step at the specified index.
 
@@ -460,9 +462,9 @@ class Pipeline:
 		"""
 		if not isinstance(index, int):
 			raise TypeError(f"{index} is not int.")
-		if not 1 <= index <= len(self.pipeline):
+		if not 1 <= index <= len(self._steps):
 			raise IndexError("Index out of range.")
-		del self.pipeline[index - 1]
+		del self._steps[index - 1]
 	def copy(self):
 		"""Return a shallow copy of the pipeline.
 
@@ -490,7 +492,7 @@ class Pipeline:
 			ValueError: If ``step`` is not found in the pipeline.
 		"""
 		self._validate_step(step)
-		for index, pipeline_step in enumerate(self.pipeline):
+		for index, pipeline_step in enumerate(self._steps):
 			if pipeline_step == step:
 				return index + 1
 		raise ValueError("Step not found in pipeline.")
@@ -508,7 +510,7 @@ class Pipeline:
 		"""
 		self._validate_step(step)
 		total = 0
-		for pipeline_step in self.pipeline:
+		for pipeline_step in self._steps:
 			if pipeline_step == step:
 				total += 1
 		return total
@@ -529,20 +531,20 @@ class Pipeline:
 	def __str__(self):
 		"""Return a human-readable representation of the pipeline."""
 		pipeline = [f"{self.default!r}"]
-		pipeline.extend(self._format_step(step) for step in self.pipeline)
+		pipeline.extend(self._format_step(step) for step in self._steps)
 		if self._name:
 			return f"{self._name}: {' | '.join(pipeline)}"
 		return " | ".join(pipeline)
 	def __repr__(self):
 		"""Return the developer-oriented representation of the pipeline."""
-		return f"{type(self).__name__}(name={self._name!r}, default={self.default!r}, total_steps={len(self.pipeline)}, current_step={self.step}, running={self.running})"
+		return f"{type(self).__name__}(name={self._name!r}, default={self.default!r}, total_steps={len(self._steps)}, current_step={self.step}, running={self.running})"
 	def __bool__(self):
 		"""Return whether the pipeline contains any configured steps.
 
 		Returns:
 			``True`` if the pipeline contains at least one step, otherwise ``False``.
 		"""
-		return bool(self.pipeline)
+		return bool(self._steps)
 	def __call__(self, *args, **kwargs):
 		"""Run the pipeline.
 
@@ -568,28 +570,28 @@ class Pipeline:
 			TypeError: If ``item`` is not callable or a tuple, or if a tuple is not a valid step.
 		"""
 		if callable(item):
-			return any(step[0] is item for step in self.pipeline)
+			return any(step[0] is item for step in self._steps)
 		if isinstance(item, tuple):
 			self._validate_step(item)
-			return any(step == item for step in self.pipeline)
+			return any(step == item for step in self._steps)
 		raise TypeError("item is not a callable or step.")
 	def __len__(self):
 		"""Return the number of configured pipeline steps."""
-		return len(self.pipeline)
+		return len(self._steps)
 	def __iter__(self):
 		"""Iterate over the configured pipeline steps.
 
 		Yields:
 			Each pipeline step in its configured order.
 		"""
-		yield from self.pipeline
+		yield from self._steps
 	def __reversed__(self):
 		"""Return an iterator that yields pipeline steps in reverse order.
 
 		Returns:
 			An iterator over the pipeline steps in reverse order.
 		"""
-		return reversed(self.pipeline)
+		return reversed(self._steps)
 	def __enter__(self):
 		"""Enter the context manager and start the pipeline if it is not running.
 
@@ -616,7 +618,7 @@ class Pipeline:
 		"""
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
-		pipeline = copy.copy(self.pipeline)
+		pipeline = copy.copy(self._steps)
 		default = copy.copy(self.default)
 		name = copy.copy(self._name)
 		return type(self)(pipeline, default, name)
@@ -634,7 +636,7 @@ class Pipeline:
 		"""
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
-		pipeline = copy.deepcopy(self.pipeline, memo)
+		pipeline = copy.deepcopy(self._steps, memo)
 		default = copy.deepcopy(self.default, memo)
 		name = copy.deepcopy(self._name, memo)
 		return type(self)(pipeline, default, name)
@@ -700,7 +702,7 @@ class Pipeline:
 		"""
 		if not isinstance(other, type(self)):
 			return NotImplemented
-		return isinstance(other, type(self)) and self.pipeline == other.pipeline and self.default == other.default and self._name == other._name
+		return isinstance(other, type(self)) and self._steps == other._steps and self.default == other.default and self._name == other._name
 	def __mul__(self, count):
 		"""Return a new pipeline with its steps repeated.
 
@@ -720,7 +722,7 @@ class Pipeline:
 			return NotImplemented
 		if count < 1:
 			raise ValueError("Count < 1.")
-		return type(self)(self.pipeline * count, self.default, self._name)
+		return type(self)(self._steps * count, self.default, self._name)
 	@property
 	def name(self):
 		"""Return the name of the worker thread and pipeline."""
@@ -743,3 +745,19 @@ class Pipeline:
 		if name is not None and not name:
 			raise ValueError("name cannot be an empty string.")
 		self._name = name
+	@property
+	def step(self):
+		"""Return the one-based index of the step currently running, or ``0`` when idle."""
+		return self._step
+	@property
+	def default(self):
+		"""Return the default value used when :meth:`run` receives no initial value."""
+		return self._default
+	@default.setter
+	def default(self, value):
+		"""Set the default value used when :meth:`run` receives no initial value.
+
+		Args:
+			value: The default initial value for pipeline execution.
+		"""
+		self._default = value
