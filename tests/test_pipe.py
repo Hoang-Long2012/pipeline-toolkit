@@ -25,6 +25,20 @@ class TestStepBasic:
 		result = s(10)
 		assert result == 15
 
+	def test_step_call_uses_configured_default_when_argument_is_omitted(self):
+		def add(x, amount):
+			return x + amount
+		s = step(add, 5)
+		s.default = 10
+
+		assert s() == 15
+
+	def test_step_call_preserves_explicit_none(self):
+		s = step(lambda value: value)
+		s.default = 10
+
+		assert s(None) is None
+
 	def test_step_with_kwargs(self):
 		"""Test step with keyword arguments."""
 		def power(x, exp=2):
