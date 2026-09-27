@@ -856,7 +856,9 @@ if add in pipeline:
 	print("add is part of the pipeline")
 ```
 
-Callable membership uses identity comparison. A valid step tuple is also checked against the full step configuration.
+Callable membership uses identity comparison.
+
+A valid step tuple is also checked against the full step configuration.
 
 A pipeline can be iterated over in its configured order:
 
