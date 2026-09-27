@@ -37,7 +37,7 @@ jobs:
           enable-cache: false
 
       - name: Install project and development dependencies
-        run: uv sync --locked --group dev
+        run: uv sync --group dev
 
       - name: Check tag matches package version
         run: |
