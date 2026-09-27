@@ -54,9 +54,6 @@ where = ["src"]
 [tool.setuptools.package-dir]
 "" = "src"
 
-[tool.uv]
-package = false
-
 [tool.ruff]
 src = ["src", "tests"]
 
