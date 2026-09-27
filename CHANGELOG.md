@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.4
+- Documentation-only release: Change the line breaks in the readme.
+
 ## 0.5.3
 - Documentation-only release: Updated `Pipeline.__contains__()` and pipeline repetition documentation to match their current behavior.
 
