@@ -77,5 +77,5 @@ dev = [
 	"pytest-cov>=5.0.0",
 	"pytest-metadata>=3.1.1",
 	"pytest-sugar>=1.1.1",
-	"ruff>=0.16.6",
+	"ruff>=0.16.6"
 ]
