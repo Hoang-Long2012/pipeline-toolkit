@@ -856,7 +856,7 @@ if add in pipeline:
 	print("add is part of the pipeline")
 ```
 
-Callable membership uses identity comparison.
+Callable membership uses identity comparison. A valid step tuple is also checked against the full step configuration.
 
 A pipeline can be iterated over in its configured order:
 
@@ -1027,7 +1027,7 @@ The resulting pipeline contains the original steps three times.
 
 The original pipeline is not modified.
 
-The repetition count must be a non-negative integer.
+The repetition count must be a positive integer.
 
 ## Functional Utilities
 
@@ -1398,7 +1398,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `__iter__()`     | Iterate over configured steps.                                                |
 | `__reversed__()` | Iterate over configured steps in reverse order.                               |
 | `__len__()`      | Return the number of configured steps.                                        |
-| `__contains__()` | Check callable membership by identity.                                        |
+| `__contains__()` | Check callable membership by identity or match a valid step tuple by its full configuration. |
 | `__call__()`     | Run the pipeline.                                                             |
 | `__bool__()`     | Return whether the pipeline contains configured steps.                        |
 | `__str__()`      | Return a human-readable pipeline representation.                              |
