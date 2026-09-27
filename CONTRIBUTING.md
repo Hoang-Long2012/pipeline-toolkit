@@ -27,6 +27,7 @@ Keep changes focused. Add or update tests for changed behavior, and update user-
 Before opening a pull request, run:
 
 ```bash
+git diff --check
 uv run ruff check .
 uv run pytest
 ```
