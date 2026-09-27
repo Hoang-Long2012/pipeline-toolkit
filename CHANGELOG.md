@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.3
+- Documentation-only release: Updated `Pipeline.__contains__()` and pipeline repetition documentation to match their current behavior.
+
 ## 0.5.2
 - Changed `Pipeline.__mul__()` so a `count` of `0` raises `ValueError` instead of returning an empty `Pipeline`.
 - Changed `step.__call__()` so omitting `default` uses `step.default`, while explicitly passing `None` uses `None` as the input value.
