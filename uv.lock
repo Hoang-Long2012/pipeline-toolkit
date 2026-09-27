@@ -424,7 +424,7 @@ wheels = [
 [[package]]
 name = "pipeline-toolkit"
 version = "0.5.3"
-source = { virtual = "." }
+source = { editable = "." }
 
 [package.dev-dependencies]
 dev = [
