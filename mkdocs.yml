@@ -63,3 +63,6 @@ markdown_extensions:
 nav:
   - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
   - Pypi: https://pypi.org/project/pipeline-toolkit
+
+extra:
+  material_version: ""
