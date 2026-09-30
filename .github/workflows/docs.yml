@@ -40,6 +40,23 @@ jobs:
       - name: Install project and development dependencies
         run: uv sync --group dev
 
+      - name: Set Material version
+        run: |
+          uv run python - <<'PY'
+          from importlib.metadata import version
+          from pathlib import Path
+
+          path = Path("mkdocs.yml")
+          text = path.read_text(encoding="utf-8")
+          material_version = version("mkdocs-material")
+          text = text.replace(
+            '  material_version: ""',
+            f'  material_version: "{material_version}"',
+            1,
+          )
+          path.write_text(text, encoding="utf-8")
+          PY
+
       - name: Build documentation
         run: uv run mkdocs build --strict
 
