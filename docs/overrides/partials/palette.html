@@ -1,0 +1,17 @@
+{#-
+  This file was automatically generated - do not edit
+-#}
+<div class="md-header__option" data-md-component="custom-palette">
+  <button type="button" class="md-header__button md-icon" aria-label="Change color scheme" aria-haspopup="menu" aria-expanded="false" aria-controls="__palette_menu" data-palette-button>
+    {% set icon = "material/brightness-7" %}
+    {% include ".icons/" ~ icon ~ ".svg" %}
+  </button>
+  <div id="__palette_menu" class="md-palette-menu" role="menu" data-palette-menu hidden>
+    {% for option in config.theme.palette %}
+      {% set scheme = option.scheme | d("default", true) %}
+      <button type="button" role="menuitemradio" aria-checked="false" data-palette-option data-md-color-media="{{ option.media }}" data-md-color-scheme="{{ scheme | replace(' ', '-') }}" data-md-color-primary="{{ option.primary | d('indigo', true) | replace(' ', '-') }}" data-md-color-accent="{{ option.accent | d('indigo', true) | replace(' ', '-') }}" data-palette-index="{{ loop.index0 }}">
+        {{ option.toggle.name if option.toggle else scheme }}
+      </button>
+    {% endfor %}
+  </div>
+</div>

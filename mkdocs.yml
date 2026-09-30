@@ -1,0 +1,65 @@
+site_name: Pipeline Toolkit
+site_description: A small functional pipeline toolkit for Python
+site_author: Hoàng Long
+site_url: https://...
+repo_url: https://github.com/Hoang-Long2012/pipeline-toolkit
+repo_name: Hoang-Long2012/pipeline-toolkit
+copyright: Copyright (C) 2026 Hoàng Long
+
+theme:
+  name: material
+  language: en
+  custom_dir: docs/overrides
+
+  features:
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            docstring_style: sphinx
+            docstring_section_style: table
+            show_root_heading: true
+            heading_level: 2
+            show_symbol_type_heading: false
+            show_symbol_type_toc: false
+            show_signature_annotations: true
+            members: true
+            show_if_no_docstring: false
+            show_category_heading: false
+            merge_init_into_class: true
+            scoped_crossrefs: true
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/palette.js
+
+markdown_extensions:
+  - nl2br
+
+nav:
+  - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
+  - Pypi: https://pypi.org/project/pipeline-toolkit
