@@ -44,6 +44,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/Hoang-Long2012/pipeline-toolkit"
 Repository = "https://github.com/Hoang-Long2012/pipeline-toolkit"
+Documentation = "https://Hoang-Long2012.github.io/pipeline-toolkit"
 Issues = "https://github.com/Hoang-Long2012/pipeline-toolkit/issues"
 Changelog = "https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/CHANGELOG.md"
 Contributing = "https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/CONTRIBUTING.md"
@@ -73,9 +74,11 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 dev = [
 	"coverage>=7.6.1",
+	"mkdocs-material>=9.7.7",
+	"mkdocstrings[python]>=0.26.1",
 	"pytest>=8.3.5",
 	"pytest-cov>=5.0.0",
 	"pytest-metadata>=3.1.1",
 	"pytest-sugar>=1.1.1",
-	"ruff>=0.16.6"
+	"ruff>=0.16.6",
 ]
