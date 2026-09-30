@@ -36,6 +36,9 @@ jobs:
           python-version: "3.14"
           enable-cache: false
 
+      - name: Validate pyproject.toml
+        run: uvx validate-pyproject pyproject.toml
+
       - name: Install project and development dependencies
         run: uv sync --group dev
 
