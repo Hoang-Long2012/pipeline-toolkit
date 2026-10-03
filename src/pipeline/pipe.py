@@ -9,14 +9,7 @@ class step:
 
 	The wrapped callable is invoked with a value as its first argument, followed by the stored positional and keyword arguments.
 
-	The ``default`` attribute provides the initial value used by operations such as ``step * n`` and ``step > file``.
-
-	Attributes:
-		function: The callable to execute.
-		args: Positional arguments passed to ``function``.
-		kwargs: Keyword arguments passed to ``function``.
-		default: The initial value used by operations that require one.
-			Defaults to ``None``.
+	The ``default`` property provides the initial value used by operations such as ``step * n`` and ``step > file``.
 
 	Args:
 		function: The callable to execute.
@@ -41,10 +34,12 @@ class step:
 		Returns:
 			tuple: One of the following forms:
 
-				(function,)
-				(function, args)
-				(function, kwargs)
-				(function, args, kwargs)
+		```python
+		(function,)
+		(function, args)
+		(function, kwargs)
+		(function, args, kwargs)
+		```
 		"""
 		parts = [self.function]
 		if self.args:

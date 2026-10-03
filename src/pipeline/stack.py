@@ -6,7 +6,9 @@ class StackUnderflowError(IndexError):
 class Stack:
 	"""A simple LIFO stack container with optional maximum capacity.
 
-	The stack follows the Last-In, First-Out (LIFO) principle. The most recently pushed item is returned by :meth:`get` or removed by :meth:`pop`.
+	The stack follows the Last-In, First-Out (LIFO) principle.
+
+	The most recently pushed item is returned by ``get()`` or removed by ``pop()``.
 
 	A maximum size can optionally be specified.
 	A ``maxsize`` of ``0`` means that the stack has no size limit.
@@ -20,15 +22,21 @@ class Stack:
 		ValueError: If ``maxsize`` is negative.
 
 	Example:
-		>>> stack = Stack(3)
-		>>> stack.push("first")
-		>>> stack.push("second")
-		>>> stack.get()
-		'second'
-		>>> stack.pop()
-		'second'
-		>>> len(stack)
-		1
+	```python
+	stack = Stack(3)
+
+	stack.push("first")
+	stack.push("second")
+
+	stack.get()
+	# 'second'
+
+	stack.pop()
+	# 'second'
+
+	len(stack)
+	# 1
+	```
 	"""
 	def __init__(self, maxsize=0):
 		"""Initialize an empty stack.

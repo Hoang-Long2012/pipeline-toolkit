@@ -1152,6 +1152,37 @@ class TestPipelineItemAccess:
 		with pytest.raises(IndexError, match="Index out of range"):
 			del pipeline[1]
 
+	def test_steps_returns_deep_copy(self):
+		"""Test steps returns a deep copy of the configured steps."""
+
+		def add(x, values):
+			values.append(x)
+			return values
+
+		args = ([5],)
+		pipeline = Pipeline([(add, args)])
+
+		steps = pipeline.steps
+
+		assert steps == pipeline._steps
+		assert steps is not pipeline._steps
+		assert steps[0] is not pipeline._steps[0]
+		assert steps[0][1] is not pipeline._steps[0][1]
+		assert steps[0][1][0] is not pipeline._steps[0][1][0]
+
+	def test_steps_is_independent(self):
+		"""Test modifying steps does not affect the pipeline."""
+
+		def add(x, values):
+			return values
+
+		pipeline = Pipeline([(add, ([5],))])
+
+		steps = pipeline.steps
+		steps[0][1][0].append(10)
+
+		assert pipeline.steps == [(add, ([5],))]
+
 
 class TestPipelineIndex:
 	"""Test finding the index of a pipeline step."""

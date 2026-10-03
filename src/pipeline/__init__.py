@@ -4,24 +4,27 @@ This package provides a simple asynchronous pipeline executor along with support
 
 The main components are:
 
-	- :class:`Pipeline`: Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning execution.
-	- :class:`Stack`: A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
-	- :func:`compose`: Apply multiple callables sequentially to a value.
-	- :func:`tap`: Apply a side effect to a deep copy of a value while returning the original value unchanged.
-	- :decorator:`pipe`: Wrap a callable as a factory for creating :class:`step` objects with preconfigured arguments.
-	- :class:`step`: Represent a callable with preconfigured arguments and provide convenient execution and composition operations.
+- `Pipeline`: Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning execution.
+- `Stack`: A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
+- `compose`: Apply multiple callables sequentially to a value.
+- `tap`: Apply a side effect to a deep copy of a value while returning the original value unchanged.
+- `pipe`: Wrap a callable as a factory for creating :class:`step` objects with preconfigured arguments.
+- `step`: Represent a callable with preconfigured arguments and provide convenient execution and composition operations.
 
 Example:
-	>>> from pipeline import Pipeline
-	>>> pipeline = Pipeline([
-			(lambda value: value + 1,),
-			(lambda value: value * 2,),
-		]
-		... ], default=5
-	)
-	>>> pipeline.run().wait()
-	>>> pipeline.results.get()
-	12
+```python
+from pipeline import Pipeline
+
+pipeline = Pipeline(
+	[
+		(lambda value: value + 1,),
+		(lambda value: value * 2,),
+	],
+	default=5
+)
+
+pipeline.run().wait().result  # 12
+```
 """
 from .compose import compose
 from .pipe import pipe, step
@@ -29,4 +32,4 @@ from .pipeline import Pipeline
 
 __version__ = "0.5.4"
 __author__ = "Hoàng Long"
-__all__ = ["Pipeline", "**author**", "**version**", "compose", "pipe", "step"]
+__all__ = ["Pipeline", "__author__", "__version__", "compose", "pipe", "step"]
