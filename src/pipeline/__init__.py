@@ -16,11 +16,11 @@ Example:
 from pipeline import Pipeline
 
 pipeline = Pipeline(
-	[
-		(lambda value: value + 1,),
-		(lambda value: value * 2,),
-	],
-	default=5
+    [
+        (lambda value: value + 1,),
+        (lambda value: value * 2,),
+    ],
+    default=5
 )
 
 pipeline.run().wait().result  # 12

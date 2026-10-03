@@ -27,11 +27,11 @@ class Pipeline:
 	Example:
 	```python
 	def add(value, amount):
-		return value + amount
+	    return value + amount
 
 	pipeline = Pipeline([
-		(add, (5,)),
-		(add, (10,)),
+	    (add, (5,)),
+	    (add, (10,)),
 	)
 	pipeline.run(0).wait().result  # 15
 	```

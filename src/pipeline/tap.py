@@ -35,7 +35,7 @@ def tap(value, function, *args, **kwargs):
 
 	```python
 	def inspect(data):
-		data["items"].append(4)
+	    data["items"].append(4)
 
 	original = {"items": [1, 2, 3]}
 
