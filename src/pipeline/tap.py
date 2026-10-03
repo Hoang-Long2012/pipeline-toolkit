@@ -25,20 +25,27 @@ def tap(value, function, *args, **kwargs):
 		Any exception raised by ``copy.deepcopy`` or ``function`` is propagated to the caller.
 
 	Example:
-		>>> data = {"items": [1, 2, 3]}
-		>>> tap(data, print)
-		{'items': [1, 2, 3]}
+	```python
+	data = {"items": [1, 2, 3]}
+	tap(data, print)
+	# {'items': [1, 2, 3]}
+	```
 
-		A function can modify its argument without modifying the original:
+	A function can modify its argument without modifying the original:
 
-		>>> def inspect(data):
-			...     data["items"].append(4)
-		>>> original = {"items": [1, 2, 3]}
-		>>> result = tap(original, inspect)
-		>>> result is original
-		True
-		>>> original
-		{'items': [1, 2, 3]}
+	```python
+	def inspect(data):
+		data["items"].append(4)
+
+	original = {"items": [1, 2, 3]}
+
+	result = tap(original, inspect)
+
+	result is original  # True
+
+	original
+	# {'items': [1, 2, 3]}
+	```
 	"""
 	if not callable(function):
 		raise TypeError("function is not callable.")

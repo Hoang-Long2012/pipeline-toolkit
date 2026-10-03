@@ -13,27 +13,28 @@ class Pipeline:
 
 	Each step is represented by a tuple containing a callable and optional positional and keyword arguments:
 
-		(function,)
-		(function, args)
-		(function, kwargs)
-		(function, args, kwargs)
+	```python
+	(function,)
+	(function, args)
+	(function, kwargs)
+	(function, args, kwargs)
+	```
 
 	Where ``args`` may be a tuple or mapping when used alone, but must be a tuple when ``kwargs`` is provided.
 	The pipeline always passes the result of the previous step as the first positional argument to the next step.
 	The pipeline is snapshotted when execution starts, so modifications to the pipeline after ``run()`` has started do not affect the current execution.
 
 	Example:
-		>>> def add(value, amount):
-			...     return value + amount
+	```python
+	def add(value, amount):
+		return value + amount
 
-		>>> pipeline = Pipeline([
-		...     (add, (5,)),
-		...     (add, (10,)),
-		... ])
-		>>> pipeline.run(0)
-		>>> pipeline.wait()
-		>>> pipeline.results.get()
-		15
+	pipeline = Pipeline([
+		(add, (5,)),
+		(add, (10,)),
+	)
+	pipeline.run(0).wait().result  # 15
+	```
 	"""
 	def __init__(self, iterable=(), default=None, name=None, *, run_now=False, run_args=(), run_kwargs=None):
 		"""Initialize a pipeline.
@@ -63,8 +64,8 @@ class Pipeline:
 		self._steps = []
 		self._thread = None
 		self._step = 0
-		self.results = Stack()
-		self.errors = Stack()
+		self._results = Stack()
+		self._errors = Stack()
 		self._default = default
 		if name is not None and not isinstance(name, str):
 			raise TypeError("name is not a str.")
@@ -127,7 +128,7 @@ class Pipeline:
 		steps = tuple(self._steps)
 		self._step = 0
 		self.results.clear()
-		self.results.push(default if default is not _DEFAULT else self._default)
+		self.results.push(default if default is not _DEFAULT else self.default)
 		self.errors.clear()
 		def worker():
 			if not steps:
@@ -154,7 +155,7 @@ class Pipeline:
 			if not self._stop_event.is_set():
 				self._step = 0
 			self._thread = None
-		self._thread = threading.Thread(target=worker, name=self._name, daemon=daemon)
+		self._thread = threading.Thread(target=worker, name=self.name, daemon=daemon)
 		self._thread.start()
 		return self
 	def run_step(self, index, default=None):
@@ -248,7 +249,7 @@ class Pipeline:
 	def rerun(self, *args, **kwargs):
 		"""Stop the current execution and start the pipeline again.
 
-		All arguments are passed directly to :meth:`run`.
+		All arguments are passed directly to ``run()``.
 
 		Returns:
 			This pipeline instance.
@@ -258,7 +259,7 @@ class Pipeline:
 		return self
 	@property
 	def running(self):
-		"""Whether the pipeline currently has a running worker thread."""
+		"""Return whether the pipeline currently has a running worker thread."""
 		return self._thread is not None and self._thread.is_alive()
 	@property
 	def result(self):
@@ -301,6 +302,14 @@ class Pipeline:
 			if reraise:
 				raise self.errors.get()
 			return self.errors.get()
+	@property
+	def results(self):
+		"""Return the stack containing initial and successful step results."""
+		return self._results
+	@property
+	def errors(self):
+		"""Return the stack containing exceptions raised by pipeline steps."""
+		return self._errors
 	def add(self, step):
 		"""Append a validated step to the pipeline.
 
@@ -461,7 +470,7 @@ class Pipeline:
 		Raises:
 			RuntimeError: If the pipeline is currently running.
 		"""
-		return self.__copy__()
+		return copy.copy(self)
 	def index(self, step):
 		"""Return the one-based index of the first matching pipeline step.
 
@@ -528,7 +537,7 @@ class Pipeline:
 	def __call__(self, *args, **kwargs):
 		"""Run the pipeline.
 
-		Arguments are passed directly to :meth:`run`.
+		Arguments are passed directly to ``run()``.
 
 		Returns:
 			This pipeline instance.
@@ -538,7 +547,7 @@ class Pipeline:
 		"""Return whether a callable or step configuration exists in the pipeline.
 
 		Callable items are matched by identity.
-		Tuple items must be valid step configurations and are matched against the full configuration.
+		Step items must be valid step configurations and are matched against the full configuration.
 
 		Args:
 			item: A callable or a step tuple to search for.
@@ -623,7 +632,7 @@ class Pipeline:
 	def __iadd__(self, step):
 		"""Append a pipeline step in place.
 
-		This is equivalent to calling :meth:`add` with the specified step.
+		This is equivalent to calling ``add()`` with the specified step.
 
 		Args:
 			step: The pipeline step to append.
@@ -731,13 +740,17 @@ class Pipeline:
 		return self._step
 	@property
 	def default(self):
-		"""Return the default value used when :meth:`run` receives no initial value."""
+		"""Return the default value used when ``run()`` receives no initial value."""
 		return self._default
 	@default.setter
 	def default(self, value):
-		"""Set the default value used when :meth:`run` receives no initial value.
+		"""Set the default value used when ``run()`` receives no initial value.
 
 		Args:
 			value: The default initial value for pipeline execution.
 		"""
 		self._default = value
+	@property
+	def steps(self):
+		"""Return a deep copy of the configured pipeline steps."""
+		return copy.deepcopy(self._steps)
