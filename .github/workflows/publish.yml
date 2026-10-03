@@ -72,6 +72,12 @@ jobs:
       - name: Build distributions
         run: uv build
 
+      - name: Test built wheel
+        run: |
+          uv venv --clear /tmp/test-env
+          uv pip install --python /tmp/test-env/bin/python dist/*.whl
+          /tmp/test-env/bin/python -c "import pipeline"
+
       - name: Check distributions with Twine
         run: uvx twine check dist/*
 
