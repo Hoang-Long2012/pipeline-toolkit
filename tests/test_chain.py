@@ -25,7 +25,7 @@ class TestChainContract:
 		def multiply_two(x):
 			return x * 2
 
-		result = chain([add_one, multiply_two], default=5)
+		result = chain([(add_one,), (multiply_two,)], default=5)
 		assert result == 12  # (5 + 1) * 2
 
 	def test_chain_passes_default_to_first_step(self):
@@ -33,7 +33,7 @@ class TestChainContract:
 		def identity(x):
 			return x
 
-		result = chain([identity], default="expected_value")
+		result = chain([(identity,)], default="expected_value")
 		assert result == "expected_value"
 
 	def test_chain_validates_all_steps_before_execution(self):
@@ -56,13 +56,14 @@ class TestChainContract:
 
 	def test_chain_accepts_iterable_of_steps(self):
 		"""Test chain materializes any iterable of steps."""
+
 		def add_one(x):
 			return x + 1
 
 		def add_two(x):
 			return x + 2
 
-		steps_iter = iter([add_one, add_two])
+		steps_iter = iter([(add_one,), (add_two,)])
 		result = chain(steps_iter, default=10)
 		assert result == 13  # 10 + 1 + 2
 
@@ -72,4 +73,4 @@ class TestChainContract:
 			raise ValueError("Step failed")
 
 		with pytest.raises(ValueError, match="Step failed"):
-			chain([raise_error], default=10)
+			chain([(raise_error,)], default=10)
