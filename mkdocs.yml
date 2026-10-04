@@ -46,12 +46,16 @@ plugins:
             show_symbol_type_toc: false
             show_signature_annotations: true
             members: true
+            members_order: __all__
             show_if_no_docstring: false
             show_category_heading: false
+            group_by_category: false
             merge_init_into_class: true
             scoped_crossrefs: true
             show_source: false
             show_attribute_values: false
+            extensions:
+              - docs/griffe_extensions.py:PreferExportedAliases
 
 extra_css:
   - stylesheets/extra.css

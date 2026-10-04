@@ -26,12 +26,12 @@ pipeline = Pipeline(
 pipeline.run().wait().result  # 12
 ```
 """
-from .chain import chain
-from .compose import compose
-from .mut import mut
-from .pipe import pipe, step
-from .pipeline import Pipeline
-from .tap import tap
+from .chain import chain as chain
+from .compose import compose as compose
+from .mut import mut as mut
+from .pipe import pipe as pipe, step as step
+from .pipeline import Pipeline as Pipeline
+from .tap import tap as tap
 
 __version__ = "0.5.4"
 __author__ = "Hoàng Long"
