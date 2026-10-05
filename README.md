@@ -36,7 +36,9 @@ It also provides small utilities for composing functions, configuring callable s
 - Sequential callable composition with `compose()`.
 - Configurable callable steps with `pipe` and `step`.
 - Step export and unpacking support.
-- Side-effect operations with `tap()`.
+- Access to configured pipeline steps through `Pipeline.steps`.
+- Synchronous sequential pipeline execution with `chain()`.
+- Side-effect operations with `tap()` and `mut()`.
 - LIFO stack support with optional maximum capacity.
 
 ## Installation
@@ -777,6 +779,29 @@ total = pipeline.count((str.upper,))
 
 The supplied step must use the standard pipeline step format.
 
+### `steps`
+
+The `steps` property returns a deep copy of the configured pipeline steps:
+
+```python
+steps = pipeline.steps
+```
+
+The returned list is independent from the pipeline's internal step configuration.
+
+Changes made to the returned list or its contents do not modify the pipeline:
+
+```python
+steps = pipeline.steps
+
+steps.clear()
+
+print(len(steps))     # 0
+print(len(pipeline))  # unchanged
+```
+
+The configured steps are deep-copied, so nested mutable values are also copied.
+
 ## Item Access
 
 Pipeline steps can also be accessed and modified using one-based indexing.
@@ -1033,6 +1058,35 @@ The repetition count must be a positive integer.
 
 ## Functional Utilities
 
+### `chain()`
+
+`chain()` executes pipeline steps synchronously in sequence.
+
+Each step receives the result of the previous step as its first argument.
+
+```python
+from pipeline import chain
+
+def add(value, amount):
+	return value + amount
+
+def multiply(value, factor):
+	return value * factor
+
+result = chain([
+	(add, (5,)),
+	(multiply, (2,)),
+], default=10)
+
+print(result)  # 30
+```
+
+`chain()` executes the steps immediately in the calling thread and returns the result produced by the last step.
+
+An empty sequence of steps returns the supplied default value.
+
+Unlike Pipeline.run(), chain() does not create a worker thread or maintain execution state.
+
 ### `compose()`
 
 `compose()` applies callables sequentially to a value.
@@ -1278,8 +1332,7 @@ The function receives a deep copy, so mutations made by the side-effect function
 `tap()` can also be used as a pipeline step:
 
 ```python
-from pipeline import Pipeline
-from pipeline.tap import tap
+from pipeline import Pipeline, tap
 
 def add(value, amount):
 	return value + amount
@@ -1296,6 +1349,32 @@ pipeline.run(10).wait()
 The value printed by `tap()` is still passed unchanged to the next step.
 
 Because `tap()` uses `copy.deepcopy()`, the value must be compatible with Python's deep-copy protocol.
+
+### `mut`
+
+`mut()` applies a side effect directly to a value and returns the original value.
+
+The value itself is passed to the function, so mutations made by the function affect the original object.
+
+```python
+from pipeline import mut
+
+value = {"items": [1, 2, 3]}
+
+def add_item(data):
+	data["items"].append(4)
+
+result = mut(value, add_item)
+
+print(result)       # {'items': [1, 2, 3, 4]}
+print(result is value)  # True
+```
+
+The return value of the side-effect function is ignored.
+
+`mut()` can be used in a functional chain when a value needs to be modified while preserving it as the returned value.
+
+`mut()` is the in-place counterpart to `tap()`: `tap()` passes a deep copy of the value to the side-effect function, while `mut()` passes the original value.
 
 ### `Stack`
 
@@ -1394,6 +1473,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `error()`        | Return or raise the most recent pipeline exception.                           |
 | `results`        | Stack of initial value and successful results.                                |
 | `errors`         | Stack of raised exceptions.                                                   |
+| `steps`           | Return a deep copy of the configured pipeline steps.                        |
 | `__getitem__()`  | Retrieve a step using one-based indexing.                                     |
 | `__setitem__()`  | Replace a step using one-based indexing.                                      |
 | `__delitem__()`  | Delete a step using one-based indexing.                                       |
@@ -1417,11 +1497,13 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 
 ### Functional Utilities
 
-| Member    | Description                                    |
-| --------- | ---------------------------------------------- |
-| `compose` | Apply callables sequentially to a value.       |
-| `pipe`    | Wrap a callable as a step factory.             |
-| `tap`     | Apply a side effect to a deep copy of a value. |
+| Member    | Description                                                        |
+| --------- | ------------------------------------------------------------------ |
+| `chain`   | Execute pipeline steps synchronously in sequence.                  |
+| `compose` | Apply callables sequentially to a value.                           |
+| `pipe`    | Wrap a callable as a step factory.                                 |
+| `tap`     | Apply a side effect to a deep copy of a value.                     |
+| `mut`     | Apply a side effect directly to a value while returning that value. |
 
 ### `step`
 
@@ -1458,6 +1540,7 @@ For detailed stack operations and behavior, see the `pipeline.stack` module.
 | `reversed(stack)`  | Iterate over values from bottom to top.                    |
 | `repr(stack)`      | Return a developer-oriented representation of the stack.   |
 
+See [API reference](https://Hoang-Long2012.github.io/pipeline-toolkit) to view the entire API.
 ## Requirements
 
 - Python 3.8 or newer
@@ -1476,5 +1559,7 @@ See [license](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/LICEN
 
 - If you'd like to contribute, feel free to submit a pull request.
 - If you'd like to report a bug or request a feature, please open an issue.
+
+See [contributing guide](https://github.com/Hoang-Long2012/pipeline-toolkit/blob/main/CONTRIBUTING.md) for more information.
 
 Copyright (C) 2026 Hoàng Long
