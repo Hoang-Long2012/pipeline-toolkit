@@ -31,7 +31,8 @@ pipeline.run().wait().result  # 12
 from .chain import chain as chain
 from .compose import compose as compose
 from .mut import mut as mut
-from .pipe import pipe as pipe, step as step
+from .pipe import pipe as pipe
+from .pipe import step as step
 from .pipeline import Pipeline as Pipeline
 from .tap import tap as tap
 
