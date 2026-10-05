@@ -47,6 +47,9 @@ jobs:
       - name: Validate pyproject.toml
         run: uvx validate-pyproject pyproject.toml
 
+      - name: Install project and development dependencies
+        run: uv sync --group dev
+
       - name: Check tag matches package version
         run: |
           if [[ ! "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -55,17 +58,15 @@ jobs:
           fi
           uv run python - <<'PY'
           import os
+          import pipeline
           import tomllib
           from pathlib import Path
 
           version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
           tag = os.environ["GITHUB_REF_NAME"]
-          if tag != f"v{version}":
+          if tag != f"v{version}" != f"v{pipeline.__version__}":
               raise SystemExit(f"Tag {tag} does not match project version {version}")
           PY
-
-      - name: Install project and development dependencies
-        run: uv sync --group dev
 
       - name: Run Ruff
         run: uv run ruff check .
