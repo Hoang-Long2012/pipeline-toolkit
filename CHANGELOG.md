@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.5
+- Added `Pipeline.steps` property for accessing a deep copy of the configured steps.
+- Added `chain()` utility for synchronously executing pipeline steps sequentially.
+- Added `mut()` utility for applying side effects directly to a value while preserving the original value as the return value.
+- Some internal changes.
+
 ## 0.5.4
 - Documentation-only release: Change the line breaks in the readme.
 

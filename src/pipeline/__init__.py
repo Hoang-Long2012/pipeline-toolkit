@@ -35,6 +35,6 @@ from .pipe import pipe as pipe, step as step
 from .pipeline import Pipeline as Pipeline
 from .tap import tap as tap
 
-__version__ = "0.5.4"
+__version__ = "0.5.5"
 __author__ = "Hoàng Long"
 __all__ = ["Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]
