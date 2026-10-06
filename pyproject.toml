@@ -62,6 +62,7 @@ trusted-publishing = "automatic"
 
 [tool.ruff]
 src = ["src", "tests"]
+indent-width = 4
 
 [tool.ruff.lint]
 ignore = ["B015", "BLE001", "RET501", "SIM102"]
