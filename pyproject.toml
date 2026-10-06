@@ -55,6 +55,11 @@ where = ["src"]
 [tool.setuptools.package-dir]
 "" = "src"
 
+[tool.uv]
+default-groups = ["dev"]
+link-mode = "copy"
+trusted-publishing = "automatic"
+
 [tool.ruff]
 src = ["src", "tests"]
 
