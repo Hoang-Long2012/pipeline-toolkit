@@ -1,5 +1,5 @@
 """Tools for creating reusable pipeline steps from callables."""
-from functools import update_wrapper
+from functools import wraps
 
 from ._compat import _DEFAULT
 
@@ -93,7 +93,7 @@ class step:
 	def default(self, value):
 		"""Set the initial value used when a step operation needs one."""
 		self._default = value
-class pipe:
+def pipe(function):
 	"""Wrap a callable as a step factory.
 
 	The wrapped callable is preserved as the underlying operation while its metadata is copied to the wrapper.
@@ -106,13 +106,9 @@ class pipe:
 	Raises:
 		TypeError: If ``function`` is not callable.
 	"""
-	def __init__(self, function):
-		if not callable(function):
-			raise TypeError("function is not callable.")
-		self.function = function
-		update_wrapper(self, self.function)
-	def __call__(self, *args, **kwargs):
-		return step(self.function, *args, **kwargs)
-	def __repr__(self):
-		name = getattr(self.function, "__name__", type(self.function).__name__)
-		return f"{type(self).__name__}({name})"
+	if not callable(function):
+		raise TypeError("function is not callable.")
+	@wraps(function)
+	def wrapper(self, *args, **kwargs):
+		return step(function, *args, **kwargs)
+	return wrapper
