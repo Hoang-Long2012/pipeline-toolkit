@@ -458,6 +458,366 @@ class TestPipelineRerun:
 		pipeline.wait()
 
 
+class TestPipelineErrorHandler:
+	"""Test pipeline error handler."""
+
+	def test_handler_error_receives_step_index(self):
+		"""Test handler receives the one-based index of the failed step."""
+
+		def identity(x):
+			return x
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		called = threading.Event()
+		received = {}
+
+		def handler(index, step, error):
+			received["index"] = index
+			called.set()
+
+		pipeline = Pipeline([
+			(identity,),
+			(raise_error,),
+		])
+		pipeline.run(10, handler_error=handler).wait()
+
+		assert called.is_set()
+		assert received["index"] == 2
+
+	def test_handler_error_receives_failed_step(self):
+		"""Test handler receives the failed step."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		failing = (raise_error,)
+		received = {}
+
+		def handler(index, step, error):
+			received["step"] = step
+
+		pipeline = Pipeline([failing])
+		pipeline.run(10, handler_error=handler).wait()
+
+		assert received["step"] == failing
+
+	def test_handler_error_receives_exception(self):
+		"""Test handler receives the raised exception."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		received = {}
+
+		def handler(index, step, error):
+			received["error"] = error
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(10, handler_error=handler).wait()
+
+		assert isinstance(received["error"], ValueError)
+		assert str(received["error"]) == "Test error"
+
+	def test_handler_error_is_called_for_each_failure(self):
+		"""Test handler is called for every failed step."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		calls = []
+
+		def handler(index, step, error):
+			calls.append((index, step, error))
+
+		pipeline = Pipeline([
+			(raise_error,),
+			(raise_error,),
+		])
+		pipeline.run(10, stop_on_error=False, handler_error=handler).wait()
+
+		assert len(calls) == 2
+		assert [call[0] for call in calls] == [1, 2]
+		assert all(isinstance(call[2], ValueError) for call in calls)
+
+	def test_handler_error_called_before_continuing(self):
+		"""Test handler is called before execution continues after an error."""
+
+		handler_called = threading.Event()
+		second_step_started = threading.Event()
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		def second_step(x):
+			second_step_started.set()
+			return x + 10
+
+		def handler(index, step, error):
+			handler_called.set()
+
+		pipeline = Pipeline([
+			(raise_error,),
+			(second_step,),
+		])
+		pipeline.run(
+			10,
+			stop_on_error=False,
+			handler_error=handler,
+		).wait()
+
+		assert handler_called.is_set()
+		assert second_step_started.is_set()
+
+	def test_handler_error_does_not_run_for_successful_step(self):
+		"""Test handler is not called for successful steps."""
+
+		def identity(x):
+			return x
+
+		called = threading.Event()
+
+		def handler(index, step, error):
+			called.set()
+
+		pipeline = Pipeline([(identity,)])
+		pipeline.run(10, handler_error=handler).wait()
+
+		assert not called.is_set()
+
+	def test_handler_error_does_not_run_for_skipped_step(self):
+		"""Test handler is not called for skipped steps."""
+
+		ready_to_skip = threading.Event()
+		proceed = threading.Event()
+		called = threading.Event()
+
+		def first(x):
+			ready_to_skip.set()
+			proceed.wait()
+			return x + 1
+
+		def second(x):
+			raise ValueError("Should not execute")
+
+		def handler(index, step, error):
+			called.set()
+
+		pipeline = Pipeline([
+			(first,),
+			(second,),
+		])
+		pipeline.run(0, handler_error=handler)
+
+		assert ready_to_skip.wait(timeout=1.0), (
+			"First step never reached sync point"
+		)
+
+		pipeline.skip()
+		proceed.set()
+		pipeline.wait()
+
+		assert not called.is_set()
+
+	def test_handler_error_is_optional(self):
+		"""Test pipeline runs normally without an error handler."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(10).wait()
+
+		assert len(pipeline.errors) == 1
+
+	def test_handler_error_invalid_type(self):
+		"""Test non-callable handler raises TypeError."""
+
+		pipeline = Pipeline()
+
+		with pytest.raises(
+			TypeError,
+			match="handler_error is not a callable",
+		):
+			pipeline.run(10, handler_error="invalid")
+
+
+class TestPipelineCalls:
+	"""Test pipeline calls stack."""
+
+	def test_calls_contains_successful_steps(self):
+		"""Test calls contains successfully executed steps."""
+
+		def add(x, y):
+			return x + y
+
+		first = (add, (5,))
+		second = (add, (10,))
+		pipeline = Pipeline([first, second])
+
+		pipeline.run(10).wait()
+
+		assert list(pipeline.calls) == [second, first]
+
+	def test_calls_excludes_failed_steps(self):
+		"""Test calls excludes steps that raise exceptions."""
+
+		def add(x, y):
+			return x + y
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		first = (add, (5,))
+		failing = (raise_error,)
+		pipeline = Pipeline([first, failing])
+
+		pipeline.run(10).wait()
+
+		assert list(pipeline.calls) == [first]
+		assert len(pipeline.errors) == 1
+
+	def test_calls_excludes_failed_steps_when_continuing(self):
+		"""Test calls excludes failed steps when stop_on_error is disabled."""
+
+		def add(x, y):
+			return x + y
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		first = (add, (5,))
+		failing = (raise_error,)
+		last = (add, (10,))
+
+		pipeline = Pipeline([first, failing, last])
+		pipeline.run(10, stop_on_error=False).wait()
+
+		assert list(pipeline.calls) == [last, first]
+		assert len(pipeline.errors) == 1
+
+	def test_calls_excludes_skipped_steps(self):
+		"""Test calls excludes skipped steps."""
+
+		ready_to_skip = threading.Event()
+		proceed = threading.Event()
+
+		def first(x):
+			ready_to_skip.set()
+			proceed.wait()
+			return x + 1
+
+		def second(x):
+			return x + 10
+
+		first_step = (first,)
+		second_step = (second,)
+
+		pipeline = Pipeline([first_step, second_step])
+		pipeline.run(0)
+
+		assert ready_to_skip.wait(timeout=1.0), (
+			"First step never reached sync point"
+		)
+
+		pipeline.skip()
+		proceed.set()
+		pipeline.wait()
+
+		assert list(pipeline.calls) == [first_step]
+		assert second_step not in pipeline.calls
+
+	def test_calls_are_cleared_on_rerun(self):
+		"""Test calls are reset when the pipeline is rerun."""
+
+		def add(x, y):
+			return x + y
+
+		first = (add, (5,))
+		second = (add, (10,))
+
+		pipeline = Pipeline([first, second])
+
+		pipeline.run(10).wait()
+		assert list(pipeline.calls) == [second, first]
+
+		pipeline.run(20).wait()
+
+		assert list(pipeline.calls) == [second, first]
+
+	def test_calls_are_cleared_before_new_run(self):
+		"""Test calls is cleared before a new run starts."""
+
+		def add(x, y):
+			return x + y
+
+		step = (add, (5,))
+		pipeline = Pipeline([step])
+
+		pipeline.run(10).wait()
+		assert len(pipeline.calls) == 1
+
+		pipeline.run(20).wait()
+
+		assert len(pipeline.calls) == 1
+		assert pipeline.calls.get() == step
+
+	def test_calls_empty_when_all_steps_fail(self):
+		"""Test calls is empty when all steps fail."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		first = (raise_error,)
+		second = (raise_error,)
+
+		pipeline = Pipeline([first, second])
+		pipeline.run(10, stop_on_error=False).wait()
+
+		assert len(pipeline.calls) == 0
+		assert len(pipeline.errors) == 2
+
+	def test_calls_excludes_failed_step_with_error_handler(self):
+		"""Test calls excludes failed steps when an error handler is used."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		handler_called = threading.Event()
+
+		def handler(index, step, error):
+			handler_called.set()
+
+		failing = (raise_error,)
+		pipeline = Pipeline([failing])
+
+		pipeline.run(10, handler_error=handler).wait()
+
+		assert handler_called.is_set()
+		assert len(pipeline.calls) == 0
+		assert len(pipeline.errors) == 1
+
+	def test_calls_matches_successful_results(self):
+		"""Test calls contains exactly the steps producing successful results."""
+
+		def add(x, y):
+			return x + y
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		first = (add, (5,))
+		failing = (raise_error,)
+		last = (add, (10,))
+
+		pipeline = Pipeline([first, failing, last])
+		pipeline.run(10, stop_on_error=False).wait()
+
+		assert list(pipeline.calls) == [last, first]
+		assert list(pipeline.results) == [25, 15, 10]
+
+
 class TestPipelineResults:
 	"""Test pipeline results stack and result property."""
 

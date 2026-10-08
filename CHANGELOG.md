@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.6
+- Added the `handler_error` parameter to `Pipeline.run()` for handling errors raised during step execution.
+- Added the `Pipeline.calls` stack for tracking successfully executed steps. Failed and skipped steps are not recorded.
+
 ## 0.5.5
 - Added `Pipeline.steps` property for accessing a deep copy of the configured steps.
 - Added `chain()` utility for synchronously executing pipeline steps sequentially.

@@ -64,6 +64,7 @@ class Pipeline:
 		self._steps = []
 		self._thread = None
 		self._step = 0
+		self._calls = Stack()
 		self._results = Stack()
 		self._errors = Stack()
 		self._default = default
@@ -87,7 +88,7 @@ class Pipeline:
 		core.validate_step(step)
 	def _execute_step(self, step, default):
 		return core.execute_step(step, default)
-	def run(self, default=_DEFAULT, delay=0, daemon=False, stop_on_error=True):
+	def run(self, default=_DEFAULT, delay=0, daemon=False, stop_on_error=True, handler_error=None):
 		"""Run the pipeline asynchronously in a worker thread.
 
 		The supplied ``default`` value is stored as the initial result.
@@ -106,14 +107,18 @@ class Pipeline:
 			daemon: Whether the worker thread should be a daemon thread.
 				Defaults to ``False``.
 			stop_on_error: Whether execution should stop after the first exception.
-				When disabled, the failed step's result is not added to ``results``, and execution continues with the previous result.
+				When disabled, the failed step's result is not added to ``results``, the exception is added to ``errors``, and execution continues with the previous result.
 				Defaults to ``True``.
+			handler_error: An optional callable invoked when a step raises an exception.
+				It receives the one-based step index, the failed step, and the exception object as arguments.
+				The handler's own exceptions are not caught by the pipeline.
+				Defaults to ``None``.
 
 		Returns:
 			This pipeline instance.
 
 		Raises:
-			TypeError: If ``delay`` is not an integer or floating-point number.
+			TypeError: If ``delay`` is not an integer or floating-point number, or if ``handler_error`` is not callable.
 			ValueError: If ``delay`` is negative.
 			RuntimeError: If the pipeline is already running.
 		"""
@@ -121,12 +126,15 @@ class Pipeline:
 			raise TypeError("Delay is not int or float.")
 		if delay < 0:
 			raise ValueError("Delay cannot be negative.")
+		if handler_error is not None and not callable(handler_error):
+			raise TypeError("handler_error is not a callable.")
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
 		self._stop_event.clear()
 		self._skip_event.clear()
 		steps = tuple(self._steps)
 		self._step = 0
+		self.calls.clear()
 		self.results.clear()
 		self.results.push(default if default is not _DEFAULT else self.default)
 		self.errors.clear()
@@ -148,8 +156,12 @@ class Pipeline:
 					self.results.push(self._execute_step(step, self.results.get()))
 				except Exception as error:
 					self.errors.push(error)
+					if handler_error is not None:
+						handler_error(self._step, step, error)
 					if stop_on_error:
 						break
+				else:
+					self.calls.push(step)
 				if delay and index < len(steps) - 1:
 					self._stop_event.wait(delay)
 			if not self._stop_event.is_set():
@@ -302,6 +314,20 @@ class Pipeline:
 			if reraise:
 				raise self.errors.get()
 			return self.errors.get()
+	@property
+	def calls(self):
+		"""Return the stack containing successfully executed pipeline steps.
+
+		The stack records each step after its execution completes successfully.
+		Therefore, a step is not included in ``calls`` if it raises an exception.
+
+		Skipped steps are not added to the stack.
+		Steps that have not yet been reached are not included.
+
+		Returns:
+			The stack containing the steps successfully executed during the current or most recent execution.
+		"""
+		return self._calls
 	@property
 	def results(self):
 		"""Return the stack containing initial and successful step results."""
