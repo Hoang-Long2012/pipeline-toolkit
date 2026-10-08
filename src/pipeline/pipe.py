@@ -61,8 +61,24 @@ class step:
 		"""
 		return self.function(default if default is not _DEFAULT else self.default, *self.args, **self.kwargs)
 	def __ror__(self, other):
+		"""Execute the step with ``other`` as the input value.
+
+		Returns:
+			The value returned by the wrapped callable.
+		"""
 		return self.function(other, *self.args, **self.kwargs)
 	def __mul__(self, other):
+		"""Execute the step repeatedly using the previous result as input.
+
+		Args:
+			other: The number of times to execute the step.
+
+		Returns:
+			The value returned by the final execution.
+
+		Raises:
+			ValueError: If ``other`` is less than 1.
+		"""
 		if not isinstance(other, int):
 			return NotImplemented
 		if other < 1:
@@ -72,8 +88,24 @@ class step:
 			result = self.function(result, *self.args, **self.kwargs)
 		return result
 	def __lt__(self, other):
+		"""Read a value from a file-like object and execute the step with it.
+
+		Args:
+			other: An object providing a ``read()`` method.
+
+		Returns:
+			The value returned by the wrapped callable.
+		"""
 		return self.function(other.read(), *self.args, **self.kwargs)
 	def __gt__(self, other):
+		"""Execute the step and write its result to a file-like object.
+
+		Args:
+			other: An object providing a ``write()`` method.
+
+		Returns:
+			The value returned by ``other.write()``.
+		"""
 		return other.write(self.function(self.default, *self.args, **self.kwargs))
 	def __iter__(self):
 		yield from self.export()
@@ -109,6 +141,6 @@ def pipe(function):
 	if not callable(function):
 		raise TypeError("function is not callable.")
 	@wraps(function)
-	def wrapper(self, *args, **kwargs):
+	def wrapper(*args, **kwargs):
 		return step(function, *args, **kwargs)
 	return wrapper
