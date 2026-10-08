@@ -4,6 +4,7 @@
 - Added the `handler_error` parameter to `Pipeline.run()` for handling errors raised during step execution.
 - Added the `Pipeline.calls` stack for tracking successfully executed steps. Failed and skipped steps are not recorded.
 - Added `Checkpoint`, a synchronization utility for coordinating execution between threads.
+- Changed `pipe` from a callable class to a function-based wrapper while preserving its step-factory behavior and callable metadata.
 
 ## 0.5.5
 - Added `Pipeline.steps` property for accessing a deep copy of the configured steps.
