@@ -29,6 +29,7 @@ pipeline.run().wait().result  # 12
 ```
 """
 from .chain import chain as chain
+from .checkpoint import Checkpoint as Checkpoint
 from .compose import compose as compose
 from .mut import mut as mut
 from .pipe import pipe as pipe
@@ -38,4 +39,4 @@ from .tap import tap as tap
 
 __version__ = "0.5.5"
 __author__ = "Hoàng Long"
-__all__ = ["Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]
+__all__ = ["Checkpoint", "Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]

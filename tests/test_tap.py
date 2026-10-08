@@ -1,7 +1,7 @@
 """Tests for the tap function."""
 import pytest
 
-from pipeline.tap import tap
+from pipeline import tap
 
 
 class TestTapBasic:
