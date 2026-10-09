@@ -64,12 +64,15 @@ jobs:
 
           version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
           tag = os.environ["GITHUB_REF_NAME"]
-          if tag != f"v{version}" != f"v{pipeline.__version__}":
-              raise SystemExit(f"Tag {tag} does not match project version {version}")
+          expected = f"v{version}"
+          module_version = f"v{pipeline.__version__}"
+
+          if tag != expected or tag != module_version:
+              raise SystemExit(f"Version mismatch: tag={tag}, project={version}, module={pipeline.__version__}")
           PY
 
       - name: Run Ruff
-        run: uv run ruff check .
+        run: uv run ruff check
 
       - name: Run ty
         run: uv run ty check .
