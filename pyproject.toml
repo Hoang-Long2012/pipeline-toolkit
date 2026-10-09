@@ -16,6 +16,8 @@ keywords = [
 	"functional programming",
 	"functional pipeline",
 	"functional toolkit",
+	"sequence pipeline",
+	"execute object",
 	"workflow",
 	"async",
 	"asynchronous",
@@ -72,6 +74,10 @@ quote-style = "double"
 indent-style = "tab"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.ty.src]
+include = ["src"]
+respect-ignore-files = true
 
 [build-system]
 requires = ["setuptools>=80"]
