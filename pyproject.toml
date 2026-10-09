@@ -79,10 +79,9 @@ line-ending = "auto"
 include = ["src"]
 respect-ignore-files = true
 
-[tool.pytest]
-minversion = "9.0"
+[tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = ["-ra", "--cov"]
+addopts = "-ra --cov"
 
 [tool.coverage.run]
 source_pkgs = ["pipeline"]
