@@ -12,9 +12,9 @@ class TestStepBasic:
 		def add(x, amount):
 			return x + amount
 		s = step(add, 5)
-		assert s.function is add
-		assert s.args == (5,)
-		assert s.kwargs == {}
+		assert s._function is add
+		assert s._args == (5,)
+		assert s._kwargs == {}
 		assert s.default is None
 
 	def test_step_call(self):
