@@ -1,9 +1,13 @@
 {#-
   This file was automatically generated - do not edit
 -#}
-{% set page.meta.title = "404 - Not found" %}
 {% extends "main.html" %}
+
+{% block htmltitle %}
+  <title>404 - Not found - {{ config.site_name }}</title>
+{% endblock %}
+
 {% block content %}
   <h1>404 - Not found</h1>
-    <p>Page not found.</p>
+  <p>Page not found.</p>
 {% endblock %}
