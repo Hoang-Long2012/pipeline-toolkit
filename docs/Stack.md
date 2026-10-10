@@ -15,6 +15,8 @@
     options:
       heading_level: 4
 
+## Operations
+
 ### Adding and Removing Items
 
 ::: pipeline.stack.Stack.push
