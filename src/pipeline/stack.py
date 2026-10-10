@@ -13,14 +13,6 @@ class Stack:
 	A maximum size can optionally be specified.
 	A ``maxsize`` of ``0`` means that the stack has no size limit.
 
-	Args:
-		maxsize: Maximum number of items allowed in the stack.
-			Defaults to ``0``, meaning unlimited capacity.
-
-	Raises:
-		TypeError: If ``maxsize`` is not an integer.
-		ValueError: If ``maxsize`` is negative.
-
 	Example:
 	```python
 	stack = Stack(3)

@@ -38,8 +38,10 @@ plugins:
         python:
           paths: [.]
           options:
-            docstring_style: sphinx
-            docstring_section_style: table
+            docstring_style: numpy
+            docstring_section_style: list
+            docstring_options:
+              ignore_init_summary: true
             show_root_heading: true
             heading_level: 2
             show_symbol_type_heading: false
