@@ -146,10 +146,10 @@ class TestCheckpointCall:
 
 
 class TestCheckpointWait:
-	"""Test waiting for checkpoint generations."""
+	"""Test waiting for an active checkpoint."""
 
-	def test_wait_blocks_until_next_generation(self):
-		"""Test wait blocks until a newer generation is published."""
+	def test_wait_blocks_until_active(self):
+		"""Test wait blocks until the checkpoint becomes active."""
 		checkpoint = Checkpoint()
 		waiting = threading.Event()
 		finished = threading.Event()
@@ -175,6 +175,7 @@ class TestCheckpointWait:
 		thread.start()
 
 		assert finished.wait(timeout=1.0)
+		assert checkpoint.is_active
 		assert checkpoint.value == 42
 		assert not checkpoint_thread_finished.is_set()
 
@@ -185,69 +186,29 @@ class TestCheckpointWait:
 		waiter.join(timeout=1.0)
 		thread.join(timeout=1.0)
 
-	def test_wait_waits_for_a_new_generation(self):
-		"""Test wait does not return for the current generation."""
+	def test_wait_returns_immediately_when_active(self):
+		"""Test wait returns immediately when the checkpoint is active."""
 		checkpoint = Checkpoint()
+		finished = threading.Event()
 
-		# Create the first generation.
-		first_finished = threading.Event()
-
-		def first():
+		def run():
 			checkpoint(42)
-			first_finished.set()
+			finished.set()
 
-		thread = threading.Thread(target=first)
+		thread = threading.Thread(target=run)
 		thread.start()
 
-		while checkpoint.value is None:
+		while not checkpoint.is_active:
 			threading.Event().wait(0.001)
 
-		checkpoint.next()
+		checkpoint.wait()
 
-		assert first_finished.wait(timeout=1.0)
-		thread.join(timeout=1.0)
-
-		# wait() starts after generation 1 exists.
-		wait_finished = threading.Event()
-		waiting = threading.Event()
-
-		def wait_for_next():
-			waiting.set()
-			checkpoint.wait()
-			wait_finished.set()
-
-		waiter = threading.Thread(target=wait_for_next)
-		waiter.start()
-
-		assert waiting.wait(timeout=1.0)
-		assert not wait_finished.is_set()
-
-		# Generation 1 must not wake the waiter.
-		thread = threading.Thread(target=lambda: None)
-		thread.start()
-		thread.join(timeout=1.0)
-
-		assert not wait_finished.is_set()
-
-		# Generation 2 wakes the waiter.
-		second_finished = threading.Event()
-
-		def second():
-			checkpoint(43)
-			second_finished.set()
-
-		thread = threading.Thread(target=second)
-		thread.start()
-
-		assert wait_finished.wait(timeout=1.0)
-		assert checkpoint.value == 43
-		assert not second_finished.is_set()
+		assert checkpoint.is_active
+		assert not finished.is_set()
 
 		checkpoint.next()
 
-		assert second_finished.wait(timeout=1.0)
-
-		waiter.join(timeout=1.0)
+		assert finished.wait(timeout=1.0)
 		thread.join(timeout=1.0)
 
 
@@ -360,6 +321,41 @@ class TestCheckpointValue:
 		checkpoint.next()
 
 		assert finished.wait(timeout=1.0)
+		thread.join(timeout=1.0)
+
+
+class TestCheckpointIsActive:
+	"""Test the checkpoint active state."""
+
+	def test_is_active_is_false_initially(self):
+		"""Test checkpoint is inactive before the first call."""
+		checkpoint = Checkpoint()
+
+		assert not checkpoint.is_active
+
+	def test_is_active_is_true_while_blocked(self):
+		"""Test checkpoint is active while waiting for release."""
+		checkpoint = Checkpoint()
+		finished = threading.Event()
+
+		def run():
+			checkpoint(42)
+			finished.set()
+
+		thread = threading.Thread(target=run)
+		thread.start()
+
+		while not checkpoint.is_active:
+			threading.Event().wait(0.001)
+
+		assert checkpoint.is_active
+		assert not finished.is_set()
+
+		checkpoint.next()
+
+		assert finished.wait(timeout=1.0)
+		assert not checkpoint.is_active
+
 		thread.join(timeout=1.0)
 
 

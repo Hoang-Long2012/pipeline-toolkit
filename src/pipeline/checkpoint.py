@@ -7,31 +7,33 @@ class Checkpoint:
 	def __init__(self):
 		self._condition = threading.Condition()
 		self._value = None
-		self._generation = 0
-		self._next = False
+		self._active = False
 	def __call__(self, value):
 		"""Publish a value and pause until ``next()`` is called."""
 		with self._condition:
 			self._value = value
-			self._generation += 1
-			self._next = False
+			self._active = True
 			self._condition.notify_all()
-			while not self._next:
+			while self._active:
 				self._condition.wait()
 		return value
 	def next(self):
-		"""Allow the current checkpoint to continue."""
+		"""Release the active checkpoint."""
 		with self._condition:
-			self._next = True
+			self._active = False
 			self._condition.notify_all()
 	def wait(self):
-		"""Wait until the checkpoint is reached again."""
+		"""Wait until a checkpoint is active."""
 		with self._condition:
-			generation = self._generation
-			while self._generation == generation:
+			while not self._active:
 				self._condition.wait()
 	@property
 	def value(self):
 		"""Return the most recently published value."""
 		with self._condition:
 			return self._value
+	@property
+	def is_active(self):
+		"""Return whether the checkpoint is currently active."""
+		with self._condition:
+			return self._active
