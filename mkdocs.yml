@@ -55,6 +55,9 @@ plugins:
             scoped_crossrefs: true
             show_source: false
             show_attribute_values: false
+            show_root_full_path: false
+            show_root_members_full_path: false
+            show_object_full_path: false
             extensions:
               - docs/griffe_extensions.py:PreferExportedAliases
 
