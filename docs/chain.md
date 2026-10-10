@@ -4,3 +4,5 @@ hide:
 ---
 
 ::: pipeline.chain
+    options:
+      heading_level: 1
