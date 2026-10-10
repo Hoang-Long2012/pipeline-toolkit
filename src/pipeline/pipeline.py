@@ -252,16 +252,30 @@ class Pipeline:
 		if self._thread is not None and self.running:
 			self._skip_event.set()
 		return self
-	def wait(self):
+	def wait(self, timeout=None):
 		"""Wait until the currently running pipeline finishes.
 
 		This method blocks only while the pipeline is running.
+		If ``timeout`` expires before the pipeline finishes, the worker thread continues running in the background.
+
+		Args:
+			timeout: Maximum time to wait in seconds, or ``None`` to wait indefinitely.
+				Must be non-negative or ``None``.
+				Defaults to ``None``.
 
 		Returns:
 			This pipeline instance.
+
+		Raises:
+			TypeError: If ``timeout`` is not an integer, a floating-point number, or ``None``.
+			ValueError: If ``timeout`` is negative.
 		"""
+		if not isinstance(timeout, (int, float, type(None))):
+			raise TypeError("timeout is not int, float, or None.")
+		if timeout is not None and timeout < 0:
+			raise ValueError("timeout cannot be negative.")
 		if self._thread is not None and self.running:
-			self._thread.join()
+			self._thread.join(timeout)
 		return self
 	def rerun(self, *args, **kwargs):
 		"""Stop the current execution and start the pipeline again.
