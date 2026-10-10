@@ -2,5 +2,9 @@
 title: API Reference
 ---
 
+## Pipeline Toolkit {{ config.extra.version }}
+
 ::: pipeline
-::: pipeline.stack
+    options:
+      show_root_heading: false
+      members: false

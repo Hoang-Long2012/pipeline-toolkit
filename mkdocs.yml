@@ -74,4 +74,5 @@ nav:
   - Pypi: https://pypi.org/project/pipeline-toolkit
 
 extra:
+  version: ""
   material_version: ""
