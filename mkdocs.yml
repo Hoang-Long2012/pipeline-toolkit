@@ -33,6 +33,7 @@ theme:
 
 plugins:
   - search
+  - macros
   - mkdocstrings:
       handlers:
         python:
