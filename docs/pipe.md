@@ -4,3 +4,5 @@ hide:
 ---
 
 ::: pipeline.pipe
+    options:
+      heading_level: 1
