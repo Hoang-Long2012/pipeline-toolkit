@@ -100,6 +100,11 @@ class TestStepOperators:
 		with pytest.raises(ValueError, match="other < 1"):
 			s * -1
 
+	def test_step_multiplication_with_non_integer(self):
+		"""Return NotImplemented when the multiplier is not an integer."""
+		s = step(int)
+		assert s.__mul__(1.5) is NotImplemented
+
 	def test_step_chaining_with_pipe_operator(self):
 		"""Test chaining steps with pipe operator."""
 		def add(x, amount):
@@ -126,6 +131,15 @@ class TestStepOperators:
 		s.default = 10
 		result = s > Writer()
 		assert result == 15
+
+	def test_step_less_than_reads_from_file(self):
+		"""Read a value from a file-like object and execute the step."""
+		from io import StringIO
+
+		s = step(str.strip)
+		result = s < StringIO("  hello  ")
+
+		assert result == "hello"
 
 
 class TestStepExport:
@@ -195,6 +209,21 @@ class TestStepRepr:
 		repr_str = repr(s)
 		assert "step" in repr_str.lower()
 		assert "add" in repr_str
+
+	def test_step_repr_without_args(self):
+		"""Represent a step without positional or keyword arguments."""
+		s = step(int)
+		assert repr(s) == "step(int)"
+
+	def test_step_repr_without_kwargs(self):
+		"""Represent a step with positional arguments only."""
+		s = step(pow, 2)
+		assert repr(s) == "step(pow, 2)"
+
+	def test_step_repr_with_args_and_kwargs(self):
+		"""Represent a step with positional and keyword arguments."""
+		s = step(pow, 2, exp=3)
+		assert repr(s) == "step(pow, 2, exp=3)"
 
 
 class TestStepErrors:
