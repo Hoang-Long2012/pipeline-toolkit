@@ -11,7 +11,7 @@ The main components are:
 - [`compose`](compose.md): Create a callable that applies multiple callables sequentially to a value.
 - [`mut`](mut.md): Apply a function directly to an object for side effects and return the same object.
 - [`tap`](tap.md): Apply a side effect to a deep copy of a value while returning the original value unchanged.
-- [`pipe`](pipe.md): Wrap a callable as a factory for creating :class:`step` objects with preconfigured arguments.
+- [`pipe`](pipe.md): Wrap a callable as a factory for creating [`step`](step.md) objects with preconfigured arguments.
 - [`step`](step.md): Represent a callable with preconfigured arguments and provide convenient execution and composition operations.
 
 Example:
