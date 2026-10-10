@@ -4,7 +4,7 @@ hide:
   - toc
 ---
 
-## Pipeline Toolkit {{ config.extra.version }}
+# Pipeline Toolkit {{ config.extra.version }}
 
 ::: pipeline
     options:
