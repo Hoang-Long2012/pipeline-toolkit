@@ -2,6 +2,7 @@
 
 ## 0.5.6
 - Added the `handler_error` parameter to `Pipeline.run()` for handling errors raised during step execution.
+- Added an optional `timeout` parameter to `Pipeline.wait()`. When the timeout expires, the method returns without stopping the running pipeline.
 - Added the `Pipeline.calls` stack for tracking successfully executed steps. Failed and skipped steps are not recorded.
 - Added `Checkpoint`, a synchronization utility for coordinating execution between threads.
 - Changed `pipe` from a callable class to a function-based wrapper while preserving its step-factory behavior and callable metadata.
