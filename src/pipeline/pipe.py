@@ -22,9 +22,9 @@ class step:
 	def __init__(self, function, *args, **kwargs):
 		if not callable(function):
 			raise TypeError("function is not callable.")
-		self.function = function
-		self.args = args
-		self.kwargs = kwargs
+		self._function = function
+		self._args = args
+		self._kwargs = kwargs
 		self._default = None
 	def export(self):
 		"""Export the step in pipeline step format.
@@ -41,11 +41,11 @@ class step:
 		(function, args, kwargs)
 		```
 		"""
-		parts = [self.function]
-		if self.args:
-			parts.append(self.args)
-		if self.kwargs:
-			parts.append(self.kwargs)
+		parts = [self._function]
+		if self._args:
+			parts.append(self._args)
+		if self._kwargs:
+			parts.append(self._kwargs)
 		return tuple(parts)
 	def __call__(self, default=_DEFAULT):
 		"""Execute the step with an input value.
@@ -59,14 +59,14 @@ class step:
 		Returns:
 			The value returned by the wrapped callable.
 		"""
-		return self.function(default if default is not _DEFAULT else self.default, *self.args, **self.kwargs)
+		return self._function(default if default is not _DEFAULT else self.default, *self._args, **self._kwargs)
 	def __ror__(self, other):
 		"""Execute the step with ``other`` as the input value.
 
 		Returns:
 			The value returned by the wrapped callable.
 		"""
-		return self.function(other, *self.args, **self.kwargs)
+		return self._function(other, *self._args, **self._kwargs)
 	def __mul__(self, other):
 		"""Execute the step repeatedly using the previous result as input.
 
@@ -85,7 +85,7 @@ class step:
 			raise ValueError("other < 1.")
 		result = self.default
 		for _ in range(other):
-			result = self.function(result, *self.args, **self.kwargs)
+			result = self._function(result, *self._args, **self._kwargs)
 		return result
 	def __lt__(self, other):
 		"""Read a value from a file-like object and execute the step with it.
@@ -96,7 +96,7 @@ class step:
 		Returns:
 			The value returned by the wrapped callable.
 		"""
-		return self.function(other.read(), *self.args, **self.kwargs)
+		return self._function(other.read(), *self._args, **self._kwargs)
 	def __gt__(self, other):
 		"""Execute the step and write its result to a file-like object.
 
@@ -106,16 +106,16 @@ class step:
 		Returns:
 			The value returned by ``other.write()``.
 		"""
-		return other.write(self.function(self.default, *self.args, **self.kwargs))
+		return other.write(self._function(self.default, *self._args, **self._kwargs))
 	def __iter__(self):
 		yield from self.export()
 	def __repr__(self):
-		name = getattr(self.function, "__name__", type(self.function).__name__)
+		name = getattr(self._function, "__name__", type(self._function).__name__)
 		parts = [f"{name}"]
-		if self.args:
-			parts.extend(f"{arg!r}" for arg in self.args)
-		if self.kwargs:
-			parts.extend(f"{key}={value!r}" for key, value in self.kwargs.items())
+		if self._args:
+			parts.extend(f"{arg!r}" for arg in self._args)
+		if self._kwargs:
+			parts.extend(f"{key}={value!r}" for key, value in self._kwargs.items())
 		return f"{type(self).__name__}({', '.join(parts)})"
 	@property
 	def default(self):
