@@ -5,7 +5,6 @@
 {% if config.mdx_configs.toc and config.mdx_configs.toc.title %}
   {% set title = config.mdx_configs.toc.title %}
 {% endif %}
-<h1>{{ page.title | d(config.site_name, true)}}</h1>
 <nav class="md-nav md-nav--secondary" aria-labelledby="toc-title">
   {% set toc = page.toc %}
   {% set first = toc | first %}
