@@ -1,9 +1,7 @@
-# Stack
-
 ::: pipeline.stack
     options:
       members: false
-      show_root_heading: false
+      heading_level: 1
 
 ::: pipeline.stack.Stack
     options:
