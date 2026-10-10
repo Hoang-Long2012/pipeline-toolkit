@@ -327,6 +327,178 @@ class TestPipelineExecution:
 		result = pipeline.wait()
 		assert result is pipeline
 
+	def test_wait_without_timeout(self):
+		"""Test wait blocks until the pipeline finishes."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait()
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(42)
+
+		try:
+			assert step_started.wait(timeout=1.0), (
+				"Pipeline never started"
+			)
+
+			wait_returned = threading.Event()
+
+			def wait_for_pipeline():
+				pipeline.wait()
+				wait_returned.set()
+
+			waiter = threading.Thread(target=wait_for_pipeline)
+			waiter.start()
+
+			assert not wait_returned.wait(timeout=0.05), (
+				"wait() returned before the pipeline finished"
+			)
+
+			step_should_exit.set()
+
+			assert wait_returned.wait(timeout=1.0), (
+				"wait() did not return after the pipeline finished"
+			)
+		finally:
+			step_should_exit.set()
+			pipeline.wait()
+
+	def test_wait_with_none_timeout(self):
+		"""Test wait accepts None as an indefinite timeout."""
+		pipeline = Pipeline()
+		pipeline.run(42)
+
+		result = pipeline.wait(timeout=None)
+
+		assert result is pipeline
+		assert not pipeline.running
+
+	def test_wait_with_zero_timeout(self):
+		"""Test wait with zero timeout does not block for a running pipeline."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait()
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(42)
+
+		try:
+			assert step_started.wait(timeout=1.0), (
+				"Pipeline never started"
+			)
+
+			start = time.monotonic()
+			result = pipeline.wait(timeout=0)
+			elapsed = time.monotonic() - start
+
+			assert result is pipeline
+			assert elapsed < 0.1
+			assert pipeline.running
+		finally:
+			step_should_exit.set()
+			pipeline.wait()
+
+	def test_wait_with_timeout_returns_before_completion(self):
+		"""Test wait returns when the timeout expires."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait()
+			return x
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(42)
+
+		try:
+			assert step_started.wait(timeout=1.0), (
+				"Pipeline never started"
+			)
+
+			start = time.monotonic()
+			result = pipeline.wait(timeout=0.05)
+			elapsed = time.monotonic() - start
+
+			assert result is pipeline
+			assert elapsed < 1.0
+			assert pipeline.running
+		finally:
+			step_should_exit.set()
+			pipeline.wait()
+
+	def test_wait_timeout_does_not_stop_pipeline(self):
+		"""Test pipeline continues running after wait times out."""
+		step_started = threading.Event()
+		step_should_exit = threading.Event()
+		step_finished = threading.Event()
+
+		def slow_func(x):
+			step_started.set()
+			step_should_exit.wait()
+			step_finished.set()
+			return x + 1
+
+		pipeline = Pipeline([(slow_func,)])
+		pipeline.run(42)
+
+		try:
+			assert step_started.wait(timeout=1.0), (
+				"Pipeline never started"
+			)
+
+			pipeline.wait(timeout=0)
+
+			assert pipeline.running
+			assert not step_finished.is_set()
+
+			step_should_exit.set()
+
+			assert step_finished.wait(timeout=1.0), (
+				"Pipeline did not continue after wait timed out"
+			)
+
+			pipeline.wait()
+
+			assert not pipeline.running
+			assert pipeline.result == 43
+		finally:
+			step_should_exit.set()
+			pipeline.wait()
+
+	def test_wait_when_pipeline_is_idle(self):
+		"""Test wait returns immediately when the pipeline has not run."""
+		pipeline = Pipeline()
+
+		start = time.monotonic()
+		result = pipeline.wait(timeout=1.0)
+		elapsed = time.monotonic() - start
+
+		assert result is pipeline
+		assert elapsed < 0.1
+		assert not pipeline.running
+
+	def test_wait_after_completion(self):
+		"""Test wait returns immediately after the pipeline finishes."""
+		pipeline = Pipeline()
+		pipeline.run(42).wait()
+
+		start = time.monotonic()
+		result = pipeline.wait(timeout=1.0)
+		elapsed = time.monotonic() - start
+
+		assert result is pipeline
+		assert elapsed < 0.1
+		assert not pipeline.running
+
 	def test_running_property(self):
 		"""Test running property during and after execution."""
 
@@ -2705,6 +2877,26 @@ class TestPipelineInvalidParameters:
 
 		with pytest.raises(ValueError, match="Delay cannot be negative"):
 			pipeline.run(10, delay=-1)
+
+	def test_wait_invalid_timeout_type(self):
+		"""Test wait rejects a non-numeric timeout."""
+		pipeline = Pipeline()
+
+		with pytest.raises(
+			TypeError,
+			match="timeout is not int, float, or None",
+		):
+			pipeline.wait(timeout="1")
+
+	def test_wait_negative_timeout(self):
+		"""Test wait rejects a negative timeout."""
+		pipeline = Pipeline()
+
+		with pytest.raises(
+			ValueError,
+			match="timeout cannot be negative",
+		):
+			pipeline.wait(timeout=-1)
 
 	def test_insert_invalid_index_type(self):
 		"""Test insert with non-integer index."""
