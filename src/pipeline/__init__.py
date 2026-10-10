@@ -29,7 +29,7 @@ pipeline = Pipeline(
 
 pipeline.run().wait().result  # 12
 ```
-```"""
+"""
 from .chain import chain as chain
 from .checkpoint import Checkpoint as Checkpoint
 from .compose import compose as compose
