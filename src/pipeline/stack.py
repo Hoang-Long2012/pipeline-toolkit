@@ -170,11 +170,9 @@ class Stack:
 		if maxsize and maxsize < len(self._stack):
 			raise ValueError(f"{maxsize} < Current stack size.")
 		self._maxsize = maxsize
-	@property
-	def peek(self):
+	def peek(self, *args, **kwargs):
 		"""Alias for ``get()``."""
-		return self.get
-	@property
-	def put(self):
+		return self.get(*args, **kwargs)
+	def put(self, *args, **kwargs):
 		"""Alias for ``push()``."""
-		return self.push
+		return self.push(*args, **kwargs)
