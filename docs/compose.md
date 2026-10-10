@@ -1,0 +1,6 @@
+---
+hide:
+  - toc
+---
+
+::: pipeline.compose
