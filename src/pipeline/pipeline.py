@@ -5,6 +5,7 @@ from collections.abc import Mapping
 
 from . import core
 from ._compat import _DEFAULT
+from .error import ErrorContext
 from .stack import Stack
 
 
@@ -110,7 +111,7 @@ class Pipeline:
 				When disabled, the failed step's result is not added to ``results``, the exception is added to ``errors``, and execution continues with the previous result.
 				Defaults to ``True``.
 			handler_error: An optional callable invoked when a step raises an exception.
-				It receives the one-based step index, the failed step, and the exception object as arguments.
+				It receives an ``ErrorContext`` instance containing the one-based step index, the failed step, the exception object, and the result passed to the failed step.
 				The handler's own exceptions are not caught by the pipeline.
 				Defaults to ``None``.
 
@@ -139,34 +140,38 @@ class Pipeline:
 		self.results.push(default if default is not _DEFAULT else self.default)
 		self.errors.clear()
 		def worker():
-			if not steps:
-				self._step = 0
-				self._thread = None
-				return None
-			if delay:
-				self._stop_event.wait(delay)
-			for index, step in enumerate(steps):
-				if self._stop_event.is_set():
-					break
-				self._step = index + 1
-				if self._skip_event.is_set():
-					self._skip_event.clear()
-					continue
-				try:
-					self.results.push(self._execute_step(step, self.results.get()))
-				except Exception as error:
-					self.errors.push(error)
-					if handler_error is not None:
-						handler_error(self._step, step, error)
-					if stop_on_error:
-						break
-				else:
-					self.calls.push(step)
-				if delay and index < len(steps) - 1:
+			try:
+				if not steps:
+					return None
+				if delay:
 					self._stop_event.wait(delay)
-			if not self._stop_event.is_set():
-				self._step = 0
-			self._thread = None
+				for index, step in enumerate(steps):
+					if self._stop_event.is_set():
+						break
+					self._step = index + 1
+					if self._skip_event.is_set():
+						self._skip_event.clear()
+						continue
+					previous_result = self.results.get()
+					try:
+						result = self._execute_step(step, previous_result)
+					except Exception as error:
+						self.errors.push(error)
+						if handler_error is not None:
+							context = ErrorContext(index=self._step, step=step, error=error, previous_result=previous_result)
+							handler_error(context)
+						if stop_on_error:
+							break
+					else:
+						self.results.push(result)
+						self.calls.push(step)
+					if delay and index < len(steps) - 1:
+						self._stop_event.wait(delay)
+			finally:
+				if not self._stop_event.is_set():
+					self._step = 0
+				if self._thread is threading.current_thread():
+					self._thread = None
 		self._thread = threading.Thread(target=worker, name=self.name, daemon=daemon)
 		self._thread.start()
 		return self

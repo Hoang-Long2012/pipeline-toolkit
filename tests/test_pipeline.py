@@ -7,6 +7,7 @@ import time
 import pytest
 
 from pipeline import Pipeline
+from pipeline.error import ErrorContext
 
 
 class TestPipelineInitialization:
@@ -37,6 +38,16 @@ class TestPipelineInitialization:
 		"""Test initializing pipeline with default value."""
 		pipeline = Pipeline(default=42)
 		assert pipeline.default == 42
+
+	def test_default_setter(self):
+		"""Test setting the pipeline's default value."""
+		pipeline = Pipeline(default=1)
+
+		old_default = pipeline.default
+		pipeline.default = 2
+
+		assert pipeline.default == 2
+		assert pipeline.default != old_default
 
 	def test_pipeline_init_with_name(self):
 		"""Test initializing pipeline with a name."""
@@ -461,8 +472,25 @@ class TestPipelineRerun:
 class TestPipelineErrorHandler:
 	"""Test pipeline error handler."""
 
+	def test_handler_error_receives_error_context(self):
+		"""Test handler receives an ErrorContext instance."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		received = []
+
+		def handler(context):
+			received.append(context)
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(10, handler_error=handler).wait()
+
+		assert len(received) == 1
+		assert isinstance(received[0], ErrorContext)
+
 	def test_handler_error_receives_step_index(self):
-		"""Test handler receives the one-based index of the failed step."""
+		"""Test context contains the one-based index of the failed step."""
 
 		def identity(x):
 			return x
@@ -470,12 +498,10 @@ class TestPipelineErrorHandler:
 		def raise_error(x):
 			raise ValueError("Test error")
 
-		called = threading.Event()
-		received = {}
+		received = []
 
-		def handler(index, step, error):
-			received["index"] = index
-			called.set()
+		def handler(context):
+			received.append(context)
 
 		pipeline = Pipeline([
 			(identity,),
@@ -483,42 +509,79 @@ class TestPipelineErrorHandler:
 		])
 		pipeline.run(10, handler_error=handler).wait()
 
-		assert called.is_set()
-		assert received["index"] == 2
+		assert received[0].index == 2
 
 	def test_handler_error_receives_failed_step(self):
-		"""Test handler receives the failed step."""
+		"""Test context contains the failed step."""
 
 		def raise_error(x):
 			raise ValueError("Test error")
 
 		failing = (raise_error,)
-		received = {}
+		received = []
 
-		def handler(index, step, error):
-			received["step"] = step
+		def handler(context):
+			received.append(context)
 
 		pipeline = Pipeline([failing])
 		pipeline.run(10, handler_error=handler).wait()
 
-		assert received["step"] == failing
+		assert received[0].step == failing
 
 	def test_handler_error_receives_exception(self):
-		"""Test handler receives the raised exception."""
+		"""Test context contains the exception raised by the step."""
 
 		def raise_error(x):
 			raise ValueError("Test error")
 
-		received = {}
+		received = []
 
-		def handler(index, step, error):
-			received["error"] = error
+		def handler(context):
+			received.append(context)
 
 		pipeline = Pipeline([(raise_error,)])
 		pipeline.run(10, handler_error=handler).wait()
 
-		assert isinstance(received["error"], ValueError)
-		assert str(received["error"]) == "Test error"
+		assert isinstance(received[0].error, ValueError)
+		assert str(received[0].error) == "Test error"
+
+	def test_handler_error_receives_previous_result(self):
+		"""Test context contains the input passed to the failed step."""
+
+		def add(x, y):
+			return x + y
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		received = []
+
+		def handler(context):
+			received.append(context)
+
+		pipeline = Pipeline([
+			(add, (5,)),
+			(raise_error,),
+		])
+		pipeline.run(10, handler_error=handler).wait()
+
+		assert received[0].previous_result == 15
+
+	def test_handler_error_receives_initial_value_on_first_step_failure(self):
+		"""Test context contains the initial value when the first step fails."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		received = []
+
+		def handler(context):
+			received.append(context)
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(42, handler_error=handler).wait()
+
+		assert received[0].previous_result == 42
 
 	def test_handler_error_is_called_for_each_failure(self):
 		"""Test handler is called for every failed step."""
@@ -526,20 +589,27 @@ class TestPipelineErrorHandler:
 		def raise_error(x):
 			raise ValueError("Test error")
 
-		calls = []
+		received = []
 
-		def handler(index, step, error):
-			calls.append((index, step, error))
+		def handler(context):
+			received.append(context)
 
 		pipeline = Pipeline([
 			(raise_error,),
 			(raise_error,),
 		])
-		pipeline.run(10, stop_on_error=False, handler_error=handler).wait()
+		pipeline.run(
+			10,
+			stop_on_error=False,
+			handler_error=handler,
+		).wait()
 
-		assert len(calls) == 2
-		assert [call[0] for call in calls] == [1, 2]
-		assert all(isinstance(call[2], ValueError) for call in calls)
+		assert len(received) == 2
+		assert [context.index for context in received] == [1, 2]
+		assert all(
+			isinstance(context.error, ValueError)
+			for context in received
+		)
 
 	def test_handler_error_called_before_continuing(self):
 		"""Test handler is called before execution continues after an error."""
@@ -554,7 +624,7 @@ class TestPipelineErrorHandler:
 			second_step_started.set()
 			return x + 10
 
-		def handler(index, step, error):
+		def handler(context):
 			handler_called.set()
 
 		pipeline = Pipeline([
@@ -578,7 +648,7 @@ class TestPipelineErrorHandler:
 
 		called = threading.Event()
 
-		def handler(index, step, error):
+		def handler(context):
 			called.set()
 
 		pipeline = Pipeline([(identity,)])
@@ -601,7 +671,7 @@ class TestPipelineErrorHandler:
 		def second(x):
 			raise ValueError("Should not execute")
 
-		def handler(index, step, error):
+		def handler(context):
 			called.set()
 
 		pipeline = Pipeline([
@@ -641,6 +711,23 @@ class TestPipelineErrorHandler:
 			match="handler_error is not a callable",
 		):
 			pipeline.run(10, handler_error="invalid")
+
+	def test_handler_error_receives_immutable_context(self):
+		"""Test ErrorContext fields cannot be reassigned."""
+
+		def raise_error(x):
+			raise ValueError("Test error")
+
+		received = []
+
+		def handler(context):
+			received.append(context)
+
+		pipeline = Pipeline([(raise_error,)])
+		pipeline.run(10, handler_error=handler).wait()
+
+		with pytest.raises(AttributeError):
+			received[0].index = 2
 
 
 class TestPipelineCalls:
@@ -786,7 +873,7 @@ class TestPipelineCalls:
 
 		handler_called = threading.Event()
 
-		def handler(index, step, error):
+		def handler(context):
 			handler_called.set()
 
 		failing = (raise_error,)
@@ -1265,17 +1352,18 @@ class TestPipelineModification:
 		def multiply(x, y):
 			return x * y
 
-		step = (add, (5,))
+		add_step = (add, (5,))
+		multiply_step = (multiply, (2,))
 		pipeline = Pipeline([
-			step,
-			(multiply, (2,)),
+			add_step,
+			multiply_step,
 		])
 
-		result = pipeline.remove(step)
+		result = pipeline.remove(multiply_step)
 
 		assert result is None
 		assert len(pipeline) == 1
-		assert pipeline[1] == (multiply, (2,))
+		assert pipeline[1] == add_step
 
 	def test_remove_missing_step(self):
 		"""Test removing a missing step raises ValueError."""
@@ -2393,6 +2481,24 @@ class TestPipelineOperators:
 class TestPipelineDelay:
 	"""Test pipeline execution delays."""
 
+	def test_run_with_delay_between_steps(self):
+		"""Test that delay is applied between consecutive steps."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([
+			(add, (5,)),
+			(add, (10,)),
+		])
+
+		start = time.monotonic()
+		pipeline.run(10, delay=0.1).wait()
+		elapsed = time.monotonic() - start
+
+		assert pipeline.result == 25
+		assert elapsed >= 0.09
+
 	def test_run_with_delay_waits_before_execution(self):
 		"""Test that delay parameter adds wait time."""
 
@@ -2423,6 +2529,36 @@ class TestPipelineDelay:
 
 class TestPipelineThreading:
 	"""Test pipeline threading behavior."""
+
+	def test_run_thread_cleanup_when_thread_differs(self):
+		"""Test that the worker thread is not cleared when it differs from the current thread."""
+		started = threading.Event()
+		proceed = threading.Event()
+
+		def wait_for_proceed(value):
+			started.set()
+			assert proceed.wait(timeout=5)
+			return value + 1
+
+		pipeline = Pipeline([(wait_for_proceed,)])
+		pipeline.run(0)
+
+		try:
+			assert started.wait(timeout=5)
+
+			worker = pipeline._thread
+			pipeline._thread = threading.Thread()
+
+			proceed.set()
+			worker.join(timeout=5)
+
+			assert not worker.is_alive()
+			assert pipeline._thread is not None
+			assert pipeline.result == 1
+		finally:
+			proceed.set()
+			if pipeline._thread is not None and pipeline._thread.is_alive():
+				pipeline._thread.join(timeout=5)
 
 	def test_daemon_thread_parameter(self):
 		"""Test daemon parameter sets thread daemon flag correctly."""
