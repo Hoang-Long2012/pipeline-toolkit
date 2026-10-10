@@ -1,5 +1,7 @@
 ---
 title: API Reference
+hide:
+  - toc
 ---
 
 ## Pipeline Toolkit {{ config.extra.version }}
