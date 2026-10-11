@@ -30,6 +30,13 @@ theme:
         icon: material/brightness-4
         name: Switch to light mode
 
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+  favicon: assets/favicon.png
+  logo: assets/logo.png
+
 plugins:
   - search
   - macros
@@ -72,6 +79,11 @@ markdown_extensions:
   - pymdownx.superfences:
       preserve_tabs: true
 
+watch:
+  - "docs/**"
+  - "mkdocs.yml"
+  - "src/pipeline/**"
+
 nav:
   - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
   - Pypi: https://pypi.org/project/pipeline-toolkit
@@ -79,3 +91,6 @@ nav:
 extra:
   version: ""
   material_version: ""
+  analytics:
+    provider: google
+    property: G-ZZ1MDHKZ3H
