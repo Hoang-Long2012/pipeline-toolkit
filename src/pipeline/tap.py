@@ -14,8 +14,8 @@ def tap(value, function, *args, **kwargs):
 	Args:
 		value: Value to pass to ``function`` and return unchanged.
 		function: Callable to invoke with a deep copy of ``value``.
-		*args: Additional positional arguments passed to ``function``.
-		**kwargs: Additional keyword arguments passed to ``function``.
+		args: Additional positional arguments passed to ``function``.
+		kwargs: Additional keyword arguments passed to ``function``.
 
 	Returns:
 		The original ``value`` object.
