@@ -13,8 +13,8 @@ def mut(value, function, *args, **kwargs):
 	Args:
 		value: Value to pass to ``function`` and return after mutation.
 		function: Callable to invoke with ``value``.
-		*args: Additional positional arguments passed to ``function``.
-		**kwargs: Additional keyword arguments passed to ``function``.
+		args: Additional positional arguments passed to ``function``.
+		kwargs: Additional keyword arguments passed to ``function``.
 
 	Returns:
 		The original ``value`` object, potentially modified by ``function``.
