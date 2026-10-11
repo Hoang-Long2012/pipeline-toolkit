@@ -59,7 +59,7 @@ jobs:
               config["extra"]["version"] = version("pipeline-toolkit")
               config["extra"]["material_version"] = version("mkdocs-material")
               config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")
-              config["extra"]["deployment_time"] = now.strftime("%H:%M:%S")
+              config["extra"]["deployment_time"] = now.strftime("%H:%M")
           with path.open("w", encoding="utf-8") as file:
               yaml.dump(config, file)
           PY
