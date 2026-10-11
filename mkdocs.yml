@@ -85,6 +85,7 @@ watch:
   - src/pipeline
 
 nav:
+  - Home: index.md
   - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
   - PyPI: https://pypi.org/project/pipeline-toolkit
 
