@@ -12,7 +12,7 @@ theme:
   custom_dir: docs/overrides
 
   features:
-    - navigation.footer
+    - toc.follow
     - search.suggest
     - search.highlight
     - content.code.copy
@@ -83,6 +83,8 @@ watch:
 
 nav:
   - Home: index.md
+  - Changelog: changelog.md
+  - Contributing: contributing.md
   - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
   - PyPI: https://pypi.org/project/pipeline-toolkit
 
