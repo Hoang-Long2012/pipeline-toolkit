@@ -13,8 +13,8 @@ class step:
 
 	Args:
 		function: The callable to execute.
-		*args: Positional arguments passed to ``function``.
-		**kwargs: Keyword arguments passed to ``function``.
+		args: Positional arguments passed to ``function``.
+		kwargs: Keyword arguments passed to ``function``.
 
 	Raises:
 		TypeError: If ``function`` is not callable.
