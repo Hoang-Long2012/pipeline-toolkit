@@ -59,7 +59,11 @@
     options:
       heading_level: 3
 
-## Results and Errors
+## Execution State
+
+::: pipeline.Pipeline.calls
+    options:
+      heading_level: 3
 
 ::: pipeline.Pipeline.results
     options:
