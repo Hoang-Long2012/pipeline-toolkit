@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "docs/**"
+      - "CHANGELOG.md"
+      - "CONTRIBUTING.md"
       - "mkdocs.yml"
       - "pyproject.toml"
       - "uv.lock"
@@ -63,6 +65,11 @@ jobs:
           with path.open("w", encoding="utf-8") as file:
               yaml.dump(config, file)
           PY
+
+      - name: Prepare documentation
+        run: |
+          cp CHANGELOG.md docs/changelog.md
+          cp CONTRIBUTING.md docs/contributing.md
 
       - name: Build documentation
         run: uv run mkdocs build --strict

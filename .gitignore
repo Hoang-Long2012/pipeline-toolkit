@@ -167,6 +167,8 @@ venv.bak/
 
 # mkdocs documentation
 /site
+/docs/changelog.md
+/docs/contributing.md
 
 # mypy
 .mypy_cache/

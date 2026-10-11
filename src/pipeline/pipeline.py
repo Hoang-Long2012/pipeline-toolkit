@@ -168,7 +168,7 @@ class Pipeline:
 					if delay and index < len(steps) - 1:
 						self._stop_event.wait(delay)
 			finally:
-				if not self._stop_event.is_set():
+				if not self._stop_event.is_set() or not self.errors:
 					self._step = 0
 				if self._thread is threading.current_thread():
 					self._thread = None
