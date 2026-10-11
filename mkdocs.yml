@@ -12,7 +12,6 @@ theme:
   custom_dir: docs/overrides
 
   features:
-    - navigation.footer
     - search.suggest
     - search.highlight
     - content.code.copy
