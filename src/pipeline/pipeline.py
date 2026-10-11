@@ -168,7 +168,7 @@ class Pipeline:
 					if delay and index < len(steps) - 1:
 						self._stop_event.wait(delay)
 			finally:
-				if not self._stop_event.is_set():
+				if not self._stop_event.is_set() or not self.errors:
 					self._step = 0
 				if self._thread is threading.current_thread():
 					self._thread = None
@@ -547,7 +547,7 @@ class Pipeline:
 			TypeError: If ``step`` has an invalid format.
 		"""
 		self._validate_step(step)
-		return sum(1 for pipeline_step in self._steps if pipeline_step == step)
+		return sum(pipeline_step == step for pipeline_step in self._steps)
 	def _format_step(self, step):
 		func = step[0]
 		if len(step) >= 2:
