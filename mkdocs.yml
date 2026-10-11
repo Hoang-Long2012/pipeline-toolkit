@@ -1,7 +1,7 @@
 site_name: Pipeline Toolkit
 site_description: A small functional pipeline toolkit for Python
 site_author: Hoàng Long
-site_url: https://Hoang-Long2012.github.io/pipeline-toolkit
+site_url: https://Hoang-Long2012.github.io/pipeline-toolkit/
 repo_url: https://github.com/Hoang-Long2012/pipeline-toolkit
 repo_name: Hoang-Long2012/pipeline-toolkit
 copyright: Copyright (C) 2026 Hoàng Long
@@ -80,17 +80,19 @@ markdown_extensions:
       preserve_tabs: true
 
 watch:
-  - "docs/**"
-  - "mkdocs.yml"
-  - "src/pipeline/**"
+  - docs
+  - mkdocs.yml
+  - src/pipeline
 
 nav:
   - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
-  - Pypi: https://pypi.org/project/pipeline-toolkit
+  - PyPI: https://pypi.org/project/pipeline-toolkit
 
 extra:
   version: ""
   material_version: ""
+  deployment_date: ""
+  deployment_time: ""
   analytics:
     provider: google
     property: G-ZZ1MDHKZ3H
