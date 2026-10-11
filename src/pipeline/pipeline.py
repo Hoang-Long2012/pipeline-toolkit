@@ -547,7 +547,7 @@ class Pipeline:
 			TypeError: If ``step`` has an invalid format.
 		"""
 		self._validate_step(step)
-		return sum(1 for pipeline_step in self._steps if pipeline_step == step)
+		return sum(pipeline_step == step for pipeline_step in self._steps)
 	def _format_step(self, step):
 		func = step[0]
 		if len(step) >= 2:
