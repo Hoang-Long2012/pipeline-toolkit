@@ -12,6 +12,7 @@ theme:
   custom_dir: docs/overrides
 
   features:
+    - navigation.instant
     - toc.follow
     - search.suggest
     - search.highlight
