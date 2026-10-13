@@ -2,20 +2,14 @@
   This file was automatically generated - do not edit
 -#}
 {% macro render_updated(date) %}
-  <span class="md-source-file__fact">
-    <span class="md-icon" title="{{ lang.t('source.file.date.updated') }}">
-      {% include ".icons/material/clock-edit-outline.svg" %}
-    </span>
-    Last updated {{ date }}
-  </span>
+  <div class="md-source-file__fact">
+    Last updated {{ date | striptags }}
+  </div>
 {% endmacro %}
 {% macro render_created(date) %}
-  <span class="md-source-file__fact">
-    <span class="md-icon" title="{{ lang.t('source.file.date.created') }}">
-      {% include ".icons/material/clock-plus-outline.svg" %}
-    </span>
-    Created {{ date }}
-  </span>
+  <div class="md-source-file__fact">
+    Created {{ date | striptags }}
+  </div>
 {% endmacro %}
 {% macro render_authors(authors) %}
   {% set git_authors = config.plugins["git-authors"] %}
