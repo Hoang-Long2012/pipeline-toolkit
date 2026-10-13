@@ -6,7 +6,7 @@
     <span class="md-icon" title="{{ lang.t('source.file.date.updated') }}">
       {% include ".icons/material/clock-edit-outline.svg" %}
     </span>
-    {{ date }}
+    Last updated {{ date }}
   </span>
 {% endmacro %}
 {% macro render_created(date) %}
@@ -14,7 +14,7 @@
     <span class="md-icon" title="{{ lang.t('source.file.date.created') }}">
       {% include ".icons/material/clock-plus-outline.svg" %}
     </span>
-    {{ date }}
+    Created {{ date }}
   </span>
 {% endmacro %}
 {% macro render_authors(authors) %}
@@ -110,10 +110,10 @@
   {% if updated or created or git_info or committers %}
     <aside class="md-source-file">
       {% if updated %}
-        Last updated {{ render_updated(updated) }}
+        {{ render_updated(updated) }}
       {% endif %}
       {% if created %}
-        Created {{ render_created(created) }}
+        {{ render_created(created) }}
       {% endif %}
       {% if git_info %}
         {{ render_authors(git_info["page_authors"]) }}
