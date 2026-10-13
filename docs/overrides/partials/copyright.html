@@ -89,7 +89,7 @@
     </a>
   {% endif %}
   <div class="md-deployment">
-    Deploy at {{ config.extra.deployment_date }} {{ config.extra.deployment_time }}
+    Deployed at {{ config.extra.deployment_date }} {{ config.extra.deployment_time }}
   </div>
   {% if page.meta %}
     {% if page.meta.git_revision_date_localized %}
@@ -102,19 +102,17 @@
     {% endif %}
   {% endif %}
   {% if updated or created or git_info or committers %}
-    <aside class="md-source-file">
-      {% if updated %}
-        {{ render_updated(updated) }}
-      {% endif %}
-      {% if created %}
-        {{ render_created(created) }}
-      {% endif %}
-      {% if git_info %}
-        {{ render_authors(git_info["page_authors"]) }}
-      {% endif %}
-      {% if committers %}
-        {{ render_committers(committers) }}
-      {% endif %}
-    </aside>
+    {% if updated %}
+      {{ render_updated(updated) }}
+    {% endif %}
+    {% if created %}
+      {{ render_created(created) }}
+    {% endif %}
+    {% if git_info %}
+      {{ render_authors(git_info["page_authors"]) }}
+    {% endif %}
+    {% if committers %}
+      {{ render_committers(committers) }}
+    {% endif %}
   {% endif %}
 </div>
