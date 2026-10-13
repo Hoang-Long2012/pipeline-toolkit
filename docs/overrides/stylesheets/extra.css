@@ -3,3 +3,8 @@
   visibility: visible;
   opacity: 1;
 }
+.md-source-file__fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
