@@ -306,3 +306,15 @@ class TestStackLifo:
 			stack.push(i)
 		for i in range(4, -1, -1):
 			assert stack.pop() == i
+
+
+class TestStackAlias:
+	def test_peek(self):
+		stack = Stack()
+		stack.push(1)
+		assert stack.peek() == 1
+
+	def test_put(self):
+		stack = Stack()
+		stack.put(1)
+		assert stack.get() == 1

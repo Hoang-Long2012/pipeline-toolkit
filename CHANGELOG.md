@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.7
+- Added equality comparison for `step` objects. Steps can now be compared with other steps and their exported tuple representations.
+
 ## 0.5.6
 - Added the `handler_error` parameter to `Pipeline.run()` for handling errors raised during step execution.
 - Added an optional `timeout` parameter to `Pipeline.wait()`. When the timeout expires, the method returns without stopping the running pipeline.
