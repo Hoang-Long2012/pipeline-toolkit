@@ -60,6 +60,24 @@ class step:
 			The value returned by the wrapped callable.
 		"""
 		return self._function(default if default is not _DEFAULT else self.default, *self._args, **self._kwargs)
+	def __eq__(self, other):
+		"""Compare the step with another step or an exported step tuple.
+
+		Two steps are equal when they wrap the same callable and have equal positional and keyword arguments.
+
+		A step is also equal to its exported tuple representation.
+
+		Args:
+			other: A ``step`` instance or an exported step tuple.
+
+		Returns:
+			``True`` if the objects represent the same step, ``False`` if they do not, or ``NotImplemented`` for unsupported types.
+		"""
+		if isinstance(other, type(self)):
+			return (self._function is other._function and self._args == other._args and self._kwargs == other._kwargs)
+		if isinstance(other, tuple):
+			return self.export() == other
+		return NotImplemented
 	def __ror__(self, other):
 		"""Execute the step with ``other`` as the input value.
 
