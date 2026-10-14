@@ -43,6 +43,9 @@ plugins:
       timezone: Asia/Ho_Chi_Minh
       type: custom
       custom_format: "%Y-%m-%d %H:%M"
+      exclude:
+        - changelog.md
+        - contributing.md
   - macros
   - mkdocstrings:
       handlers:
