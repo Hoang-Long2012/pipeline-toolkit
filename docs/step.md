@@ -3,6 +3,7 @@
       heading_level: 1
 
 ## Configuration
+
 ::: pipeline.step.default
     options:
       heading_level: 3
@@ -13,13 +14,13 @@
     options:
       heading_level: 3
 
-Export
+## Export
 
 ::: pipeline.step.export
     options:
       heading_level: 3
 
-Operators
+## Operators
 
 ::: pipeline.step.__ror__
     options:
