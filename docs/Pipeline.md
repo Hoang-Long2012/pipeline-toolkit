@@ -211,10 +211,12 @@
     options:
       heading_level: 3
 
-::: pipeline.Pipeline.__eq__
+::: pipeline.Pipeline.__mul__
     options:
       heading_level: 3
 
-::: pipeline.Pipeline.__mul__
+## Comparison
+
+::: pipeline.Pipeline.__eq__
     options:
       heading_level: 3
