@@ -3,15 +3,15 @@
       members: false
       heading_level: 1
 
-## Configuration
-
-::: pipeline.step.default
-    options:
-      heading_level: 3
-
 ## Execution
 
 ::: pipeline.step.__call__
+    options:
+      heading_level: 3
+
+## Configuration
+
+::: pipeline.step.default
     options:
       heading_level: 3
 
