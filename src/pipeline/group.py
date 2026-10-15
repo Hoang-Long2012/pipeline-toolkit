@@ -84,3 +84,7 @@ class Group:
 		yield from reversed(self._pipelines)
 	def __repr__(self):
 		return f"{type(self).__name__}(pipeline={sum(isinstance(pipeline, Pipeline) for pipeline in self._pipelines)}, subgroup={sum(isinstance(pipeline, type(self)) for pipeline in self._pipelines)})"
+	def __eq__(self, other):
+		if not isinstance(other, type(self)):
+			return NotImplemented
+		return self._pipelines == other._pipelines
