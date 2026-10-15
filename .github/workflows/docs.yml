@@ -40,8 +40,8 @@ jobs:
           python-version: "3.14"
           enable-cache: false
 
-      - name: Install project and development dependencies
-        run: uv sync --group dev
+      - name: Install project and documentation dependencies
+        run: uv sync --group documentation
 
       - name: Set deployment info
         run: |
