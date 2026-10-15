@@ -1,5 +1,6 @@
 ::: pipeline.step
     options:
+      members: false
       heading_level: 1
 
 ## Configuration
