@@ -109,14 +109,17 @@ test = [
 	"pytest-metadata>=3.1.1",
 	"pytest-sugar>=1.1.1",
 ]
-dev = [
-	{include-group = "test"},
+documentation = [
 	"mkdocs-git-revision-date-localized-plugin>=1.4.7",
 	"mkdocs-macros-plugin>=1.5.0",
 	"mkdocs-material>=9.7.7",
 	"mkdocstrings[python]>=0.26.1",
-	"radon>=6.0.1",
 	"ruamel-yaml>=0.18.16",
+]
+dev = [
+	{include-group = "test"},
+	{include-group = "documentation"},
+	"radon>=6.0.1",
 	"ruff>=0.16.6",
 	"ty>=0.0.85",
 	"validate-pyproject>=0.25",
