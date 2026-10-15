@@ -543,6 +543,40 @@ class TestPipelineStop:
 		result = pipeline.stop()
 		assert result == 0
 
+	def test_stop_after_error(self):
+		"""Test stopping a pipeline after an error."""
+		started = threading.Event()
+		release = threading.Event()
+		stopped_at = []
+
+		def fail(value):
+			raise ValueError("test")
+
+		def block(value):
+			started.set()
+			release.wait()
+			return value
+
+		def stop():
+			stopped_at.append(pipeline.stop())
+
+		pipeline = Pipeline([
+			(fail,),
+			(block,),
+		])
+		pipeline.run(stop_on_error=False)
+
+		assert started.wait(1)
+
+		stop_thread = threading.Thread(target=stop)
+		stop_thread.start()
+		release.set()
+		stop_thread.join()
+
+		assert stopped_at == [2]
+		assert pipeline.step == 0
+		assert len(pipeline.errors) == 1
+
 
 class TestPipelineSkip:
 	"""Test pipeline skip functionality."""

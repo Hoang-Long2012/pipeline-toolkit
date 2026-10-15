@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.8
+- Documentation-only release: Shorten the readme.
+
+## 0.5.7
+- Added equality comparison for `step` objects. Steps can now be compared with other steps and their exported tuple representations.
+
 ## 0.5.6
 - Added the `handler_error` parameter to `Pipeline.run()` for handling errors raised during step execution.
 - Added an optional `timeout` parameter to `Pipeline.wait()`. When the timeout expires, the method returns without stopping the running pipeline.
@@ -14,7 +20,7 @@
 - Some internal changes.
 
 ## 0.5.4
-- Documentation-only release: Change the line breaks in the readme.
+- Documentation-only release: Change the line breaks in the README.
 
 ## 0.5.3
 - Documentation-only release: Updated `Pipeline.__contains__()` and pipeline repetition documentation to match their current behavior.
@@ -66,7 +72,7 @@
 - First stable API release.
 
 ## 0.3.1
-- Documentation-only release: Edited features list in readme.
+- Documentation-only release: Edited features list in the READMe.
 
 ## 0.3.0
 - Removed `Pipeline.wait(reraise_exception)` and exception re-raising from `Pipeline.wait()`.
@@ -81,7 +87,7 @@
 - Changed `Pipeline.run_step()` signature to make the `default` argument optional, defaulting to `None`.
 
 ## 0.2.4
-- Documentation-only release: Fix heading level in README.
+- Documentation-only release: Fix heading level in the README.
 
 ## 0.2.3
 - Added context manager support to `Pipeline` for automatically starting and stopping pipeline execution.

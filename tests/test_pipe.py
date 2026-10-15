@@ -142,6 +142,87 @@ class TestStepOperators:
 		assert result == "hello"
 
 
+class TestStepEquality:
+	"""Test step equality."""
+
+	def test_equal_steps(self):
+		"""Steps with the same callable and arguments are equal."""
+		def add(x, amount):
+			return x + amount
+
+		s1 = step(add, 5, base=10)
+		s2 = step(add, 5, base=10)
+
+		assert s1 == s2
+
+	def test_steps_with_different_functions_are_not_equal(self):
+		"""Steps wrapping different callables are not equal."""
+		def add(x, amount):
+			return x + amount
+
+		def subtract(x, amount):
+			return x - amount
+
+		assert step(add, 5) != step(subtract, 5)
+
+	def test_steps_with_different_args_are_not_equal(self):
+		"""Steps with different positional arguments are not equal."""
+		def add(x, amount):
+			return x + amount
+
+		assert step(add, 5) != step(add, 10)
+
+	def test_steps_with_different_kwargs_are_not_equal(self):
+		"""Steps with different keyword arguments are not equal."""
+		def power(x, exp=2):
+			return x ** exp
+
+		assert step(power, exp=2) != step(power, exp=3)
+
+	def test_step_equals_exported_tuple(self):
+		"""A step is equal to its exported tuple representation."""
+		def add(x, amount):
+			return x + amount
+
+		s = step(add, 5)
+
+		assert s == (add, (5,))
+
+	def test_step_equals_exported_tuple_with_kwargs(self):
+		"""A step with keyword arguments equals its exported tuple."""
+		def power(x, exp=2):
+			return x ** exp
+
+		s = step(power, exp=3)
+
+		assert s == (power, {"exp": 3})
+
+	def test_step_is_not_equal_to_unsupported_type(self):
+		"""A step is not equal to an unsupported type."""
+		s = step(int)
+
+		assert s != "step"
+		assert s != 42
+
+	def test_step_eq_returns_not_implemented_for_unsupported_type(self):
+		"""Return NotImplemented for unsupported types."""
+		s = step(int)
+
+		assert s.__eq__("step") is NotImplemented
+
+	def test_step_equality_ignores_default(self):
+		"""Step equality does not depend on the configured default."""
+		def add(x, amount):
+			return x + amount
+
+		s1 = step(add, 5)
+		s2 = step(add, 5)
+		s1.default = 10
+		s2.default = 20
+
+		assert s1 == s2
+
+
 class TestStepExport:
 	"""Test step export functionality."""
 
