@@ -25,6 +25,10 @@
     options:
       heading_level: 3
 
+::: pipeline.Pipeline.__call__
+    options:
+      heading_level: 3
+
 ## Manual Step Execution
 
 ::: pipeline.Pipeline.run_step
@@ -159,7 +163,7 @@
     options:
       heading_level: 3
 
-## Iterating
+## Iteration
 
 ::: pipeline.Pipeline.__iter__
     options:
@@ -172,10 +176,6 @@
 ## Protocols
 
 ::: pipeline.Pipeline.__bool__
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.__call__
     options:
       heading_level: 3
 
