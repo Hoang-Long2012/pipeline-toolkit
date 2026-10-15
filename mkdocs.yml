@@ -12,6 +12,7 @@ theme:
   custom_dir: docs/overrides
 
   features:
+    - navigation.instant
     - toc.follow
     - search.suggest
     - search.highlight
@@ -36,6 +37,15 @@ theme:
 
 plugins:
   - search
+  - git-revision-date-localized:
+      enable_creation_date: true
+      enable_git_follow: false
+      timezone: Asia/Ho_Chi_Minh
+      type: custom
+      custom_format: "%Y-%m-%d %H:%M"
+      exclude:
+        - changelog.md
+        - contributing.md
   - macros
   - mkdocstrings:
       handlers:
