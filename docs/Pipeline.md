@@ -35,31 +35,15 @@
     options:
       heading_level: 3
 
-## Context Management
-
-::: pipeline.Pipeline.__enter__
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.__exit__
-    options:
-      heading_level: 3
-
-## Copying
-
-::: pipeline.Pipeline.copy
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.__copy__
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.__deepcopy__
-    options:
-      heading_level: 3
-
 ## Execution State
+
+::: pipeline.Pipeline.running
+    options:
+      heading_level: 3
+
+::: pipeline.Pipeline.step
+    options:
+      heading_level: 3
 
 ::: pipeline.Pipeline.calls
     options:
@@ -123,20 +107,6 @@
     options:
       heading_level: 3
 
-## Configuration
-
-::: pipeline.Pipeline.default
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.name
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.steps
-    options:
-      heading_level: 3
-
 ## Item Access
 
 ::: pipeline.Pipeline.__getitem__
@@ -151,15 +121,55 @@
     options:
       heading_level: 3
 
-## State and Protocols
+## Configuration
 
-::: pipeline.Pipeline.running
+::: pipeline.Pipeline.default
     options:
       heading_level: 3
 
-::: pipeline.Pipeline.step
+::: pipeline.Pipeline.name
     options:
       heading_level: 3
+
+::: pipeline.Pipeline.steps
+    options:
+      heading_level: 3
+
+## Copying
+
+::: pipeline.Pipeline.copy
+    options:
+      heading_level: 3
+
+::: pipeline.Pipeline.__copy__
+    options:
+      heading_level: 3
+
+::: pipeline.Pipeline.__deepcopy__
+    options:
+      heading_level: 3
+
+## Context Management
+
+::: pipeline.Pipeline.__enter__
+    options:
+      heading_level: 3
+
+::: pipeline.Pipeline.__exit__
+    options:
+      heading_level: 3
+
+## Iterating
+
+::: pipeline.Pipeline.__iter__
+    options:
+      heading_level: 3
+
+::: pipeline.Pipeline.__reversed__
+    options:
+      heading_level: 3
+
+## Protocols
 
 ::: pipeline.Pipeline.__bool__
     options:
@@ -174,14 +184,6 @@
       heading_level: 3
 
 ::: pipeline.Pipeline.__contains__
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.__iter__
-    options:
-      heading_level: 3
-
-::: pipeline.Pipeline.__reversed__
     options:
       heading_level: 3
 
