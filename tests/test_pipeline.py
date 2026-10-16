@@ -1500,7 +1500,7 @@ class TestPipelineModification:
 		pipeline = Pipeline()
 		result = pipeline.add((add, (5,)))
 
-		assert result is None
+		assert result is pipeline
 		assert len(pipeline) == 1
 
 	def test_insert_step(self):
@@ -1516,8 +1516,9 @@ class TestPipelineModification:
 			(add, (5,)),
 			(add, (10,)),
 		])
-		pipeline.insert(2, (multiply, (2,)))
+		result = pipeline.insert(2, (multiply, (2,)))
 
+		assert result is pipeline
 		assert len(pipeline) == 3
 
 	def test_pop_step(self):
@@ -1545,8 +1546,9 @@ class TestPipelineModification:
 			(add, (5,)),
 			(add, (10,)),
 		])
-		pipeline.clear()
+		result = pipeline.clear()
 
+		assert result is pipeline
 		assert len(pipeline) == 0
 
 	def test_remove_step(self):
@@ -1567,7 +1569,7 @@ class TestPipelineModification:
 
 		result = pipeline.remove(multiply_step)
 
-		assert result is None
+		assert result is pipeline
 		assert len(pipeline) == 1
 		assert pipeline[1] == add_step
 
@@ -1593,7 +1595,7 @@ class TestPipelineModification:
 
 		result = pipeline.discard(step)
 
-		assert result is None
+		assert result is pipeline
 		assert len(pipeline) == 0
 
 	def test_discard_missing_step(self):
@@ -1603,8 +1605,9 @@ class TestPipelineModification:
 			return x + y
 
 		pipeline = Pipeline()
+		result = pipeline.discard((add, (5,)))
 
-		assert pipeline.discard((add, (5,))) is None
+		assert result is pipeline
 		assert len(pipeline) == 0
 
 
@@ -1623,7 +1626,7 @@ class TestPipelineUpdate:
 			(add, (20,)),
 		])
 
-		assert result is None
+		assert result is pipeline
 		assert len(pipeline) == 3
 		assert pipeline[1] == (add, (5,))
 		assert pipeline[2] == (add, (10,))
@@ -1639,7 +1642,7 @@ class TestPipelineUpdate:
 
 		result = pipeline.update([])
 
-		assert result is None
+		assert result is pipeline
 		assert len(pipeline) == 1
 		assert pipeline[1] == (add, (5,))
 
@@ -1974,7 +1977,7 @@ class TestPipelineReversal:
 
 		result = pipeline.reverse()
 
-		assert result is None
+		assert result is pipeline
 		assert pipeline[1] == (multiply, (2,))
 		assert pipeline[2] == (add, (5,))
 
@@ -1983,7 +1986,7 @@ class TestPipelineReversal:
 
 		pipeline = Pipeline()
 
-		assert pipeline.reverse() is None
+		assert pipeline.reverse() is pipeline
 		assert len(pipeline) == 0
 
 	def test_reversed_returns_reverse_iterator(self):

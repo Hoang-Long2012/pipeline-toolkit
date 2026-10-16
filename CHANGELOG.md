@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.9
+- Changed `Pipeline.add()`, `insert()`, `update()`, `remove()`, `discard()`, `clear()`, and `reverse()` to return the current pipeline instance, allowing method chaining.
+
 ## 0.5.8
 - Documentation-only release: Shorten the readme.
 
