@@ -361,17 +361,24 @@ class Pipeline:
 		Args:
 			step: The step to append.
 
+		Returns:
+			This pipeline instance.
+
 		Raises:
 			TypeError: If ``step`` has an invalid format.
 		"""
 		self._validate_step(step)
 		self._steps.append(step)
+		return self
 	def insert(self, index, step):
 		"""Insert a validated step at the specified index.
 
 		Args:
 			index: One-based position at which to insert the step.
 			step: The step to insert.
+
+		Returns:
+			This pipeline instance.
 
 		Raises:
 			TypeError: If ``index`` is not an integer or ``step`` is invalid.
@@ -383,6 +390,7 @@ class Pipeline:
 			raise IndexError("Index out of range.")
 		self._validate_step(step)
 		self._steps.insert(index - 1, step)
+		return self
 	def update(self, iterable):
 		"""Append multiple validated steps to the pipeline.
 
@@ -391,6 +399,9 @@ class Pipeline:
 		Args:
 			iterable: An iterable of pipeline steps.
 
+		Returns:
+			This pipeline instance.
+
 		Raises:
 			TypeError: If any item in ``iterable`` has an invalid step format.
 		"""
@@ -398,11 +409,15 @@ class Pipeline:
 		for step in steps:
 			self._validate_step(step)
 		self._steps.extend(steps)
+		return self
 	def remove(self, step):
 		"""Remove the first matching step from the pipeline.
 
 		Args:
 			step: The pipeline step to remove.
+
+		Returns:
+			This pipeline instance.
 
 		Raises:
 			TypeError: If ``step`` has an invalid format.
@@ -412,7 +427,7 @@ class Pipeline:
 		for index, pipeline_step in enumerate(self._steps):
 			if pipeline_step == step:
 				del self._steps[index]
-				return None
+				return self
 		raise ValueError("Step not found in pipeline.")
 	def discard(self, step):
 		"""Remove the first matching step from the pipeline if present.
@@ -422,6 +437,9 @@ class Pipeline:
 		Args:
 			step: The pipeline step to remove.
 
+		Returns:
+			This pipeline instance.
+
 		Raises:
 			TypeError: If ``step`` has an invalid format.
 		"""
@@ -429,6 +447,7 @@ class Pipeline:
 			self.remove(step)
 		except ValueError:
 			pass
+		return self
 	def pop(self, index):
 		"""Remove and return the step at the specified index.
 
@@ -448,11 +467,21 @@ class Pipeline:
 			raise IndexError("Index out of range.")
 		return self._steps.pop(index - 1)
 	def clear(self):
-		"""Remove all steps from the pipeline."""
+		"""Remove all steps from the pipeline.
+
+		Returns:
+			This pipeline instance.
+		"""
 		self._steps.clear()
+		return self
 	def reverse(self):
-		"""Reverse the order of pipeline steps in place."""
+		"""Reverse the order of pipeline steps in place.
+
+		Returns:
+			This pipeline instance.
+		"""
 		self._steps.reverse()
+		return self
 	def __getitem__(self, index):
 		"""Return the pipeline step at the specified index.
 
