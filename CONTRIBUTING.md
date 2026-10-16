@@ -29,7 +29,8 @@ Before opening a pull request, run:
 ```bash
 git diff --check
 uv run validate-pyproject pyproject.toml
-uv run ruff check .
+uv run ruff check
+uv run ty check
 uv run pytest
 ```
 
