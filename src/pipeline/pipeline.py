@@ -261,7 +261,7 @@ class Pipeline:
 		Args:
 			timeout: Maximum time to wait in seconds, or ``None`` to wait indefinitely.
 				Must be non-negative or ``None``.
-				Defaults to ``None``.
+				Defaults to ``None`` (wait indefinitely).
 
 		Returns:
 			This pipeline instance.
