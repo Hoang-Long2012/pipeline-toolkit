@@ -2,10 +2,17 @@
   This file was automatically generated - do not edit
 -#}
 <div class="md-search" data-md-component="search">
+  <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <label for="search-input">{{ lang.t('search.placeholder') }}</label>
       <input id="search-input" type="text" class="md-search__input" name="query" aria-label="{{ lang.t('search.placeholder') }}" placeholder="{{ lang.t('search.placeholder') }}" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        {% set icon = config.theme.icon.search or "material/magnify" %}
+        {% include ".icons/" ~ icon ~ ".svg" %}
+        {% set icon = config.theme.icon.previous or "material/arrow-left" %}
+        {% include ".icons/" ~ icon ~ ".svg" %}
+      </label>
       <nav class="md-search__options" aria-label="{{ lang.t('search') }}">
         {% if "search.share" in features %}
           <a href="javascript:void(0)" class="md-search__icon md-icon" title="{{ lang.t('search.share') }}" aria-label="{{ lang.t('search.share') }}" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
