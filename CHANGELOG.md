@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.0
+- Added `Group` for organizing, executing, and controlling multiple `Pipeline` instances or nested groups as a single unit.
+
 ## 0.5.9
 - Changed `Pipeline.add()`, `insert()`, `update()`, `remove()`, `discard()`, `clear()`, and `reverse()` to return the current pipeline instance, allowing method chaining.
 
