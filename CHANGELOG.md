@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.3
+- Documentation-only release: Improved pipe's docstring.
+
 ## 0.6.2
 - Documentation-only release: Improved docstring in `compose`, `step`, and `Group`.
 
