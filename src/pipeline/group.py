@@ -1,5 +1,6 @@
 """A container for managing and executing a collection of pipelines or sub-groups."""
 import copy
+
 from .pipeline import Pipeline
 
 

@@ -2,7 +2,7 @@
 
 import pytest
 
-from pipeline import Pipeline, Group
+from pipeline import Group, Pipeline
 
 
 def _increment(value):
