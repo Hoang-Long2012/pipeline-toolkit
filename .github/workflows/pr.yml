@@ -1,0 +1,151 @@
+name: Pull request checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Code quality and validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check patch whitespace
+        if: github.event_name == 'pull_request'
+        run: git -c core.whitespace=cr-at-eol diff --check origin/${{ github.base_ref }}...HEAD
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: "3.14"
+          enable-cache: true
+
+      - name: Validate pyproject.toml
+        run: uvx validate-pyproject pyproject.toml
+
+      - name: Install dependencies with locked file
+        run: uv sync --locked --group dev
+
+      - name: Run Ruff
+        run: uv run ruff check
+
+      - name: Run ty
+        run: uv run ty check .
+
+  test-matrix:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
+          - "3.15"
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install test dependencies
+        run: uv sync --group test
+
+      - name: Run pytest
+        run: uv run pytest
+
+  build:
+    name: Check and build package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: "3.14"
+          enable-cache: false
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Test built wheel
+        run: |
+          uv venv --clear /tmp/test-env
+          uv pip install --python /tmp/test-env/bin/python dist/*.whl
+          /tmp/test-env/bin/python -c "import pipeline"
+          rm -rf /tmp/test-env
+
+      - name: Test built sdist
+        run: |
+          uv venv --clear /tmp/test-env
+          uv pip install --python /tmp/test-env/bin/python dist/*.tar.gz
+          /tmp/test-env/bin/python -c "import pipeline"
+          rm -rf /tmp/test-env
+
+      - name: Check distributions with Twine
+        run: uvx twine check dist/*
+
+  docs:
+    name: Build documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: "3.14"
+          enable-cache: false
+
+      - name: Install documentation dependencies
+        run: uv sync --group documentation
+
+      - name: Prepare documentation
+        run: |
+          cp CHANGELOG.md docs/changelog.md
+          cp CONTRIBUTING.md docs/contributing.md
+
+      - name: Build documentation
+        run: uv run mkdocs build --strict
