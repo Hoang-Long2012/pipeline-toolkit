@@ -3,6 +3,9 @@
   visibility: visible;
   opacity: 1;
 }
+.md-search__overlay {
+visibility: hidden;
+}
 .md-source-file__fact {
   display: block;
 }
