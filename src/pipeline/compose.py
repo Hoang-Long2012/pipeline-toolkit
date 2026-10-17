@@ -10,7 +10,7 @@ def compose(steps, default=None):
 		default: Initial value passed to the first callable.
 
 	Returns:
-		The result produced by the last callable.
+		The result produced by the last callable, or ``default`` when no callables are provided.
 
 	Raises:
 		TypeError: If `steps` is not iterable, or any step is not callable.

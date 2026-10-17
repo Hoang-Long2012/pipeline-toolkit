@@ -9,7 +9,7 @@ class step:
 
 	The wrapped callable is invoked with a value as its first argument, followed by the stored positional and keyword arguments.
 
-	The ``default`` property provides the initial value used by operations such as ``step * n`` and ``step > file``.
+	The ``default`` property provides the initial value used when an operation does not supply an input value.
 
 	Args:
 		function: The callable to execute.
@@ -92,7 +92,7 @@ class step:
 			other: The number of times to execute the step.
 
 		Returns:
-			The value returned by the final execution.
+			The value returned by the final execution, or ``NotImplemented`` if ``other`` is not an integer.
 
 		Raises:
 			ValueError: If ``other`` is less than 1.
@@ -134,7 +134,7 @@ class step:
 			parts.extend(f"{arg!r}" for arg in self._args)
 		if self._kwargs:
 			parts.extend(f"{key}={value!r}" for key, value in self._kwargs.items())
-		return f"{type(self).__name__}({', '.join(parts)})"
+		return f"<{type(self).__name__}({', '.join(parts)})>"
 	@property
 	def default(self):
 		"""The initial value used when a step operation needs one."""

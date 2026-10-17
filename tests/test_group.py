@@ -438,7 +438,7 @@ class TestGroupIndex:
 	def test_index_subgroup_not_found(self):
 		"""Test missing subgroup raises ValueError mentioning subgroup."""
 		group = Group([Pipeline(name="p1")])
-		with pytest.raises(ValueError, match="subgroup not found in group"):
+		with pytest.raises(ValueError, match="sub-group not found in group"):
 			group.index(Group())
 
 	def test_index_invalid_type(self):
@@ -805,19 +805,19 @@ class TestGroupRepr:
 
 	def test_repr_empty_group(self):
 		"""Test repr for empty group."""
-		assert repr(Group()) == "Group(pipeline=0, subgroup=0)"
+		assert repr(Group()) == "Group(pipeline=0, sub-group=0)"
 
 	def test_repr_pipelines_only(self):
 		"""Test repr for group containing only pipelines."""
-		assert repr(Group([Pipeline(), Pipeline()])) == "Group(pipeline=2, subgroup=0)"
+		assert repr(Group([Pipeline(), Pipeline()])) == "Group(pipeline=2, sub-group=0)"
 
 	def test_repr_subgroups_only(self):
 		"""Test repr for group containing only nested groups."""
-		assert repr(Group([Group(), Group()])) == "Group(pipeline=0, subgroup=2)"
+		assert repr(Group([Group(), Group()])) == "Group(pipeline=0, sub-group=2)"
 
 	def test_repr_mixed(self):
 		"""Test repr for group containing both pipelines and nested groups."""
-		assert repr(Group([Pipeline(), Group()])) == "Group(pipeline=1, subgroup=1)"
+		assert repr(Group([Pipeline(), Group()])) == "Group(pipeline=1, sub-group=1)"
 
 
 class TestGroupExecution:

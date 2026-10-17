@@ -294,17 +294,17 @@ class TestStepRepr:
 	def test_step_repr_without_args(self):
 		"""Represent a step without positional or keyword arguments."""
 		s = step(int)
-		assert repr(s) == "step(int)"
+		assert repr(s) == "<step(int)>"
 
 	def test_step_repr_without_kwargs(self):
 		"""Represent a step with positional arguments only."""
 		s = step(pow, 2)
-		assert repr(s) == "step(pow, 2)"
+		assert repr(s) == "<step(pow, 2)>"
 
 	def test_step_repr_with_args_and_kwargs(self):
 		"""Represent a step with positional and keyword arguments."""
 		s = step(pow, 2, exp=3)
-		assert repr(s) == "step(pow, 2, exp=3)"
+		assert repr(s) == "<step(pow, 2, exp=3)>"
 
 
 class TestStepErrors:
