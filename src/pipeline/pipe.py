@@ -143,6 +143,7 @@ class step:
 	def default(self, value):
 		"""Set the initial value used when a step operation needs one."""
 		self._default = value
+
 def pipe(function):
 	"""Wrap a callable as a step factory.
 
@@ -152,6 +153,9 @@ def pipe(function):
 
 	Args:
 		function: The callable to wrap.
+
+	Returns:
+		A callable that creates ``step`` instances.
 
 	Raises:
 		TypeError: If ``function`` is not callable.
