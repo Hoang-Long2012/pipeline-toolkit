@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.1
+- Documentation-only release: Edit the `Group` description at the package level.
+
 ## 0.6.0
 - Added `Group` for organizing, executing, and controlling multiple `Pipeline` instances or nested groups as a single unit.
 - Changed `compose()` to accept an iterable of callables via `steps` instead of variadic positional arguments.
