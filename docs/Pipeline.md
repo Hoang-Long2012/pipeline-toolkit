@@ -9,6 +9,10 @@
     options:
       heading_level: 3
 
+::: pipeline.error.ErrorContext
+    options:
+      heading_level: 4
+
 ::: pipeline.Pipeline.__call__
     options:
       heading_level: 3
