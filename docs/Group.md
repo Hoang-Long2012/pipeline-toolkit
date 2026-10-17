@@ -21,7 +21,7 @@
     options:
       heading_level: 3
 
-## Pipeline and subgroup Management
+## Pipeline and sub-group Management
 
 ::: pipeline.Group.add
     options:
