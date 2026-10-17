@@ -80,6 +80,7 @@ extra_css:
 
 extra_javascript:
   - javascripts/palette.js
+  - javascripts/search.js
 
 markdown_extensions:
   - nl2br
