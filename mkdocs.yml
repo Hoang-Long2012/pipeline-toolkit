@@ -5,6 +5,7 @@ site_url: https://Hoang-Long2012.github.io/pipeline-toolkit/
 repo_url: https://github.com/Hoang-Long2012/pipeline-toolkit
 repo_name: Hoang-Long2012/pipeline-toolkit
 copyright: Copyright (C) 2026 Hoàng Long
+use_directory_urls: false
 
 theme:
   name: material
