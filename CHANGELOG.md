@@ -2,6 +2,7 @@
 
 ## 0.6.0
 - Added `Group` for organizing, executing, and controlling multiple `Pipeline` instances or nested groups as a single unit.
+- Changed `compose()` to accept an iterable of callables via `steps` instead of variadic positional arguments.
 
 ## 0.5.9
 - Changed `Pipeline.add()`, `insert()`, `update()`, `remove()`, `discard()`, `clear()`, and `reverse()` to return the current pipeline instance, allowing method chaining.
