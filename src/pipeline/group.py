@@ -78,6 +78,31 @@ class Group:
 			if pipeline == candidate:
 				return True
 		return False
+	def __getitem__(self, index):
+		if not isinstance(index, int):
+			raise TypeError("index is not a int.")
+		if index < 0:
+			raise ValueError("index  not be a negative.")
+		if index >= len(self._pipelines):
+			raise IndexError("index out of range.")
+		return self._pipelines[index]
+	def __setitem__(self, index, pipeline):
+		if not isinstance(index, int):
+			raise TypeError("index is not a int.")
+		if index < 0:
+			raise ValueError("index  not be a negative.")
+		if index >= len(self._pipelines):
+			raise IndexError("index out of range.")
+		self._validate(pipeline)
+		self._pipelines[index] = pipeline
+	def __delitem__(self, index):
+		if not isinstance(index, int):
+			raise TypeError("index is not a int.")
+		if index < 0:
+			raise ValueError("index  not be a negative.")
+		if index >= len(self._pipelines):
+			raise IndexError("index out of range.")
+		del self._pipelines[index]
 	def __iter__(self):
 		yield from self._pipelines		
 	def __reversed__(self):
