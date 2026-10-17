@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.2
+- Documentation-only release: Improved docstring in `compose`, `step`, and `Group`.
+
 ## 0.6.1
 - Documentation-only release: Edit the `Group` description at the package level.
 
