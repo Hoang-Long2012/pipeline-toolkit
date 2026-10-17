@@ -5,6 +5,7 @@ This package provides a simple asynchronous pipeline executor along with support
 The main components are:
 
 - [`Pipeline`](Pipeline.md): Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning execution.
+- [`Group`](Group.md): Manage a collection of pipelines or sub-groups with support for collective execution, control, and sequence operations.
 - [`Checkpoint`](Checkpoint.md): Store values and provide a synchronization point for coordinating pipeline execution.
 - [`Stack`](Stack.md): A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
 - [`chain`](chain.md): Apply multiple callables sequentially, passing each result to the next callable.
@@ -33,6 +34,7 @@ pipeline.run().wait().result  # 12
 from .chain import chain as chain
 from .checkpoint import Checkpoint as Checkpoint
 from .compose import compose as compose
+from .group import Group as Group
 from .mut import mut as mut
 from .pipe import pipe as pipe
 from .pipe import step as step
@@ -41,4 +43,4 @@ from .tap import tap as tap
 
 __version__ = "0.5.9"
 __author__ = "Hoàng Long"
-__all__ = ["Checkpoint", "Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]
+__all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]
