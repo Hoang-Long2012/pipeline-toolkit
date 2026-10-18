@@ -219,6 +219,10 @@
     options:
       heading_level: 3
 
+::: pipeline.Pipeline.__or__
+    options:
+      heading_level: 3
+
 ## Comparison
 
 ::: pipeline.Pipeline.__eq__
