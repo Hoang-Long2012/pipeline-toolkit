@@ -2,6 +2,7 @@
 
 ## 0.6.4
 - Added the `|` operator to append multiple steps to a pipeline in place, equivalent to `update()`.
+- Changed `Group.add()`, `insert()`, `extend()`, `remove()`, `clear()`, and `reverse()` to return `self` instead of `None`, making these mutating operations chainable.
 
 ## 0.6.3
 - Documentation-only release: Improved pipe's docstring.
