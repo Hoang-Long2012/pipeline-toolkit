@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.4
+- Added the `|` operator to append multiple steps to a pipeline in place, equivalent to `update()`.
+
 ## 0.6.3
 - Documentation-only release: Improved pipe's docstring.
 
