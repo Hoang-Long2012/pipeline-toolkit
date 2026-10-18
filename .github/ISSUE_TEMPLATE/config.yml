@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+
+contact_links:
+  - name: Questions and support
+    url: https://github.com/Hoang-Long2012/pipeline-toolkit/discussions
+    about: Ask questions or get help using Pipeline-Toolkit.
