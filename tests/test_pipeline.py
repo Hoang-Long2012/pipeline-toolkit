@@ -2619,6 +2619,47 @@ class TestPipelineOperators:
 
 		assert pipeline.__mul__("2") is NotImplemented
 
+	def test_or_appends_steps_in_place(self):
+		"""Test | appends steps and returns the same pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))], default=10)
+		original = pipeline
+
+		result = pipeline | [(add, (10,))]
+
+		assert result is original
+		assert list(pipeline) == [(add, (5,)), (add, (10,))]
+		assert pipeline.default == 10
+
+	def test_or_accepts_generator(self):
+		"""Test | accepts a generator of steps."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline()
+
+		result = pipeline | ((add, (value,)) for value in (5, 10))
+
+		assert result is pipeline
+		assert list(pipeline) == [(add, (5,)), (add, (10,))]
+
+	def test_or_invalid_step_leaves_pipeline_unchanged(self):
+		"""Test | validates all steps before modifying the pipeline."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+
+		with pytest.raises(TypeError, match="Step function must be callable"):
+			pipeline | [(add, (10,)), ("not_callable",)]
+
+		assert list(pipeline) == [(add, (5,))]
+
 	def test_eq_same_configuration(self):
 		"""Test equal pipelines compare equal."""
 

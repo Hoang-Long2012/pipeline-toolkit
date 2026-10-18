@@ -595,12 +595,12 @@ class Pipeline:
 		"""Return a human-readable representation of the pipeline."""
 		pipeline = [f"{self.default!r}"]
 		pipeline.extend(self._format_step(step) for step in self._steps)
-		if self._name:
-			return f"{self._name}: {' | '.join(pipeline)}"
+		if self.name:
+			return f"{self.name}: {' | '.join(pipeline)}"
 		return " | ".join(pipeline)
 	def __repr__(self):
 		"""Return the developer-oriented representation of the pipeline."""
-		return f"{type(self).__name__}(name={self._name!r}, default={self.default!r}, total_steps={len(self._steps)}, current_step={self.step}, running={self.running})"
+		return f"{type(self).__name__}(name={self.name!r}, default={self.default!r}, total_steps={len(self._steps)}, current_step={self.step}, running={self.running})"
 	def __bool__(self):
 		"""Return whether the pipeline contains any configured steps.
 
@@ -683,7 +683,7 @@ class Pipeline:
 			raise RuntimeError("Pipeline is already running.")
 		pipeline = copy.copy(self._steps)
 		default = copy.copy(self.default)
-		name = copy.copy(self._name)
+		name = copy.copy(self.name)
 		return type(self)(pipeline, default, name)
 	def __deepcopy__(self, memo):
 		"""Create a deep copy of the pipeline.
@@ -701,7 +701,7 @@ class Pipeline:
 			raise RuntimeError("Pipeline is already running.")
 		pipeline = copy.deepcopy(self._steps, memo)
 		default = copy.deepcopy(self.default, memo)
-		name = copy.deepcopy(self._name, memo)
+		name = copy.deepcopy(self.name, memo)
 		return type(self)(pipeline, default, name)
 	def __iadd__(self, step):
 		"""Append a pipeline step in place.
@@ -734,7 +734,7 @@ class Pipeline:
 			TypeError: If any item in ``other`` has an invalid step format.
 		"""
 		other = tuple(other)
-		return type(self)([*self, *other], self.default, self._name)
+		return type(self)([*self, *other], self.default, self.name)
 	def __radd__(self, other):
 		"""Return a new pipeline by prepending iterable steps.
 
@@ -750,7 +750,7 @@ class Pipeline:
 			TypeError: If any item in ``other`` has an invalid step format.
 		"""
 		other = tuple(other)
-		return type(self)([*other, *self], self.default, self._name)
+		return type(self)([*other, *self], self.default, self.name)
 	def __eq__(self, other):
 		"""Return whether two pipelines have equal configurations.
 
@@ -765,7 +765,7 @@ class Pipeline:
 		"""
 		if not isinstance(other, type(self)):
 			return NotImplemented
-		return self._steps == other._steps and self.default == other.default and self._name == other._name
+		return self._steps == other._steps and self.default == other.default and self._name == other.name
 	def __mul__(self, count):
 		"""Return a new pipeline with its steps repeated.
 
@@ -785,7 +785,23 @@ class Pipeline:
 			return NotImplemented
 		if count < 1:
 			raise ValueError("Count < 1.")
-		return type(self)(self._steps * count, self.default, self._name)
+		return type(self)(self._steps * count, self.default, self.name)
+	def __or__(self, other):
+		"""Append pipeline steps in place.
+
+		The supplied iterable is converted to a tuple and appended to the pipeline.
+		This is equivalent to calling ``update()``.
+
+		Args:
+			other: An iterable containing pipeline steps to append.
+
+		Returns:
+			This pipeline instance.
+
+		Raises:
+			TypeError: If any item in ``other`` has an invalid step format.
+		"""
+		return self.update(other)
 	@property
 	def name(self):
 		"""Return the name of the worker thread and pipeline."""
