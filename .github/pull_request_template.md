@@ -23,6 +23,7 @@
 - [ ] `uv run ruff check`
 - [ ] `uv run ty check`
 - [ ] `uv run pytest`
+- [ ] All tests pass.
 
 ## Contributor checklist
 
