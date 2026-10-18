@@ -11,13 +11,17 @@
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Documentation update
+- [ ] Test suite update
 - [ ] Other (describe above)
 
 ## Verification
 
 <!-- List the checks you ran and their results. -->
 
-- [ ] `uv run ruff check .`
+- [ ] `git diff --check`
+- [ ] `uv run validate-pyproject pyproject.toml`
+- [ ] `uv run ruff check`
+- [ ] `uv run ty check`
 - [ ] `uv run pytest`
 
 ## Contributor checklist
