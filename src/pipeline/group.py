@@ -84,17 +84,24 @@ class Group:
 		Args:
 			pipeline: A ``Pipeline`` or ``Group`` instance to add.
 
+		Returns:
+			This group instance.
+
 		Raises:
 			TypeError: If ``pipeline`` is not a ``Pipeline`` or ``Group``.
 		"""
 		self._validate(pipeline)
 		self._pipelines.append(pipeline)
+		return self
 	def insert(self, index, pipeline):
 		"""Insert a pipeline or sub-group at the given zero-based index.
 
 		Args:
 			index: The zero-based integer position at which to insert.
 			pipeline: A ``Pipeline`` or ``Group`` instance to insert.
+
+		Returns:
+			This group instance.
 
 		Raises:
 			TypeError: If ``index`` is not an integer, or if ``pipeline`` is not a ``Pipeline`` or ``Group``.
@@ -106,11 +113,15 @@ class Group:
 			raise ValueError("index  not be a negative.")
 		self._validate(pipeline)
 		self._pipelines.insert(index, pipeline)
+		return self
 	def extend(self, iterable):
 		"""Extend the group by appending pipelines and sub-groups from an iterable.
 
 		Args:
 			iterable: An iterable containing ``Pipeline`` or ``Group`` instances.
+
+		Returns:
+			This group instance.
 
 		Raises:
 			TypeError: If ``iterable`` is not iterable, or if any item is not a ``Pipeline`` or ``Group``.
@@ -119,11 +130,15 @@ class Group:
 		for pipeline in iterable:
 			self._validate(pipeline)
 		self._pipelines.extend(iterable)
+		return self
 	def remove(self, pipeline):
 		"""Remove the first occurrence of a pipeline or sub-group from the group.
 
 		Args:
 			pipeline: The ``Pipeline`` or ``Group`` instance to remove.
+
+		Returns:
+			This group instance.
 
 		Raises:
 			TypeError: If ``pipeline`` is not a ``Pipeline`` or ``Group``.
@@ -131,6 +146,7 @@ class Group:
 		"""
 		self._validate(pipeline)
 		self._pipelines.remove(pipeline)
+		return self
 	def pop(self, index):
 		"""Remove and return the pipeline or sub-group at the given zero-based index.
 
@@ -154,10 +170,18 @@ class Group:
 		return self._pipelines.pop(index)
 
 	def clear(self):
-		"""Remove all pipelines and sub-groups from the group."""
+		"""Remove all pipelines and sub-groups from the group.
+
+		Returns:
+			This group instance.
+		"""
 		self._pipelines.clear()
 	def reverse(self):
-		"""Reverse the order of pipelines and sub-groups in the group in place."""
+		"""Reverse the order of pipelines and sub-groups in the group in place.
+
+		Returns:
+			This group instance.
+		"""
 		self._pipelines.reverse()
 	def index(self, pipeline):
 		"""Return the zero-based index of the first occurrence of a pipeline or sub-group.
