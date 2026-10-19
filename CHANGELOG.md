@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.6
+- Metadata-only release: Fixed project URLs in package metadata.
+
 ## 0.6.5
 - Metadata-only release: Updated project URLs in package metadata.
 
