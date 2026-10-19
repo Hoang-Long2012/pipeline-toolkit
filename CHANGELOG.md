@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.7
+- Documentation-only release: Updated API reference link in the readme.
+
 ## 0.6.6
 - Metadata-only release: Fixed project URLs in package metadata.
 
