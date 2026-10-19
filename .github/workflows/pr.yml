@@ -32,17 +32,19 @@ jobs:
         if: github.event_name == 'pull_request'
         run: git -c core.whitespace=cr-at-eol diff --check origin/${{ github.base_ref }}...HEAD
 
-      - name: Set up uv and Python
+      - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          python-version: "3.14"
           enable-cache: true
+
+      - name: Install project Python
+        run: uv python install
 
       - name: Validate pyproject.toml
         run: uvx validate-pyproject pyproject.toml
 
       - name: Install dependencies with locked file
-        run: uv sync --locked --group dev
+        run: uv sync --group dev
 
       - name: Run Ruff
         run: uv run ruff check
@@ -96,11 +98,13 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Set up uv and Python
+      - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          python-version: "3.14"
           enable-cache: false
+
+      - name: Install project Python
+        run: uv python install
 
       - name: Build distributions
         run: uv build
@@ -133,11 +137,13 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
-      - name: Set up uv and Python
+      - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          python-version: "3.14"
           enable-cache: false
+
+      - name: Install project Python
+        run: uv python install
 
       - name: Install documentation dependencies
         run: uv sync --group documentation
