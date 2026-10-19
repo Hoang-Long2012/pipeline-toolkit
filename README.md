@@ -41,6 +41,6 @@ multiply(15, 2)
 30
 ```
 
-See the [API Reference](https://Hoang-Long2012.github.io/pipeline-toolkit) for detailed documentation.
+See the [API Reference](https://pipeline-toolkit.pages.dev) for detailed documentation.
 
 Copyright (C) 2026 Hoàng Long
