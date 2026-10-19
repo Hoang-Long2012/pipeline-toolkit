@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.5
+- Metadata-only release: Updated project URLs in package metadata.
+
 ## 0.6.4
 - Added the `|` operator to append multiple steps to a pipeline in place, equivalent to `update()`.
 - Changed `Group.add()`, `insert()`, `extend()`, `remove()`, `clear()`, and `reverse()` to return `self` instead of `None`, making these mutating operations chainable.
@@ -11,7 +14,7 @@
 - Documentation-only release: Improved docstring in `compose`, `step`, and `Group`.
 
 ## 0.6.1
-- Documentation-only release: Edit the `Group` description at the package level.
+- Documentation-only release: Edited the `Group` description at the package level.
 
 ## 0.6.0
 - Added `Group` for organizing, executing, and controlling multiple `Pipeline` instances or nested groups as a single unit.
@@ -21,7 +24,7 @@
 - Changed `Pipeline.add()`, `insert()`, `update()`, `remove()`, `discard()`, `clear()`, and `reverse()` to return the current pipeline instance, allowing method chaining.
 
 ## 0.5.8
-- Documentation-only release: Shorten the readme.
+- Documentation-only release: Shortened the readme.
 
 ## 0.5.7
 - Added equality comparison for `step` objects. Steps can now be compared with other steps and their exported tuple representations.
@@ -40,7 +43,7 @@
 - Some internal changes.
 
 ## 0.5.4
-- Documentation-only release: Change the line breaks in the README.
+- Documentation-only release: Changed the line breaks in the README.
 
 ## 0.5.3
 - Documentation-only release: Updated `Pipeline.__contains__()` and pipeline repetition documentation to match their current behavior.
@@ -107,7 +110,7 @@
 - Changed `Pipeline.run_step()` signature to make the `default` argument optional, defaulting to `None`.
 
 ## 0.2.4
-- Documentation-only release: Fix heading level in the README.
+- Documentation-only release: Fixed heading level in the README.
 
 ## 0.2.3
 - Added context manager support to `Pipeline` for automatically starting and stopping pipeline execution.
