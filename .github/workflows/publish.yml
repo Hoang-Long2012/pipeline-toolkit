@@ -74,11 +74,13 @@ jobs:
       - name: Check patch whitespace
         run: git -c core.whitespace=cr-at-eol diff --check "${GITHUB_REF}^{commit}^" "${GITHUB_REF}^{commit}"
 
-      - name: Set up uv and Python
+      - name: Setup uv
         uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
-          python-version: "3.14"
           enable-cache: false
+
+      - name: Install project Python
+        run: uv python install
 
       - name: Validate pyproject.toml
         run: uvx validate-pyproject pyproject.toml
