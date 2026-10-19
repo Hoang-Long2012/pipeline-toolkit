@@ -51,7 +51,7 @@ Repository = "https://github.com/Hoang-Long2012/pipeline-toolkit"
 Documentation = "https://pipeline-toolkit.pages.dev"
 Issues = "https://github.com/Hoang-Long2012/pipeline-toolkit/issues"
 Changelog = "https://pipeline-toolkit.pages.dev/changelog.html"
-Contributing = "https:///pipeline-toolkit.pages.dev/contributing.html"
+Contributing = "https://pipeline-toolkit.pages.dev/contributing.html"
 
 [tool.setuptools.packages.find]
 where = ["src"]
