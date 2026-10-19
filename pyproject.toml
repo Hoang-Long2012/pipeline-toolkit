@@ -48,10 +48,10 @@ classifiers = [
 [project.urls]
 Homepage = "https://github.com/Hoang-Long2012/pipeline-toolkit"
 Repository = "https://github.com/Hoang-Long2012/pipeline-toolkit"
-Documentation = "https://Hoang-Long2012.github.io/pipeline-toolkit"
+Documentation = "https://pipeline-toolkit.pages.dev"
 Issues = "https://github.com/Hoang-Long2012/pipeline-toolkit/issues"
-Changelog = "https://Hoang-Long2012.github.io/pipeline-toolkit/changelog"
-Contributing = "https://Hoang-Long2012.github.io/pipeline-toolkit/contributing"
+Changelog = "https://pipeline-toolkit.pages.dev/changelog"
+Contributing = "https:///pipeline-toolkit.pages.dev/contributing"
 
 [tool.setuptools.packages.find]
 where = ["src"]
