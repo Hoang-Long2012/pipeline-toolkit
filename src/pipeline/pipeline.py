@@ -168,7 +168,7 @@ class Pipeline:
 					if delay and index < len(steps) - 1:
 						self._stop_event.wait(delay)
 			finally:
-				if not self._stop_event.is_set() or not self.errors:
+				if  not self._stop_event.is_set() and  (not self.errors or  not stop_on_error):
 					self._step = 0
 				if self._thread is threading.current_thread():
 					self._thread = None
@@ -826,7 +826,13 @@ class Pipeline:
 		self._name = name
 	@property
 	def step(self):
-		"""Return the one-based index of the step currently running, or ``0`` when idle."""
+		"""Return the current one-based pipeline step index.
+
+		Returns:
+			The one-based index of the currently executing step.
+			``0`` when the pipeline is not currently executing a step, or when the previous execution completed without stopping on an error.
+				If execution stopped because of an error while ``stop_on_error`` is enabled, the index of the failed step is retained.
+		"""
 		return self._step
 	@property
 	def default(self):
