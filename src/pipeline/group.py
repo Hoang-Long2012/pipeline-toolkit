@@ -9,6 +9,8 @@ class Group:
 
 	``Group`` allows multiple ``Pipeline`` instances or nested ``Group`` instances to be organized, executed, and controlled together as a single unit.
 
+	A ``Group`` cannot contain itself.
+
 	Pipelines and sub-groups in a group can be started, stopped, or waited on collectively.
 	The group also supports common sequence operations such as indexing, iteration, and length inspection.
 
@@ -32,15 +34,15 @@ class Group:
 
 		Raises:
 			TypeError: If ``iterable`` is not iterable, or if any item is not a ``Pipeline`` or ``Group``.
+			ValueError: If a group attempts to contain itself.
 		"""
 		self._pipelines = []
-		for pipeline in iterable:
-			if not isinstance(pipeline, (Pipeline, type(self))):
-				raise TypeError(f"{pipeline} is not a Pipeline or Group.")
-			self._pipelines.append(pipeline)
+		self.extend(iterable)
 	def _validate(self, pipeline):
 		if not isinstance(pipeline, (Pipeline, type(self))):
 			raise TypeError("pipeline is not a Pipeline or Group.")
+		if pipeline is self:
+			raise ValueError("group cannot contain itself.")
 	def run(self, *args, **kwargs):
 		"""Start all pipelines in the group.
 
@@ -89,6 +91,7 @@ class Group:
 
 		Raises:
 			TypeError: If ``pipeline`` is not a ``Pipeline`` or ``Group``.
+			ValueError: If ``pipeline`` is this group.
 		"""
 		self._validate(pipeline)
 		self._pipelines.append(pipeline)
@@ -105,7 +108,7 @@ class Group:
 
 		Raises:
 			TypeError: If ``index`` is not an integer, or if ``pipeline`` is not a ``Pipeline`` or ``Group``.
-			ValueError: If ``index`` is negative.
+			ValueError: If ``index`` is negative, or if ``pipeline`` is this group.
 		"""
 		if not isinstance(index, int):
 			raise TypeError("index is not a int.")
@@ -125,6 +128,7 @@ class Group:
 
 		Raises:
 			TypeError: If ``iterable`` is not iterable, or if any item is not a ``Pipeline`` or ``Group``.
+			ValueError: If any item is this group.
 		"""
 		iterable = tuple(iterable)
 		for pipeline in iterable:
@@ -292,7 +296,7 @@ class Group:
 
 		Raises:
 			TypeError: If ``index`` is not an integer, or if ``pipeline`` is not a ``Pipeline`` or ``Group``.
-			ValueError: If ``index`` is negative.
+			ValueError: If ``index`` is negative, or if ``pipeline`` is this group.
 			IndexError: If ``index`` is out of range.
 		"""
 		if not isinstance(index, int):

@@ -111,6 +111,13 @@ class TestGroupAdd:
 		with pytest.raises(TypeError, match="Pipeline or Group"):
 			group.add("invalid")
 
+	def test_add_self_raises_value_error(self):
+		"""Test adding a group to itself raises ValueError."""
+		group = Group()
+		with pytest.raises(ValueError, match="cannot contain itself"):
+			group.add(group)
+		assert len(group) == 0
+
 
 class TestGroupInsert:
 	"""Test Group insert method."""
@@ -177,6 +184,13 @@ class TestGroupInsert:
 		with pytest.raises(TypeError, match="Pipeline or Group"):
 			group.insert(0, "invalid")
 
+	def test_insert_self_raises_value_error(self):
+		"""Test inserting a group into itself raises ValueError."""
+		group = Group()
+		with pytest.raises(ValueError, match="cannot contain itself"):
+			group.insert(0, group)
+		assert len(group) == 0
+
 
 class TestGroupExtend:
 	"""Test Group extend method."""
@@ -239,6 +253,15 @@ class TestGroupExtend:
 		group = Group([initial_pipeline])
 		with pytest.raises(TypeError, match="Pipeline or Group"):
 			group.extend([Pipeline(), "invalid"])
+		assert len(group) == 1
+		assert group[0] is initial_pipeline
+
+	def test_extend_self_raises_value_error_and_leaves_group_unmodified(self):
+		"""Test extending with the group itself fails without changing it."""
+		initial_pipeline = Pipeline()
+		group = Group([initial_pipeline])
+		with pytest.raises(ValueError, match="cannot contain itself"):
+			group.extend([Pipeline(), group])
 		assert len(group) == 1
 		assert group[0] is initial_pipeline
 
@@ -571,6 +594,15 @@ class TestGroupSetItem:
 		group = Group([Pipeline()])
 		with pytest.raises(TypeError, match="Pipeline or Group"):
 			group[0] = "invalid"
+
+	def test_setitem_self_raises_value_error(self):
+		"""Test assigning a group to itself raises ValueError."""
+		pipeline = Pipeline()
+		group = Group([pipeline])
+		with pytest.raises(ValueError, match="cannot contain itself"):
+			group[0] = group
+		assert len(group) == 1
+		assert group[0] is pipeline
 
 
 class TestGroupDelItem:
