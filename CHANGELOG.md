@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.8
+- Fixed a `Group` containing itself, which could create an invalid recursive group structure.
+
 ## 0.6.7
 - Documentation-only release: Updated API reference link in the readme.
 
