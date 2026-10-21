@@ -320,6 +320,39 @@ class TestPipelineExecution:
 		pipeline.run(10).wait()
 		assert pipeline.results.get() == 30
 
+	def test_step_tracks_current_step_and_resets_after_success(self):
+		"""Test step reports the running index and resets after success."""
+		first_started = threading.Event()
+		release_first = threading.Event()
+		second_started = threading.Event()
+		release_second = threading.Event()
+
+		def first(value):
+			first_started.set()
+			release_first.wait()
+			return value + 1
+
+		def second(value):
+			second_started.set()
+			release_second.wait()
+			return value + 1
+
+		pipeline = Pipeline([(first,), (second,)])
+		pipeline.run(0)
+		try:
+			assert first_started.wait(timeout=1)
+			assert pipeline.step == 1
+
+			release_first.set()
+			assert second_started.wait(timeout=1)
+			assert pipeline.step == 2
+		finally:
+			release_first.set()
+			release_second.set()
+
+		pipeline.wait()
+		assert pipeline.step == 0
+
 	def test_wait_returns_pipeline(self):
 		"""Test that wait returns the pipeline instance."""
 		pipeline = Pipeline()
@@ -531,6 +564,37 @@ class TestPipelineStop:
 		pipeline.run(10, delay=1.0)
 		stopped_step = pipeline.stop()
 		assert stopped_step == 0
+		assert pipeline.step == 0
+
+	def test_stop_during_step_waits_for_step_and_prevents_next_step(self):
+		"""Test stopping during a step lets it finish but stops later steps."""
+		started = threading.Event()
+		release = threading.Event()
+		stopped_at = []
+
+		def block(value):
+			started.set()
+			release.wait()
+			return value + 1
+
+		def add_ten(value):
+			return value + 10
+
+		pipeline = Pipeline([(block,), (add_ten,)])
+		pipeline.run(0)
+		assert started.wait(timeout=1)
+
+		stop_thread = threading.Thread(target=lambda: stopped_at.append(pipeline.stop()))
+		stop_thread.start()
+		assert pipeline._stop_event.wait(timeout=1)
+		release.set()
+		stop_thread.join(timeout=1)
+
+		assert not stop_thread.is_alive()
+		assert stopped_at == [1]
+		assert pipeline.step == 0
+		assert pipeline.result == 1
+		assert list(pipeline.calls) == [(block,)]
 
 	def test_stop_after_execution_completes(self):
 		"""Test stop after pipeline has finished returns 0."""
@@ -620,6 +684,26 @@ class TestPipelineSkip:
 		pipeline.wait()
 
 		assert pipeline.results.get() == 101
+
+	def test_skip_during_initial_delay_skips_first_step(self):
+		"""Test skip during the initial delay skips the first step."""
+		called = []
+
+		def first(value):
+			called.append("first")
+			return value + 1
+
+		def second(value):
+			called.append("second")
+			return value + 10
+
+		pipeline = Pipeline([(first,), (second,)])
+		pipeline.run(0, delay=0.5)
+		pipeline.skip()
+		pipeline.wait()
+
+		assert called == ["second"]
+		assert pipeline.result == 10
 
 
 class TestPipelineRerun:
@@ -917,6 +1001,30 @@ class TestPipelineErrorHandler:
 			match="handler_error is not a callable",
 		):
 			pipeline.run(10, handler_error="invalid")
+
+	def test_handler_exception_is_not_caught_by_pipeline(self, monkeypatch):
+		"""Test exceptions raised by the handler reach the thread hook."""
+		uncaught = []
+
+		def raise_step_error(value):
+			raise ValueError("step error")
+
+		def raise_handler_error(context):
+			raise RuntimeError("handler error")
+
+		monkeypatch.setattr(
+			threading,
+			"excepthook",
+			lambda args: uncaught.append(args.exc_value),
+		)
+		pipeline = Pipeline([(raise_step_error,)])
+		pipeline.run(handler_error=raise_handler_error).wait()
+
+		assert len(pipeline.errors) == 1
+		assert isinstance(pipeline.errors.get(), ValueError)
+		assert len(uncaught) == 1
+		assert isinstance(uncaught[0], RuntimeError)
+		assert str(uncaught[0]) == "handler error"
 
 	def test_handler_error_receives_immutable_context(self):
 		"""Test ErrorContext fields cannot be reassigned."""
@@ -1232,7 +1340,7 @@ class TestPipelineErrors:
 		pipeline.run(10, stop_on_error=True).wait()
 
 		assert len(pipeline.errors) == 1
-		assert pipeline.step == 0
+		assert pipeline.step == 1
 
 	def test_stop_on_error_false(self):
 		"""Test pipeline continues on error when stop_on_error=False."""
@@ -1251,6 +1359,22 @@ class TestPipelineErrors:
 
 		assert len(pipeline.errors) == 1
 		assert pipeline.results.get() == 15
+		assert pipeline.step == 0
+
+	def test_stop_on_error_true_retains_later_failed_step_index(self):
+		"""Test the index of a later failed step is retained."""
+
+		def identity(value):
+			return value
+
+		def raise_error(value):
+			raise ValueError("Error")
+
+		pipeline = Pipeline([(identity,), (raise_error,), (identity,)])
+		pipeline.run(10, stop_on_error=True).wait()
+
+		assert len(pipeline.errors) == 1
+		assert pipeline.step == 2
 
 	def test_error_raises_latest_exception(self):
 		"""Test error raises the latest pipeline exception."""
@@ -1277,6 +1401,25 @@ class TestPipelineErrors:
 
 		assert isinstance(error, ValueError)
 		assert str(error) == "Test error"
+
+	def test_error_selects_latest_of_multiple_exceptions(self):
+		"""Test error returns or raises the latest of multiple exceptions."""
+		first_error = ValueError("first error")
+		latest_error = TypeError("latest error")
+
+		def raise_first(value):
+			raise first_error
+
+		def raise_latest(value):
+			raise latest_error
+
+		pipeline = Pipeline([(raise_first,), (raise_latest,)])
+		pipeline.run(0, stop_on_error=False).wait()
+
+		assert len(pipeline.errors) == 2
+		with pytest.raises(TypeError, match="latest error"):
+			pipeline.error()
+		assert pipeline.error(reraise=False) is latest_error
 
 	def test_error_returns_none_without_exception(self):
 		"""Test error returns None when no exception occurred."""
@@ -1340,9 +1483,27 @@ class TestPipelineManualSteps:
 			(add, (5,)),
 			(add, (10,)),
 		])
+		assert not pipeline.running
 		result = pipeline.run_step(1, 10)
 
 		assert result == 15
+		assert not pipeline.running
+		assert len(pipeline.results) == 0
+		assert len(pipeline.errors) == 0
+
+	def test_run_step_propagates_exception(self):
+		"""Test run_step propagates exceptions to the caller."""
+
+		def raise_error(value):
+			raise ValueError("Test error")
+
+		pipeline = Pipeline([(raise_error,)])
+		assert not pipeline.running
+
+		with pytest.raises(ValueError, match="Test error"):
+			pipeline.run_step(1, 10)
+
+		assert not pipeline.running
 		assert len(pipeline.results) == 0
 		assert len(pipeline.errors) == 0
 
@@ -1441,9 +1602,11 @@ class TestPipelineExecute:
 			return x + y
 
 		pipeline = Pipeline([(add, (5,))])
+		assert not pipeline.running
 		result = pipeline.execute((add, (10,)), 5)
 
 		assert result == 15
+		assert not pipeline.running
 		assert len(pipeline.results) == 0
 		assert len(pipeline.errors) == 0
 
@@ -1482,10 +1645,15 @@ class TestPipelineExecute:
 		def raise_error(x):
 			raise ValueError("Test error")
 
-		pipeline = Pipeline()
+		pipeline = Pipeline([(raise_error,)])
+		assert not pipeline.running
 
 		with pytest.raises(ValueError, match="Test error"):
 			pipeline.execute((raise_error,), 10)
+
+		assert not pipeline.running
+		assert len(pipeline.results) == 0
+		assert len(pipeline.errors) == 0
 
 
 class TestPipelineModification:
@@ -2090,6 +2258,16 @@ class TestPipelineContextManager:
 		assert not pipeline.running
 
 		step_should_exit.set()
+
+	def test_context_manager_does_not_suppress_exceptions(self):
+		"""Test exceptions from the with body propagate to the caller."""
+		pipeline = Pipeline()
+
+		with pytest.raises(ValueError, match="context error"):
+			with pipeline:
+				raise ValueError("context error")
+
+		assert not pipeline.running
 
 
 class TestPipelineCopy:

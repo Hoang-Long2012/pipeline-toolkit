@@ -180,6 +180,7 @@ class Group:
 			This group instance.
 		"""
 		self._pipelines.clear()
+		return self
 	def reverse(self):
 		"""Reverse the order of pipelines and sub-groups in the group in place.
 
@@ -187,6 +188,7 @@ class Group:
 			This group instance.
 		"""
 		self._pipelines.reverse()
+		return self
 	def index(self, pipeline):
 		"""Return the zero-based index of the first occurrence of a pipeline or sub-group.
 
