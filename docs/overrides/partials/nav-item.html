@@ -111,7 +111,7 @@
         {% else %}
           {% set class = "md-nav__link--active" if index == page %}
           <div class="md-nav__link md-nav__container">
-            <a href="{{ index.url | url }}" class="md-nav__link {{ class }}">
+            <a href="{{ index.url | url }}" class="md-nav__link {{ class }}" {% if index == page %}aria-current="page"{% endif %}>
               {{ render_content(index, nav_item) }}
             </a>
             {% if nav_item.children | length > 1 %}
@@ -153,7 +153,7 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       {% endif %}
-      <a href="{{ nav_item.url | url }}" class="md-nav__link md-nav__link--active">
+      <a href="{{ nav_item.url | url }}" class="md-nav__link md-nav__link--active" aria-current="page">
         {{ render_content(nav_item) }}
       </a>
       {% if toc %}
