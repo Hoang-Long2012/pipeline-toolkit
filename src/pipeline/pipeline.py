@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from . import core
 from ._compat import _DEFAULT
 from .error import ErrorContext
-from .stack import Stack
+from .stack import Stack, StackUnflowError
 
 
 class Pipeline:
@@ -140,6 +140,7 @@ class Pipeline:
 		self.results.push(default if default is not _DEFAULT else self.default)
 		self.errors.clear()
 		def worker():
+			previous_result = _DEFAULT
 			try:
 				if not steps:
 					return None
@@ -152,7 +153,14 @@ class Pipeline:
 					if self._skip_event.is_set():
 						self._skip_event.clear()
 						continue
-					previous_result = self.results.get()
+					try:
+						if previous_result is _DEFAULT:
+							previous_result = self.results.get()
+					except StackUnflowError:
+						if default is _DEFAULT:
+							previous_result = self.default
+						else:
+							previous_result = default
 					try:
 						result = self._execute_step(step, previous_result)
 					except Exception as error:
@@ -163,6 +171,7 @@ class Pipeline:
 						if stop_on_error:
 							break
 					else:
+						previous_result = result
 						self.results.push(result)
 						self.calls.push(step)
 					if delay and index < len(steps) - 1:

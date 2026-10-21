@@ -2,6 +2,7 @@
 
 ## 0.6.9
 - Changed the meaning of `Pipeline.step`: `0` now indicates that no active or retained step position exists, while a positive value identifies the current or retained step position.
+- Changed pipeline execution to preserve the previous result when the results stack is unavailable.
 
 ## 0.6.8
 - Fixed a `Group` containing itself, which could create an invalid recursive group structure.
