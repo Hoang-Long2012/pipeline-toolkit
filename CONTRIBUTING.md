@@ -6,7 +6,16 @@ Thanks for helping improve `Pipeline-Toolkit`. Contributions of bug reports, fea
 
 Open an issue in the [GitHub repository](https://github.com/Hoang-Long2012/pipeline-toolkit/issues).
 
-For a bug, include a short reproduction, what you expected to happen, what happened instead, and your Python version.
+For a bug report, please include:
+
+- A short description.
+- Reproduction steps.
+- What you expected to happen.
+- What happened instead.
+- Your package version.
+- Your Python version.
+- Traceback (if available).
+- Additional context (if available).
 
 ## Set up the project
 
