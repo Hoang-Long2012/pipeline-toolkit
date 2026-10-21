@@ -1,3 +1,6 @@
+.md-palette-menu {
+display: block;
+}
 .md-search {
   display: block;
   visibility: visible;
