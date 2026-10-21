@@ -83,7 +83,8 @@ class TestGroupAdd:
 		"""Test adding a Pipeline instance."""
 		group = Group()
 		p = Pipeline()
-		group.add(p)
+		result = group.add(p)
+		assert result is group
 		assert len(group) == 1
 		assert group[0] is p
 
@@ -127,7 +128,8 @@ class TestGroupInsert:
 		p1 = Pipeline()
 		p2 = Pipeline()
 		group = Group([p1])
-		group.insert(0, p2)
+		result = group.insert(0, p2)
+		assert result is group
 		assert group[0] is p2
 		assert group[1] is p1
 
@@ -200,7 +202,8 @@ class TestGroupExtend:
 		p1 = Pipeline()
 		p2 = Pipeline()
 		group = Group()
-		group.extend([p1, p2])
+		result = group.extend([p1, p2])
+		assert result is group
 		assert len(group) == 2
 		assert group[0] is p1
 		assert group[1] is p2
@@ -279,7 +282,8 @@ class TestGroupRemove:
 		"""Test removing existing pipeline."""
 		p = Pipeline()
 		group = Group([p])
-		group.remove(p)
+		result = group.remove(p)
+		assert result is group
 		assert len(group) == 0
 
 	def test_remove_subgroup(self):
@@ -392,7 +396,8 @@ class TestGroupClear:
 	def test_clear_removes_all_items(self):
 		"""Test clear empties non-empty group."""
 		group = Group([Pipeline(), Group()])
-		group.clear()
+		result = group.clear()
+		assert result is group
 		assert len(group) == 0
 
 	def test_clear_empty_group(self):
@@ -410,7 +415,8 @@ class TestGroupReverse:
 		p1 = Pipeline()
 		p2 = Pipeline()
 		group = Group([p1, p2])
-		group.reverse()
+		result = group.reverse()
+		assert result is group
 		assert group[0] is p2
 		assert group[1] is p1
 
