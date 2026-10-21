@@ -57,6 +57,14 @@ body:
     validations:
       required: false
   - type: textarea
+    id: traceback
+    attributes:
+      label: Traceback
+      description: Please add tracebacks if available.
+      render: python
+    validations:
+      required: false
+  - type: textarea
     id: additional-context
     attributes:
       label: Additional context
