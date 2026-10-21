@@ -8,6 +8,7 @@ import pytest
 
 from pipeline import Pipeline
 from pipeline.error import ErrorContext
+from pipeline.stack import StackUnderflowError
 
 
 class TestPipelineInitialization:
@@ -3096,6 +3097,29 @@ class TestPipelineSnapshot:
 
 class TestPipelineEdgeCases:
 	"""Test pipeline edge cases."""
+
+	@pytest.mark.parametrize(
+		("run_default", "use_run_default", "expected"),
+		[
+			pytest.param(None, False, 42, id="pipeline-default"),
+			pytest.param(10, True, 10, id="explicit-default"),
+		],
+	)
+	def test_run_uses_default_if_initial_result_is_unavailable(self, monkeypatch, run_default, use_run_default, expected):
+		"""Test run falls back to its configured initial value if results are emptied."""
+		seen = []
+		pipeline = Pipeline([(lambda value: seen.append(value) or value,)], default=42)
+
+		def raise_underflow():
+			raise StackUnderflowError
+
+		monkeypatch.setattr(pipeline.results, "get", raise_underflow)
+		if use_run_default:
+			pipeline.run(run_default).wait()
+		else:
+			pipeline.run().wait()
+
+		assert seen == [expected]
 
 	def test_none_as_explicit_default(self):
 		"""Test passing None explicitly as default overrides pipeline default."""
