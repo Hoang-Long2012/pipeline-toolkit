@@ -1,3 +1,7 @@
+.md-palette-menu [data-palette-option] {
+	display: block;
+	width: 100%;
+}
 .md-search {
   display: block;
   visibility: visible;
