@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from . import core
 from ._compat import _DEFAULT
 from .error import ErrorContext
-from .stack import Stack, StackUnflowError
+from .stack import Stack, StackUnderflowError
 
 
 class Pipeline:
@@ -156,7 +156,7 @@ class Pipeline:
 					try:
 						if previous_result is _DEFAULT:
 							previous_result = self.results.get()
-					except StackUnflowError:
+					except StackUnderflowError:
 						if default is _DEFAULT:
 							previous_result = self.default
 						else:
