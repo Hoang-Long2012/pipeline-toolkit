@@ -4,7 +4,7 @@
 
 ## Related issue
 
-<!-- Link an issue, for example: Closes #123. -->
+<!-- Link a related issue if applicable, for example: Closes #123. -->
 
 ## Type of change
 
@@ -12,7 +12,9 @@
 - [ ] New feature
 - [ ] Documentation update
 - [ ] Test suite update
-- [ ] Other (describe above)
+- [ ] Dependencies update
+- [ ] Package metadata update
+- [ ] Other (describe below)
 
 ## Verification
 
@@ -23,7 +25,6 @@
 - [ ] `uv run ruff check`
 - [ ] `uv run ty check`
 - [ ] `uv run pytest`
-- [ ] All tests pass.
 
 ## Contributor checklist
 
