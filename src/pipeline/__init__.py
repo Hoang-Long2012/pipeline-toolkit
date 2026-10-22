@@ -31,6 +31,8 @@ pipeline = Pipeline(
 pipeline.run().wait().result  # 12
 ```
 """
+from importlib.metadata import packages_distributions, version
+
 from .chain import chain as chain
 from .checkpoint import Checkpoint as Checkpoint
 from .compose import compose as compose
@@ -41,6 +43,9 @@ from .pipe import step as step
 from .pipeline import Pipeline as Pipeline
 from .tap import tap as tap
 
-__version__ = "0.6.9"
+_package = __name__.split(".", 1)[0]
+_distribution = packages_distributions()[_package][0]
+
+__version__ = version(_distribution)
 __author__ = "Hoàng Long"
 __all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]
