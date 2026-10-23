@@ -2,6 +2,7 @@
     options:
       members: false
       heading_level: 1
+      show_root_full_path: true
 
 ::: pipeline.stack.Stack
     options:
