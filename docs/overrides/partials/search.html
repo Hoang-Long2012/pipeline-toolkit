@@ -6,7 +6,7 @@
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <label id="search-label" for="search-input">{{ lang.t('search.placeholder') }}</label>
-      <input id="search-input" type="text" class="md-search__input" aria-labelledby="search-label" name="query" placeholder="{{ lang.t('search.placeholder') }}" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <input id="search-input" type="text" class="md-search__input" aria-labelledby="search-label" name="query" placeholder="{{ lang.t('search.placeholder') }}" title=​"Type search term here" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         {% set icon = config.theme.icon.search or "material/magnify" %}
         {% include ".icons/" ~ icon ~ ".svg" %}
