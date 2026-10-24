@@ -39,6 +39,31 @@ If the answer to the last question is yes, prefer the existing design unless the
 
 Do not reinterpret the project's design goals as problems to be fixed.
 
+## Requirements
+
+Do not infer additional requirements from the task.
+
+If the task mentions a specific API, behavior, file, or failure case, limit the implementation to that scope unless another change is strictly necessary for correctness.
+
+Do not treat consistency with other APIs as a requirement unless the task explicitly requires it.
+
+## Source of Truth
+
+When sources disagree, use the following priority:
+
+1. The explicit task request.
+2. Existing public API and established documented behavior.
+3. Existing implementation.
+4. Existing tests.
+5. Type hints, docstrings, and comments.
+6. General library conventions or external best practices.
+
+If the implementation appears inconsistent with the established public behavior, treat that as a potential bug rather than automatically redefining the behavior.
+
+Do not change a higher-priority source merely to make it agree with a lower-priority one.
+
+Tests are evidence of behavior, not permission to redefine a higher-priority public API or task requirement.
+
 ## Scope
 
 - Read the relevant source code and tests before making changes.
@@ -47,8 +72,14 @@ Do not reinterpret the project's design goals as problems to be fixed.
 - Do not clean up, modernize, or improve surrounding code unless explicitly requested.
 - Do not modify documentation, configuration, workflows, or unrelated tests unless the task requires it.
 - Do not change implementation code merely to make a test pass when the task is specifically about tests.
+- Do not weaken, delete, skip, or rewrite an existing test merely because the current implementation fails it.
+- If an existing test conflicts with the requested behavior, identify the conflict explicitly before changing the test.
 - Preserve existing public APIs and behavior unless the task explicitly requests a behavior change.
 - Treat the requested task as an exhaustive scope, not as a starting point for broader improvements.
+
+Generated files are not implementation targets unless the task explicitly requires updating them.
+
+Prefer modifying their source/template/configuration and regenerating only when required.
 
 ## Implementation Guidelines
 
@@ -70,6 +101,23 @@ Do not reinterpret the project's design goals as problems to be fixed.
 - Do not introduce patterns solely because they are common in other libraries or considered best practice elsewhere.
 - When multiple implementations satisfy the requirement, prefer the smallest implementation that fits the existing architecture and project philosophy.
 - Treat internal simplicity as a feature. A slightly repetitive implementation may be preferable to a generalized abstraction if the abstraction adds more complexity than value.
+
+### API Compatibility
+
+Treat the following as part of public behavior unless explicitly changed:
+
+- method and function signatures;
+- accepted argument forms;
+- return values and object identity;
+- raised exception types;
+- meaningful exception messages;
+- state transitions;
+- execution order;
+- mutation and reuse semantics;
+- side effects;
+- lifecycle and timing semantics.
+
+Do not change any of these merely as an implementation improvement.
 
 ## Code Style
 
@@ -103,10 +151,12 @@ Do not reinterpret the project's design goals as problems to be fixed.
 After making changes:
 
 1. Inspect the diff.
-2. Run linter on areas that have changed.
-3. Run type-checker on areas that have changed.
+2. Run the linter on changed code when applicable.
+3. Run the type-checker on changed code when applicable.
 4. Run the smallest relevant test command.
 5. Run additional checks only when they are necessary for the requested change.
+
+Verification should be proportional to the change.
 
 Do not automatically:
 
@@ -162,3 +212,13 @@ Before finishing:
 - If something was intentionally not run, do not pretend that it was verified.
 
 When the requested task is complete, stop. Do not continue with unrelated improvements.
+
+Do not perform opportunistic cleanup.
+
+Examples include:
+
+- renaming variables for consistency;
+- reorganizing imports unrelated to the task;
+- simplifying neighboring code;
+- replacing existing patterns with preferred idioms;
+- updating comments or docstrings that are not affected by the change.
