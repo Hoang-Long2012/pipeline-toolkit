@@ -588,16 +588,17 @@ class Pipeline:
 		return sum(pipeline_step == step for pipeline_step in self._steps)
 	def _format_step(self, step):
 		func = step[0]
+		parts = ["_"]
 		if len(step) >= 2:
 			args = step[1]
 		else:
 			args = ()
 		if isinstance(args, tuple):
-			parts = [repr(arg) for arg in args]
+			parts.extend([repr(arg) for arg in args])
 			if len(step) == 3:
 				parts.extend(f"{key}={value!r}" for key, value in step[2].items())
 		else:
-			parts = [f"{key}={value!r}" for key, value in args.items()]
+			parts.extend([f"{key}={value!r}" for key, value in args.items()])
 		name = getattr(func, "__name__", type(func).__name__)
 		return f"{name}({', '.join(parts)})"
 	def __str__(self):
