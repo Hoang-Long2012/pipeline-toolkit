@@ -10,6 +10,8 @@ hide:
 pip install pipeline-toolkit
 ```
 
+Requires Python 3.8 or later.
+
 ::: pipeline
     options:
       show_root_heading: false
