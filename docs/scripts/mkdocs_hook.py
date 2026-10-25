@@ -77,7 +77,7 @@ def _tags(line):
 
 		value = line[index:end + 1]
 
-		if value.startswith("<!") or value.startswith("<?"):
+		if value.startswith(("<!", "<?")):
 			index = end + 1
 			continue
 
@@ -126,7 +126,7 @@ def clean_html_whitespace(output):
 			cleaned.append(line)
 			continue
 
-		first_name, first_closing, _ = tags[0]
+		_first_name, first_closing, _ = tags[0]
 
 		if first_closing:
 			level = max(0, level - 1)
