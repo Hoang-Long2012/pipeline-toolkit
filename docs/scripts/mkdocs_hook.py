@@ -1,5 +1,5 @@
-import prettierfier
-
-
 def on_post_page(output, page, config):
-	return prettierfier.prettify_html(output)
+	return "\n".join(
+		line.strip() for line in output.splitlines()
+		if line.strip()
+	)
