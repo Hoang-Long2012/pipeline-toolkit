@@ -74,7 +74,10 @@ plugins:
             show_root_members_full_path: false
             show_object_full_path: false
             extensions:
-              - docs/griffe_extensions.py:PreferExportedAliases
+              - docs/scripts/griffe_extension.py:PreferExportedAliases
+
+hooks:
+  - docs/scripts/mkdocs_hook.py
 
 extra_css:
   - stylesheets/extra.css
