@@ -25,6 +25,7 @@
 - [ ] `uv run ruff check`
 - [ ] `uv run ty check`
 - [ ] `uv run pytest`
+- [ ] `uv run mkdocs build --strict`
 
 ## Contributor checklist
 
