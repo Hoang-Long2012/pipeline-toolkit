@@ -17,29 +17,28 @@ VOID_TAGS = {
 
 RAW_TAGS = {
 	"pre",
-	"textarea",
 	"script",
 	"style",
+	"textarea",
 }
 
 
-def _tag_name(tag):
-	tag = tag.lstrip("<").lstrip("/").strip()
+def _tag_name(value):
+	value = value.lstrip("<").lstrip("/").strip()
 
-	if not tag:
+	if not value:
 		return ""
 
-	for index, char in enumerate(tag):
+	for index, char in enumerate(value):
 		if char.isspace() or char in "/>":
-			return tag[:index].lower()
+			return value[:index].lower()
 
-	return tag.lower()
+	return value.lower()
 
 
-def _tags(line):
-	result = []
+def _find_tags(line):
+	tags = []
 	index = 0
-	quote = None
 
 	while index < len(line):
 		if line[index] != "<":
@@ -50,7 +49,6 @@ def _tags(line):
 			end = line.find("-->", index + 4)
 
 			if end == -1:
-				result.append(("comment", False, False))
 				break
 
 			index = end + 3
@@ -62,7 +60,7 @@ def _tags(line):
 		while end < len(line):
 			char = line[end]
 
-			if quote:
+			if quote is not None:
 				if char == quote:
 					quote = None
 			elif char in "\"'":
@@ -77,7 +75,7 @@ def _tags(line):
 
 		value = line[index:end + 1]
 
-		if value.startswith(("<!", "<?")):
+		if value.startswith("<!") or value.startswith("<?"):
 			index = end + 1
 			continue
 
@@ -86,73 +84,81 @@ def _tags(line):
 		name = _tag_name(value)
 
 		if name:
-			result.append((name, closing, self_closing))
+			tags.append((name, closing, self_closing))
 
 		index = end + 1
 
-	return result
+	return tags
+
+
+def _raw_state(tags, raw_tag):
+	for name, closing, self_closing in tags:
+		if name != raw_tag:
+			continue
+
+		if closing:
+			return None
+
+		if not self_closing:
+			return raw_tag
+
+	return raw_tag
 
 
 def clean_html_whitespace(output):
 	lines = output.splitlines(keepends=True)
-	cleaned = []
 
-	level = 0
+	cleaned = []
+	stack = []
 	raw_tag = None
 
 	for line in lines:
 		stripped = line.strip()
 
-		if not stripped:
-			if raw_tag:
-				cleaned.append(line)
-
-			continue
-
-		if raw_tag:
+		if raw_tag is not None:
 			cleaned.append(line)
 
-			tags = _tags(line)
-
-			for name, closing, self_closing in tags:
-				if closing and name == raw_tag:
-					raw_tag = None
+			if f"</{raw_tag}>" in line.lower():
+				raw_tag = None
 
 			continue
 
-		tags = _tags(line)
+		if not stripped:
+			continue
+
+		tags = _find_tags(line)
 
 		if not tags:
 			cleaned.append(line)
 			continue
 
-		_first_name, first_closing, _ = tags[0]
+		# A line beginning with a closing tag belongs to the
+		# parent level rather than the element being closed.
+		first_name, first_closing, _ = tags[0]
 
-		if first_closing:
-			level = max(0, level - 1)
+		if first_closing and stack and stack[-1] == first_name:
+			stack.pop()
 
-		if stripped.startswith("</"):
-			indentation = "	 " * level
-		else:
-			indentation = "	 " * level
-
-		cleaned.append(indentation + stripped)
+		cleaned.append("\t" * len(stack) + stripped)
 
 		for name, closing, self_closing in tags:
-			if name in RAW_TAGS and not closing and not self_closing:
-				raw_tag = name
-				break
+			if name in RAW_TAGS:
+				if closing or self_closing:
+					continue
 
-			if closing or self_closing or name in VOID_TAGS:
+				raw_tag = name
 				continue
 
-			level += 1
+			if name in VOID_TAGS or self_closing:
+				continue
 
-			if any(
-				other_name == name and other_closing
-				for other_name, other_closing, _ in tags
-			):
-				level -= 1
+			if closing:
+				if stack and stack[-1] == name:
+					stack.pop()
+
+				continue
+
+			stack.append(name)
 
 	return "".join(cleaned)
 
