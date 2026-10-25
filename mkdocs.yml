@@ -90,6 +90,10 @@ markdown_extensions:
   - nl2br
   - pymdownx.superfences:
       preserve_tabs: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
 
 watch:
   - docs
