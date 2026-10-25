@@ -43,6 +43,8 @@ uv run ty check
 uv run pytest
 ```
 
+If your changes involve the documentation, run `uv run mkdocs build --strict`.
+
 If you change dependencies, regenerate `uv.lock` with `uv lock` and include the updated lockfile.
 
 Do not edit the lockfile by hand.
