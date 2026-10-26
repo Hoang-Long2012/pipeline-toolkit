@@ -22,7 +22,7 @@ For a bug report, please include:
 Install [uv](https://docs.astral.sh/uv/) and sync the development environment from the lockfile:
 
 ```bash
-uv sync --locked --group dev
+uv sync
 ```
 
 The repository uses Python 3.14 for development.
