@@ -71,7 +71,13 @@ jobs:
 
       - name: Prepare documentation
         run: |
-          cp CHANGELOG.md docs/changelog.md
+          {
+            printf '%s\n' '---'
+            printf '%s\n' 'hide:'
+            printf '%s\n' '  - toc'
+            printf '%s\n' '---'
+            cat CHANGELOG.md
+          } > docs/changelog.md
           cp CONTRIBUTING.md docs/contributing.md
 
       - name: Build documentation
