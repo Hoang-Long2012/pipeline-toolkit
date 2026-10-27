@@ -2,14 +2,76 @@
 	display: block;
 	width: 100%;
 }
+
 .md-search {
-  display: block;
-  visibility: visible;
-  opacity: 1;
+	display: block;
+	visibility: visible;
+	opacity: 1;
 }
+
 .md-search__overlay {
-visibility: hidden;
+	visibility: hidden;
 }
+
 .md-source-file__fact {
-  display: block;
+	display: block;
+}
+
+/*
+ * Keep the primary navigation and table of contents in the page
+ * instead of switching to Material's mobile drawer layout.
+ */
+@media screen and (max-width: 76.1875em) {
+	/* Hide the mobile drawer button. */
+	.md-header__button[for="__drawer"] {
+		display: none;
+	}
+
+	/* Keep the primary sidebar in the document flow. */
+	.md-sidebar--primary {
+		position: static;
+		display: block;
+		transform: none;
+		width: auto;
+		height: auto;
+	}
+
+	/* Keep the table of contents in the document flow. */
+	.md-sidebar--secondary {
+		position: static;
+		display: block;
+		transform: none;
+		width: auto;
+		height: auto;
+	}
+
+	/* Prevent Material's drawer clipping/overflow behavior. */
+	.md-sidebar__scrollwrap {
+		height: auto;
+	}
+
+	.md-sidebar__inner {
+		height: auto;
+	}
+
+	/* Keep the three page regions in the same DOM order. */
+	.md-main__inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.md-sidebar--primary {
+		grid-column: 1;
+		grid-row: 1;
+	}
+
+	.md-content {
+		grid-column: 1;
+		grid-row: 2;
+	}
+
+	.md-sidebar--secondary {
+		grid-column: 1;
+		grid-row: 3;
+	}
 }
