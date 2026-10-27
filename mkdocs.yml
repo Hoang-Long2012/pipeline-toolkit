@@ -47,6 +47,7 @@ plugins:
       exclude:
         - changelog.md
         - contributing.md
+  - htmlproofer
   - macros
   - mkdocstrings:
       handlers:

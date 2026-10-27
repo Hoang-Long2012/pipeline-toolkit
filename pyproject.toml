@@ -112,6 +112,7 @@ test = [
 documentation = [
 	"justhtml>=0.1.0",
 	"mkdocs-git-revision-date-localized-plugin>=1.4.7",
+	"mkdocs-htmlproofer-plugin>=1.4.1",
 	"mkdocs-macros-plugin>=1.5.0",
 	"mkdocs-material>=9.7.7",
 	"mkdocstrings[python]>=0.26.1",
