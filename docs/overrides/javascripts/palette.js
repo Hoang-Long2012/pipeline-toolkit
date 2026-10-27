@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	const button = root.querySelector("[data-palette-button]");
 	const dialog = root.querySelector("[data-palette-menu]");
+	const closeButton = root.querySelector("[data-palette-close]");
 	const options = [...root.querySelectorAll("[data-palette-option]")];
 
 	if (!button || !dialog || !options.length)
@@ -55,6 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			closeDialog();
 		else
 			openDialog();
+	});
+
+	closeButton?.addEventListener("click", () => {
+		closeDialog();
+		button.focus();
 	});
 
 	options.forEach(option => {
