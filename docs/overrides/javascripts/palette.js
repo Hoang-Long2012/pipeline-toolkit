@@ -7,10 +7,10 @@ document.addEventListener("DOMContentLoaded", () => {
 		return;
 
 	const button = root.querySelector("[data-palette-button]");
-	const menu = root.querySelector("[data-palette-menu]");
+	const dialog = root.querySelector("[data-palette-menu]");
 	const options = [...root.querySelectorAll("[data-palette-option]")];
 
-	if (!button || !menu || !options.length)
+	if (!button || !dialog || !options.length)
 		return;
 
 	function applyPalette(option) {
@@ -27,99 +27,55 @@ document.addEventListener("DOMContentLoaded", () => {
 		for (const [key, value] of Object.entries(palette.color))
 			document.body.setAttribute(`data-md-color-${key}`, value);
 
-		for (const item of options) {
-			item.setAttribute(
-				"aria-checked",
-				item === option ? "true" : "false"
-			);
-		}
+		for (const item of options)
+			item.checked = item === option;
 
 		__md_set("__palette", palette);
 	}
 
-	function openMenu() {
-		menu.hidden = false;
-		button.setAttribute("aria-expanded", "true");
+	function openDialog() {
+		if (!dialog.open)
+			dialog.showModal();
 
-		const selected = options.find(
-			option => option.getAttribute("aria-checked") === "true"
-		);
-
+		const selected = options.find(option => option.checked);
 		(selected || options[0]).focus();
+
+		button.setAttribute("aria-expanded", "true");
 	}
 
-	function closeMenu() {
-		menu.hidden = true;
+	function closeDialog() {
+		if (dialog.open)
+			dialog.close();
+
 		button.setAttribute("aria-expanded", "false");
 	}
 
-	function toggleMenu() {
-		if (menu.hidden)
-			openMenu();
-		else {
-			closeMenu();
-			button.focus();
-		}
-	}
-
-	button.addEventListener("click", toggleMenu);
-
-	button.addEventListener("keydown", event => {
-		if (
-			event.key === "Enter" ||
-			event.key === " "
-		) {
-			event.preventDefault();
-			toggleMenu();
-		}
-
-		if (event.key === "ArrowDown") {
-			event.preventDefault();
-			openMenu();
-		}
+	button.addEventListener("click", () => {
+		if (dialog.open)
+			closeDialog();
+		else
+			openDialog();
 	});
 
-	options.forEach((option, index) => {
-		option.addEventListener("click", () => {
+	options.forEach(option => {
+		option.addEventListener("change", () => {
 			applyPalette(option);
-			closeMenu();
+			closeDialog();
 			button.focus();
-		});
-
-		option.addEventListener("keydown", event => {
-			if (event.key === "ArrowDown") {
-				event.preventDefault();
-				options[(index + 1) % options.length].focus();
-			}
-
-			if (event.key === "ArrowUp") {
-				event.preventDefault();
-				options[
-					(index - 1 + options.length) % options.length
-				].focus();
-			}
-
-			if (event.key === "Home") {
-				event.preventDefault();
-				options[0].focus();
-			}
-
-			if (event.key === "End") {
-				event.preventDefault();
-				options.at(-1).focus();
-			}
-
-			if (event.key === "Escape") {
-				event.preventDefault();
-				closeMenu();
-				button.focus();
-			}
 		});
 	});
 
-	document.addEventListener("click", event => {
-		if (!root.contains(event.target))
-			closeMenu();
+	dialog.addEventListener("cancel", event => {
+		event.preventDefault();
+		closeDialog();
+		button.focus();
+	});
+
+	dialog.addEventListener("click", event => {
+		if (event.target === dialog) {
+			closeDialog();
+			button.focus();
+		}
 	});
 
 	const saved = __md_get("__palette");
