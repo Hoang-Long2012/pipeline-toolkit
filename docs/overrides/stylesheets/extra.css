@@ -23,7 +23,7 @@
 	cursor: pointer;
 }
 
-}}.md-search {
+.md-search {
 	display: block;
 	visibility: visible;
 	opacity: 1;
@@ -47,22 +47,23 @@
 		display: none;
 	}
 
-	/* Keep the primary sidebar in the document flow. */
-	.md-sidebar--primary {
+	/* Keep sidebars in the document flow. */
+	.md-sidebar--primary,
+	.md-sidebar--secondary {
 		position: static;
-		display: block;
 		transform: none;
 		width: auto;
 		height: auto;
 	}
 
-	/* Keep the table of contents in the document flow. */
-	.md-sidebar--secondary {
-		position: static;
+	.md-sidebar--primary:not([hidden]),
+	.md-sidebar--secondary:not([hidden]) {
 		display: block;
-		transform: none;
-		width: auto;
-		height: auto;
+	}
+
+	/* Respect Material's hidden attribute. */
+	.md-sidebar[hidden] {
+		display: none !important;
 	}
 
 	/* Prevent Material's drawer clipping/overflow behavior. */
