@@ -15,6 +15,7 @@ theme:
   features:
     - navigation.instant
     - toc.follow
+    - toc.integrate
     - search.suggest
     - search.highlight
     - content.code.copy
