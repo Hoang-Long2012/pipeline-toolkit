@@ -121,7 +121,6 @@ documentation = [
 dev = [
 	{include-group = "test"},
 	{include-group = "documentation"},
-	"radon>=6.0.1",
 	"ruff>=0.16.6",
 	"ty>=0.0.85",
 	"validate-pyproject>=0.25",
