@@ -6,7 +6,7 @@
     {% set icon = "material/brightness-7" %}
     {% include ".icons/" ~ icon ~ ".svg" %}
   </button>
-  <dialog id="__palette_dialog" class="md-palette-dialog" aria-labelledby="__palette_dialog_title" role="dialog" data-palette-menu hidden>
+  <dialog id="__palette_dialog" class="md-palette-dialog" aria-labelledby="__palette_dialog_title" role="dialog" data-palette-menu>
     <h2 id="__palette_dialog_title">Color scheme</h2>
     <div role="radiogroup" aria-labelledby="__palette_dialog_title">
       {% for option in config.theme.palette %}
