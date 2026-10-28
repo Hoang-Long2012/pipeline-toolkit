@@ -1,0 +1,6 @@
+# CODEOWNERS
+# Each line defines a file pattern and the owner(s) responsible for reviewing changes.
+# Owners are automatically requested for review when a pull request touches matching files.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+* @Hoang-Long2012
