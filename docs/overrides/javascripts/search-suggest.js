@@ -8,6 +8,8 @@ const observer = new MutationObserver(() => {
 
 	suggest.setAttribute("aria-live", "polite")
 	suggest.setAttribute("aria-atomic", "true")
+
+	suggest.hidden = !suggest.textContent.trim()
 })
 
 observer.observe(document.body, {
