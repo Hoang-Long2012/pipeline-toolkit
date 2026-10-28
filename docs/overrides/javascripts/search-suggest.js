@@ -9,7 +9,11 @@ const observer = new MutationObserver(() => {
 	suggest.setAttribute("aria-live", "polite")
 	suggest.setAttribute("aria-atomic", "true")
 
-	suggest.hidden = !suggest.textContent.trim()
+	const content = suggest.textContent
+		.replace(/[\s\u200B]+/g, "")
+		.trim()
+
+	suggest.hidden = !content
 })
 
 observer.observe(document.body, {
