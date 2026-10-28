@@ -33,6 +33,10 @@
 	visibility: hidden;
 }
 
+.md-search__suggest:empty {
+	display: none;
+}
+
 .md-source-file__fact {
 	display: block;
 }
