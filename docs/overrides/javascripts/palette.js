@@ -66,8 +66,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	options.forEach(option => {
 		option.addEventListener("change", () => {
 			applyPalette(option);
-			closeDialog();
-			button.focus();
 		});
 	});
 
