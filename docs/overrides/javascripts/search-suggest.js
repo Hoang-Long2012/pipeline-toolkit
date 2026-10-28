@@ -10,7 +10,7 @@ const observer = new MutationObserver(() => {
 	suggest.setAttribute("aria-atomic", "true")
 
 	const content = suggest.textContent
-		.replace(/[\s\u200B]+/g, "")
+		.replace(/\u200B/g, "")
 		.trim()
 
 	suggest.hidden = !content
