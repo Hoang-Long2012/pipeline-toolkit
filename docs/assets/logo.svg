@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="ptBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d" />
+      <stop offset="45%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <!-- Main Pipeline Gradient -->
+    <linearGradient id="ptPipeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="25%" stop-color="#0ea5e9" />
+      <stop offset="55%" stop-color="#6366f1" />
+      <stop offset="80%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <!-- Core Flow Gradient -->
+    <linearGradient id="ptCoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe" />
+      <stop offset="35%" stop-color="#bae6fd" />
+      <stop offset="70%" stop-color="#e0e7ff" />
+      <stop offset="100%" stop-color="#f5d0fe" />
+    </linearGradient>
+
+    <!-- Ambient Shadow & Glow Filter -->
+    <filter id="ptGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="ptPulse" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Container -->
+  <rect width="512" height="512" rx="112" fill="url(#ptBgGrad)" />
+  <rect width="508" height="508" x="2" y="2" rx="110" fill="none" stroke="rgba(56, 189, 248, 0.18)" stroke-width="2" />
+
+  <!-- Soft Ambient Pipe Lighting -->
+  <path d="M 151 106 L 151 406 M 151 150 L 301 150 C 361 150 361 270 301 270 L 151 270"
+        fill="none" stroke="#6366f1" stroke-width="60" stroke-linecap="round" stroke-linejoin="round"
+        opacity="0.3" filter="url(#ptGlow)" />
+
+  <!-- Pipe Outer Dark Shadow / Stroke for High Contrast -->
+  <path d="M 151 106 L 151 406 M 151 150 L 301 150 C 361 150 361 270 301 270 L 151 270"
+        fill="none" stroke="#050814" stroke-width="54" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Pipe Body -->
+  <path d="M 151 106 L 151 406 M 151 150 L 301 150 C 361 150 361 270 301 270 L 151 270"
+        fill="none" stroke="url(#ptPipeGrad)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- High-Speed Data Stream Core -->
+  <path d="M 151 116 L 151 396 M 151 150 L 301 150 C 353 150 353 270 301 270 L 151 270"
+        fill="none" stroke="url(#ptCoreGrad)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"
+        opacity="0.95" />
+
+  <!-- Pipe Flanges -->
+  <!-- Top Inlet Flange -->
+  <rect x="127" y="92" width="48" height="14" rx="5" fill="#38bdf8" filter="url(#ptPulse)" />
+  <rect x="133" y="95" width="36" height="8" rx="3" fill="#ffffff" />
+
+  <!-- Bottom Outlet Flange -->
+  <rect x="127" y="400" width="48" height="14" rx="5" fill="#c084fc" filter="url(#ptPulse)" />
+  <rect x="133" y="403" width="36" height="8" rx="3" fill="#ffffff" />
+
+  <!-- Step 1: Input / First Transformation Node -->
+  <circle cx="226" cy="150" r="19" fill="#0f172a" stroke="#38bdf8" stroke-width="6" />
+  <circle cx="226" cy="150" r="8" fill="#38bdf8" filter="url(#ptPulse)" />
+  <circle cx="226" cy="150" r="3.5" fill="#ffffff" />
+
+  <!-- Step 2: Intermediate Transform Node -->
+  <circle cx="361" cy="210" r="21" fill="#0f172a" stroke="#818cf8" stroke-width="6.5" />
+  <circle cx="361" cy="210" r="9" fill="#818cf8" filter="url(#ptPulse)" />
+  <circle cx="361" cy="210" r="4" fill="#ffffff" />
+
+  <!-- Step 3: Return / Accumulator Node -->
+  <circle cx="226" cy="270" r="19" fill="#0f172a" stroke="#c084fc" stroke-width="6" />
+  <circle cx="226" cy="270" r="8" fill="#c084fc" filter="url(#ptPulse)" />
+  <circle cx="226" cy="270" r="3.5" fill="#ffffff" />
+
+  <!-- Central Interconnect Valve / Junction -->
+  <circle cx="151" cy="270" r="13" fill="#6366f1" stroke="#ffffff" stroke-width="4.5" />
+
+  <!-- Directional Stream Chevrons -->
+  <path d="M 178 144 L 186 150 L 178 156" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+  <path d="M 276 276 L 268 270 L 276 264" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+  <path d="M 145 342 L 151 350 L 157 342" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+</svg>
