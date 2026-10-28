@@ -727,8 +727,7 @@ class Pipeline:
 		Raises:
 			TypeError: If ``step`` has an invalid format.
 		"""
-		self.add(step)
-		return self
+		return self.add(step)
 	def __add__(self, other):
 		"""Return a new pipeline by concatenating pipeline steps.
 
