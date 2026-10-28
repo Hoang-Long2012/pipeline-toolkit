@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="favBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0f1d" />
+      <stop offset="100%" stop-color="#1e1b4b" />
+    </linearGradient>
+
+    <!-- Pipe Gradient -->
+    <linearGradient id="favPipe" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="30%" stop-color="#3b82f6" />
+      <stop offset="70%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <!-- Core Gradient -->
+    <linearGradient id="favCore" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#bae6fd" />
+      <stop offset="100%" stop-color="#f5d0fe" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Base for High Contrast on Light/Dark Tabs -->
+  <rect width="512" height="512" rx="120" fill="url(#favBg)" />
+
+  <!-- Outer Contrast Stroke -->
+  <path d="M 151 106 L 151 406 M 151 150 L 301 150 C 365 150 365 270 301 270 L 151 270"
+        fill="none" stroke="#030712" stroke-width="64" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Bold Pipe Body -->
+  <path d="M 151 106 L 151 406 M 151 150 L 301 150 C 365 150 365 270 301 270 L 151 270"
+        fill="none" stroke="url(#favPipe)" stroke-width="50" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Flow Core -->
+  <path d="M 151 116 L 151 396 M 151 150 L 301 150 C 357 150 357 270 301 270 L 151 270"
+        fill="none" stroke="url(#favCore)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+
+  <!-- Flanges -->
+  <rect x="123" y="90" width="56" height="18" rx="6" fill="#38bdf8" />
+  <rect x="123" y="404" width="56" height="18" rx="6" fill="#c084fc" />
+
+  <!-- Glowing Stage Nodes (Large for small-scale visibility) -->
+  <circle cx="226" cy="150" r="24" fill="#0a0f1d" stroke="#38bdf8" stroke-width="8" />
+  <circle cx="226" cy="150" r="10" fill="#ffffff" />
+
+  <circle cx="365" cy="210" r="26" fill="#0a0f1d" stroke="#818cf8" stroke-width="8.5" />
+  <circle cx="365" cy="210" r="11" fill="#ffffff" />
+
+  <circle cx="226" cy="270" r="24" fill="#0a0f1d" stroke="#c084fc" stroke-width="8" />
+  <circle cx="226" cy="270" r="10" fill="#ffffff" />
+
+  <circle cx="151" cy="270" r="16" fill="#6366f1" stroke="#ffffff" stroke-width="5" />
+</svg>
