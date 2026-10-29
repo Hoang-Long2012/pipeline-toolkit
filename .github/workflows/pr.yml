@@ -1,4 +1,4 @@
-name: Pull request checks
+name: Pull request or push checks
 
 on:
   pull_request:
@@ -65,11 +65,15 @@ jobs:
         run: uv run ty check .
 
   test-matrix:
-    name: Test Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
         python-version:
           - "3.8"
           - "3.9"
