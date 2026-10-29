@@ -103,6 +103,11 @@ requires = ["setuptools>=75.3.2"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
+quality = [
+	"ruff>=0.16.6",
+	"ty>=0.0.85",
+	"validate-pyproject>=0.25",
+]
 test = [
 	"coverage>=7.6.1",
 	"pytest>=8.3.5",
@@ -122,9 +127,7 @@ documentation = [
 	"ruamel-yaml>=0.18.16",
 ]
 dev = [
+	{include-group = "quality"},
 	{include-group = "test"},
 	{include-group = "documentation"},
-	"ruff>=0.16.6",
-	"ty>=0.0.85",
-	"validate-pyproject>=0.25",
 ]

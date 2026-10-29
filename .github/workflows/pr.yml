@@ -56,7 +56,7 @@ jobs:
         run: uvx validate-pyproject pyproject.toml
 
       - name: Install dependencies with locked file
-        run: uv sync --group dev
+        run: uv sync --group quality
 
       - name: Run Ruff
         run: uv run ruff check
