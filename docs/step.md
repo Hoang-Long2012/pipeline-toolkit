@@ -21,6 +21,16 @@
     options:
       heading_level: 3
 
+## Representation
+
+::: pipeline.step.__iter__
+    options:
+      heading_level: 3
+
+::: pipeline.step.__repr__
+    options:
+      heading_level: 3
+
 ## Operators
 
 ::: pipeline.step.__ror__

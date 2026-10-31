@@ -126,8 +126,16 @@ class step:
 		"""
 		return other.write(self._function(self.default, *self._args, **self._kwargs))
 	def __iter__(self):
+		"""Iterate over the exported step components.
+
+		This allows the step to be unpacked using tuple unpacking syntax, such as ``function, args, kwargs = my_step``.
+		"""
 		yield from self.export()
 	def __repr__(self):
+		"""Return a readable representation of the step.
+
+		The representation includes the wrapped callable name and its configured positional and keyword arguments.
+		"""
 		name = getattr(self._function, "__name__", type(self._function).__name__)
 		parts = [f"{name}"]
 		if self._args:
