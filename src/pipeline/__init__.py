@@ -8,9 +8,9 @@ The main components are:
   - [`Pipeline`](Pipeline.md): Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning execution.
   - [`Group`](Group.md): Manage a collection of pipelines or sub-groups with support for collective execution, control, and container operations.
   - [`Checkpoint`](Checkpoint.md): Store values and provide a synchronization point for coordinating pipeline execution.
+  - [`Stack`](Stack.md): A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
 
 - Functional utilities:
-  - [`Stack`](Stack.md): A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
   - [`chain`](chain.md): Apply multiple callables sequentially, passing each result to the next callable.
   - [`compose`](compose.md): Create a callable that applies multiple callables sequentially to a value.
   - [`mut`](mut.md): Apply a function directly to an object for side effects and return the same object.
@@ -24,11 +24,11 @@ Example:
 from pipeline import Pipeline
 
 pipeline = Pipeline(
-    [
-        (lambda value: value + 1,),
-        (lambda value: value * 2,),
-    ],
-    default=5
+	[
+		(lambda value: value + 1,),
+		(lambda value: value * 2,),
+	],
+	default=5
 )
 
 pipeline.run().wait()
