@@ -59,6 +59,9 @@ default-groups = ["dev"]
 link-mode = "copy"
 trusted-publishing = "automatic"
 
+[tool.uv.build-backend]
+module-name = "pipeline"
+
 [tool.ruff]
 src = ["src", "tests"]
 indent-width = 4
