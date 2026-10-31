@@ -2,8 +2,6 @@
 
 Build reusable, editable asynchronous pipelines from ordinary Python callables.
 
-This package provides a simple asynchronous pipeline executor along with supporting functional utilities and container components.
-
 The main components are:
 
 - Core components:
