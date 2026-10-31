@@ -1,3 +1,8 @@
+---
+hide:
+  - toc
+---
+
 ::: pipeline.Checkpoint
     options:
       members: false
