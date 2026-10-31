@@ -29,12 +29,16 @@ print(pipeline.result)  # 30
 
 The value flows through each step sequentially:
 
-```mermaid
-flowchart TD
-	input["10"] --> add["add(10, 5)"]
-	add --> value["15"]
-	value --> multiply["multiply(15, 2)"]
-	multiply --> output["30"]
+```text
+10
+ ↓
+add(10, 5)
+ ↓
+15
+ ↓
+multiply(15, 2)
+ ↓
+30
 ```
 
 See the [API Reference](https://pipeline-toolkit.pages.dev) for detailed documentation.
