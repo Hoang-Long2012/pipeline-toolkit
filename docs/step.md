@@ -1,3 +1,8 @@
+---
+hide:
+  - toc
+---
+
 ::: pipeline.step
     options:
       members: false
