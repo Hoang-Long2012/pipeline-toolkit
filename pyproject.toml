@@ -8,7 +8,8 @@ authors = [
 	{ name = "Hoàng Long", email = "hoanglongcodes@gmail.com" }
 ]
 
-license = {file = "LICENSE"}
+license = "mit"
+license-files = ["LICENSE"]
 requires-python = ">=3.8"
 
 dependencies = []
@@ -42,7 +43,8 @@ classifiers = [
 	"Programming Language :: Python :: 3.14",
 	"Programming Language :: Python :: 3.15",
 	"Topic :: Software Development :: Libraries :: Python Modules",
-	"Topic :: Utilities"
+	"Topic :: Utilities",
+	"License :: OSI Approved :: MIT License"
 ]
 
 [project.urls]
