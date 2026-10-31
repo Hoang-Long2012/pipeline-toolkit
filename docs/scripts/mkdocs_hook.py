@@ -1,6 +1,18 @@
+from datetime import datetime
+from importlib.metadata import version
 from pathlib import Path
 
 from justhtml import JustHTML
+from zoneinfo import ZoneInfo
+
+
+def on_config(config):
+	now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))
+	config["extra"]["version"] = version("pipeline-toolkit")
+	config["extra"]["material_version"] = version("mkdocs-material")
+	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")
+	config["extra"]["deployment_time"] = now.strftime("%H:%M")
+	return config
 
 
 def on_pre_build(config):
