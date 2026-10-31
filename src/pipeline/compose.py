@@ -8,6 +8,7 @@ def compose(steps, default=None):
 	Args:
 		steps: Callables to apply sequentially.
 		default: Initial value passed to the first callable.
+			Defaults to ``None``.
 
 	Returns:
 		The result produced by the last callable, or ``default`` when no callables are provided.
