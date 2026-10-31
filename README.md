@@ -29,7 +29,7 @@ print(pipeline.result)  # 30
 
 The value flows through each step sequentially:
 
-```text
+```mermaid
 10
  ↓
 add(10, 5)
