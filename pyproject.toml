@@ -83,6 +83,7 @@ respect-ignore-files = true
 testpaths = ["tests"]
 addopts = "-ra --cov"
 timeout = 10
+strict_config = true
 
 [tool.coverage.run]
 source_pkgs = ["pipeline"]
