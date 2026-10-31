@@ -4,7 +4,7 @@ Thanks for helping improve `Pipeline-Toolkit`. Contributions of bug reports, fea
 
 ## Report a bug or suggest an improvement
 
-Open an issue in the [GitHub repository](https://github.com/Hoang-Long2012/pipeline-toolkit/issues).
+Open an issue in the [GitHub repository](https://github.com/Hoang-Long2012/pipeline-toolkit/issues/new).
 
 For a bug report, please include:
 
@@ -31,7 +31,7 @@ The package itself supports Python 3.8 and newer.
 
 ## Make and check a change
 
-Keep changes focused. Add or update tests for changed behavior, and update user-facing documentation when the public API or its behavior changes.
+Keep changes focused and follow the existing coding style (use tabs for Python indentation). Add or update tests for changed behavior, and update user-facing documentation when the public API or its behavior changes.
 
 Before opening a pull request, run:
 
@@ -43,7 +43,7 @@ uv run ty check
 uv run pytest
 ```
 
-If your changes involve the documentation, run `uv run mkdocs build --strict`.
+If your changes involve the documentation, run `uv run mkdocs build --strict`. You can also preview documentation locally with `uv run mkdocs serve`.
 
 If you change dependencies, regenerate `uv.lock` with `uv lock` and include the updated lockfile.
 
@@ -51,4 +51,4 @@ Do not edit the lockfile by hand.
 
 ## Open a pull request
 
-Push your branch to your fork and open a pull request against `main`. In the pull request description, explain the problem and change, list the checks you ran, and link any related issue.
+Push your branch to your fork and [open a pull request against `main`](https://github.com/Hoang-Long2012/pipeline-toolkit/compare). In the pull request description, explain the problem and change, list the checks you ran, and link any related issue.
