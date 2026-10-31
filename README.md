@@ -31,15 +31,6 @@ The value flows through each step sequentially:
 
 ```mermaid
 info
-10
- ↓
-add(10, 5)
- ↓
-15
- ↓
-multiply(15, 2)
- ↓
-30
 ```
 
 See the [API Reference](https://pipeline-toolkit.pages.dev) for detailed documentation.
