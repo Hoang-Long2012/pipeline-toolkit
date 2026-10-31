@@ -30,7 +30,7 @@ print(pipeline.result)  # 30
 The value flows through each step sequentially:
 
 ```mermaid
-abciy
+info
 10
  ↓
 add(10, 5)
