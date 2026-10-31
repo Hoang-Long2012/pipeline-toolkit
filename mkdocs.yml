@@ -80,7 +80,7 @@ plugins:
               - docs/scripts/griffe_extension.py:PreferExportedAliases
 
 hooks:
-  - docs/scripts/mkdocs_hook.py
+  - docs/scripts/mkdocs_hooks.py
 
 extra_css:
   - stylesheets/extra.css
