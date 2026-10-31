@@ -109,6 +109,10 @@ nav:
   - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
   - PyPI: https://pypi.org/project/pipeline-toolkit
 
+validation:
+  nav:
+    omitted_files: ignore
+
 extra:
   version: ""
   material_version: ""
