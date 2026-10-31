@@ -31,7 +31,7 @@ pipeline = Pipeline(
 pipeline.run().wait().result  # 12
 ```
 """
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 
 from .chain import chain as chain
 from .checkpoint import Checkpoint as Checkpoint
@@ -43,6 +43,10 @@ from .pipe import step as step
 from .pipeline import Pipeline as Pipeline
 from .tap import tap as tap
 
-__version__ = version("pipeline-toolkit")
+try:
+	__version__ = version("pipeline-toolkit")
+except PackageNotFoundError:
+	__version__ = "0.0.0-dev0"
+
 __author__ = "Hoàng Long"
 __all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]
