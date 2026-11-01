@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.11
+- Documentation and metadata only release: Some changes and improvements have been made to the docstring and package metadata.
+
 ## 0.6.10
 - Improved `Pipeline` step string representation to include the `_` placeholder for the piped input value.
 
