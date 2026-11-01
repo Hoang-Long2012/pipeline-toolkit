@@ -4,6 +4,8 @@ This changelog documents the release history of Pipeline Toolkit, including new 
 
 Releases are listed in reverse chronological order, with the latest version at the top. Each entry summarizes the changes introduced in that release.
 
+Changes are categorized as `Added`, `Changed`, `Improved`, or `Fixed`. Documentation-only and metadata-only releases are explicitly identified.
+
 ## 0.6.11
 - Documentation and metadata only release: Some changes and improvements have been made to the docstring and package metadata.
 
