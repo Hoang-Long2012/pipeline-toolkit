@@ -27,11 +27,12 @@ def main():
 		if filename is None:
 			continue
 
-		files.append({
-			"filename": filename,
-			"coverage": line_rate * 100,
-			"missing": lines_valid - lines_covered,
-		})
+		if line_rate < 1:
+			files.append({
+				"filename": filename,
+				"coverage": line_rate * 100,
+				"missing": lines_valid - lines_covered,
+			})
 
 	files.sort(key=lambda item: item["filename"])
 
