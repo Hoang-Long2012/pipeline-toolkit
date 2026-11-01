@@ -62,7 +62,7 @@ jobs:
         run: uv run ruff check
 
       - name: Run ty
-        run: uv run ty check .
+        run: uv run ty check
 
   test-matrix:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
@@ -101,7 +101,11 @@ jobs:
         run: uv sync --group test
 
       - name: Run pytest
-        run: uv run pytest
+        run: uv run pytest --cov-report=xml
+
+      - name: Generate coverage summary
+        if: always()
+        run: uv run python .github/scripts/coverage_summary.py
 
   build:
     name: Check and build package
