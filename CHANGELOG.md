@@ -4,7 +4,7 @@ This changelog documents the release history of Pipeline Toolkit, including new 
 
 Releases are listed in reverse chronological order, with the latest version at the top. Each entry summarizes the changes introduced in that release.
 
-Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fixed`, and `removed`.
+Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fixed`, and `Removed`.
 
 Documentation-only and metadata-only releases are explicitly identified.
 
