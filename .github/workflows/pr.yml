@@ -170,3 +170,40 @@ jobs:
 
       - name: Build documentation
         run: uv run mkdocs build --strict
+
+  ci:
+    name: CI
+    if: always()
+    needs:
+      - dependency-review
+      - quality
+      - test-matrix
+      - build
+      - docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify required jobs
+        env:
+          DEPENDENCY_REVIEW: ${{ needs['dependency-review'].result }}
+          QUALITY: ${{ needs.quality.result }}
+          TEST_MATRIX: ${{ needs['test-matrix'].result }}
+          BUILD: ${{ needs.build.result }}
+          DOCS: ${{ needs.docs.result }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          failed=0
+
+          for result in "$QUALITY" "$TEST_MATRIX" "$BUILD" "$DOCS"; do
+            if [ "$result" != "success" ]; then
+              echo "A required job did not succeed."
+              failed=1
+            fi
+          done
+
+          if [ "$EVENT_NAME" = "pull_request" ] && [ "$DEPENDENCY_REVIEW" != "success" ]; then
+            echo "Dependency review did not succeed."
+            failed=1
+          fi
+
+          exit "$failed"
