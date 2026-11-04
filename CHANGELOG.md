@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.6.12
+- Documentation-only release: Improved the package example and description of `Pipeline` in the package's docstring.
+
 ## 0.6.11
 - Documentation and metadata only release: Some changes and improvements have been made to the docstring and package metadata.
 
