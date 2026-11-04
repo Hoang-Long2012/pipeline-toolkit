@@ -103,9 +103,15 @@ jobs:
       - name: Run pytest
         run: uv run pytest --cov-report=xml
 
-      - name: Generate coverage summary
-        if: always()
-        run: uv run python .github/scripts/coverage_summary.py
+      - name: Upload coverage to Codecov
+        if: ${{ always() && matrix.os == 'ubuntu-latest' && matrix.python-version == '3.15' && hashFiles('coverage.xml') != '' }}
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage.xml
+          disable_search: true
+          fail_ci_if_error: false
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     name: Check and build package
