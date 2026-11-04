@@ -5,7 +5,7 @@ Build reusable, editable asynchronous pipelines from ordinary Python callables.
 The main components are:
 
 - Core components:
-    - [`Pipeline`](Pipeline.md): Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning execution.
+    - [`Pipeline`](Pipeline.md): Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning pipelines.
     - [`Group`](Group.md): Manage a collection of pipelines or sub-groups with support for collective execution, control, and container operations.
     - [`Checkpoint`](Checkpoint.md): Store values and provide a synchronization point for coordinating pipeline execution.
     - [`Stack`](Stack.md): A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
@@ -23,15 +23,24 @@ Example:
 ```python
 from pipeline import Pipeline
 
+def add(x, y):
+    return x + y
+
+def multiply(x, y):
+    return x * y
+
 pipeline = Pipeline(
-	[
-		(lambda value: value + 1,),
-		(lambda value: value * 2,),
-	],
-	default=5
+    [
+        (add, (1,)),
+        (multiply, (2,)),
+    ]
 )
 
-pipeline.run().wait()
+pipeline.run(5)
+
+# Do something
+
+pipeline.wait()
 
 print(pipeline.result)  # 12
 ```
