@@ -1,18 +1,13 @@
-::: pipeline.stack
-    options:
-      members: false
-      heading_level: 1
-      show_root_full_path: true
-
 ::: pipeline.stack.Stack
     options:
       members: false
+      heading_level: 1
 
-### Capacity
+## Capacity
 
 ::: pipeline.stack.Stack.maxsize
     options:
-      heading_level: 4
+      heading_level: 3
 
 ## Operations
 
