@@ -18,6 +18,8 @@ class Stack:
 
 	Example:
 	```python
+	from pipeline.stack import Stack
+
 	stack = Stack(3)
 
 	stack.push("first")
