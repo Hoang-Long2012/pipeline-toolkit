@@ -113,6 +113,11 @@ validation:
   nav:
     omitted_files: ignore
 
+exclude_docs: |
+  overrides/
+  scripts/
+  _redirects
+
 extra:
   version: ""
   material_version: ""
