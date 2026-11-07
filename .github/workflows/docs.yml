@@ -42,11 +42,13 @@ jobs:
       - name: Install project Python
         run: uv python install
 
-      - name: Install project and documentation dependencies
+      - name: Install documentation dependencies
         run: uv sync --group documentation
 
       - name: Build documentation
         run: uv run mkdocs build --strict
+        env:
+          NO_MKDOCS_2_WARNING: "1"
 
       - name: Set up GitHub Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0

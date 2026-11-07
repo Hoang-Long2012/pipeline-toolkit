@@ -188,6 +188,8 @@ jobs:
 
       - name: Build documentation
         run: uv run mkdocs build --strict
+        env:
+          NO_MKDOCS_2_WARNING: "1"
 
   ci:
     name: CI
