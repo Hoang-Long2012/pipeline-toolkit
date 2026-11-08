@@ -31,7 +31,7 @@ The package itself supports Python 3.8 and newer.
 
 ## Make and check a change
 
-Keep changes focused and follow the existing coding style (use tabs for Python indentation). Add or update tests for changed behavior, and update user-facing documentation when the public API or its behavior changes.
+Keep changes focused and follow the existing coding style (use tabs for Python indentation, spaces for Markdown indentation). Add or update tests for changed behavior, and update user-facing documentation when the public API or its behavior changes.
 
 Before opening a pull request, run:
 
