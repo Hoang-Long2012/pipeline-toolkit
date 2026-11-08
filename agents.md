@@ -123,6 +123,7 @@ Do not change any of these merely as an implementation improvement.
 
 - Preserve the existing formatting and coding style.
 - Use tabs for Python indentation.
+- Use spaces for Markdown indentation.
 - Prefer straightforward, readable Python over unnecessary abstractions.
 - Do not introduce unnecessary dependencies.
 - Follow the existing project architecture instead of introducing new patterns without a clear need.
