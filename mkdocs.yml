@@ -11,8 +11,8 @@ theme:
   name: material
   language: en
   custom_dir: docs/overrides
-  logo: assets/logo.svg
-  favicon: assets/favicon.svg
+  logo: overrides/assets/images/logo.svg
+  favicon: overrides/assets/images/favicon.svg
 
   features:
     - navigation.instant
@@ -83,11 +83,11 @@ hooks:
   - docs/scripts/mkdocs_hooks.py
 
 extra_css:
-  - stylesheets/extra.css
+  - overrides/assets/stylesheets/extra.css
 
 extra_javascript:
-  - javascripts/palette.js
-  - javascripts/search-suggest.js
+  - overrides/assets/javascripts/palette.js
+  - overrides/assets/javascripts/search-suggest.js
 
 markdown_extensions:
   - nl2br
