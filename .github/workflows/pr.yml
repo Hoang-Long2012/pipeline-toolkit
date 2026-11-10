@@ -15,6 +15,8 @@ on:
       - "pyproject.toml"
       - "uv.lock"
       - ".github/workflows/pr.yml"
+      - ".github/workflows/codeql.yml"
+      - ".github/codeql/**"
       - ".github/scripts/**"
   schedule:
     - cron: "0 0 * * 0"
@@ -70,6 +72,8 @@ jobs:
 
             workflow:
               - '.github/workflows/pr.yml'
+              - ".github/workflows/codeql.yml"
+              - ".github/codeql/**"
               - '.github/scripts/**'
 
   dependency-review:
@@ -84,6 +88,45 @@ jobs:
         uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
         with:
           fail-on-severity: moderate
+
+  analyze:
+    name: CodeQL (${{ matrix.language }})
+    needs: changes
+    if: |
+      needs.changes.outputs.run-all == 'true' ||
+      needs.changes.outputs.code == 'true' ||
+      needs.changes.outputs.workflow == 'true'
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - actions
+          - python
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-extended
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: /language:${{ matrix.language }}
 
   quality:
     name: Code quality and validation
@@ -270,6 +313,7 @@ jobs:
     needs:
       - changes
       - dependency-review
+      - analyze
       - quality
       - test-matrix
       - build
@@ -281,6 +325,7 @@ jobs:
         env:
           CHANGES: ${{ needs.changes.result }}
           DEPENDENCY_REVIEW: ${{ needs['dependency-review'].result }}
+          ANALYZE: ${{ needs.analyze.result }}
           QUALITY: ${{ needs.quality.result }}
           TEST_MATRIX: ${{ needs['test-matrix'].result }}
           BUILD: ${{ needs.build.result }}
@@ -294,7 +339,7 @@ jobs:
             failed=1
           fi
 
-          for result in "$QUALITY" "$TEST_MATRIX" "$BUILD" "$DOCS"; do
+          for result in "$ANALYZE" "$QUALITY" "$TEST_MATRIX" "$BUILD" "$DOCS"; do
             if [ "$result" = "failure" ] || [ "$result" = "cancelled" ]; then
               echo "A required job failed or was cancelled."
               failed=1
