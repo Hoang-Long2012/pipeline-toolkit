@@ -15,8 +15,8 @@ on:
       - "pyproject.toml"
       - "uv.lock"
       - ".python-version"
-      - ".github/workflows/pr.yml"
-      - ".github/workflows/codeql.yml"
+      - ".github/workflows/**"
+      - ".github/actions/**"
       - ".github/codeql/**"
       - ".github/scripts/**"
   schedule:
@@ -43,6 +43,11 @@ jobs:
       config: ${{ steps.filter.outputs.config }}
       docs: ${{ steps.filter.outputs.docs }}
       workflow: ${{ steps.filter.outputs.workflow }}
+      codeql-actions: ${{ steps.filter.outputs.codeql-actions }}
+      codeql-python: ${{ steps.filter.outputs.codeql-python }}
+      codeql-common: ${{ steps.filter.outputs.codeql-common }}
+      codeql-matrix: ${{ steps.matrix.outputs.include }}
+      has-codeql: ${{ steps.matrix.outputs.has-codeql }}
       run-all: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
 
     steps:
@@ -75,8 +80,48 @@ jobs:
             workflow:
               - ".github/workflows/pr.yml"
               - ".github/workflows/codeql.yml"
+              - ".github/actions/**"
               - ".github/codeql/**"
               - ".github/scripts/**"
+
+            codeql-actions:
+              - ".github/workflows/**"
+              - ".github/actions/**"
+
+            codeql-python:
+              - "src/pipeline/**"
+              - "tests/**"
+              - ".github/scripts/**"
+
+            codeql-common:
+              - ".github/workflows/codeql.yml"
+              - ".github/codeql/**"
+
+      - name: Generate CodeQL matrix
+        id: matrix
+        env:
+          ACTIONS: ${{ steps.filter.outputs.codeql-actions }}
+          PYTHON: ${{ steps.filter.outputs.codeql-python }}
+          COMMON: ${{ steps.filter.outputs.codeql-common }}
+          RUN_ALL: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import os
+
+          env = os.environ
+
+          languages = []
+
+          if env["RUN_ALL"] == "true" or env["ACTIONS"] == "true" or env["COMMON"] == "true":
+              languages.append({"language": "actions"})
+
+          if env["RUN_ALL"] == "true" or env["PYTHON"] == "true" or env["COMMON"] == "true":
+              languages.append({"language": "python"})
+
+          print(f"include={json.dumps(languages)}")
+          print(f"has-codeql={str(bool(languages)).lower()}")
+          PY
 
   dependency-review:
     if: github.event_name == 'pull_request'
@@ -94,10 +139,7 @@ jobs:
   analyze:
     name: CodeQL (${{ matrix.language }})
     needs: changes
-    if: |
-      needs.changes.outputs.run-all == 'true' ||
-      needs.changes.outputs.code == 'true' ||
-      needs.changes.outputs.workflow == 'true'
+    if: needs.changes.outputs.has-codeql == 'true'
     runs-on: ubuntu-latest
 
     permissions:
@@ -108,9 +150,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language:
-          - actions
-          - python
+        include: ${{ fromJSON(needs.changes.outputs.codeql-matrix) }}
 
     steps:
       - name: Check out source
