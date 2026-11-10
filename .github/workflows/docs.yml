@@ -11,6 +11,7 @@ on:
       - "mkdocs.yml"
       - "pyproject.toml"
       - "uv.lock"
+      - ".python-version"
       - ".github/workflows/docs.yml"
       - "src/pipeline/**"
   workflow_dispatch:
