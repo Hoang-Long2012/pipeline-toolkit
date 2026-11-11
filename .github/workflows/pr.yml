@@ -82,7 +82,7 @@ jobs:
               - ".github/workflows/codeql.yml"
               - ".github/actions/**"
               - ".github/codeql/**"
-              - ".github/scripts/**"
+              - ".github/scripts/coverage_summary.py"
 
             codeql-actions:
               - ".github/workflows/**"
