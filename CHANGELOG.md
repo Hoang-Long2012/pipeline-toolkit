@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.6.14
+- Documentation-only release: Updated package docstring.
+
 ## 0.6.13
 - Documentation-only release: Improved Stack example in Stack docstring.
 
