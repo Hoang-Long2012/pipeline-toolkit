@@ -15,6 +15,7 @@ def on_config(config):
 	config["extra"]["material_version"] = version("mkdocs-material")
 	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")
 	config["extra"]["deployment_time"] = now.strftime("%H:%M")
+	config["nav"].append({"api": {Path(api_file).stem: str(Path(api_file).relative_to("docs")) for api_file in sorted(Path("docs/api").glob("*.md"))}})
 	return config
 
 
