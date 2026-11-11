@@ -4,13 +4,13 @@ Build reusable, editable asynchronous pipelines from ordinary Python callables.
 
 The main components are:
 
-- ## Core components:
+- # Core components:
     - [`Pipeline`](api/Pipeline.md): Execute callable steps sequentially in a worker thread with support for stopping, skipping, waiting, and rerunning pipelines.
     - [`Group`](api/Group.md): Manage a collection of pipelines or sub-groups with support for collective execution, control, and container operations.
     - [`Checkpoint`](api/Checkpoint.md): Store values and provide a synchronization point for coordinating pipeline execution.
     - [`Stack`](api/Stack.md): A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
 
-- ## Functional utilities:
+- # Functional utilities:
     - [`chain`](api/chain.md): Apply multiple callables sequentially, passing each result to the next callable.
     - [`compose`](api/compose.md): Create a callable that applies multiple callables sequentially to a value.
     - [`mut`](api/mut.md): Apply a function directly to an object for side effects and return the same object.
