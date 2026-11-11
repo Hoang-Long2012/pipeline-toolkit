@@ -16,7 +16,7 @@ theme:
   favicon: overrides/assets/images/favicon.svg
 
   features:
-    - navigation.instant
+    - navigation.instance
     - toc.follow
     - search.suggest
     - search.highlight
@@ -88,6 +88,7 @@ extra_css:
   - overrides/assets/stylesheets/extra.css
 
 extra_javascript:
+  - overrides/assets/javascripts/nav-subsection.js
   - overrides/assets/javascripts/palette.js
   - overrides/assets/javascripts/search-suggest.js
 
@@ -116,7 +117,6 @@ validation:
     omitted_files: ignore
 
 exclude_docs: |
-  overrides/
   scripts/
   _redirects
 
