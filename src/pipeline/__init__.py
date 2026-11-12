@@ -18,7 +18,7 @@ The main components are:
     - [`pipe`](api/pipe.md): Wrap a callable as a factory for creating [`step`](api/step.md) objects with preconfigured arguments.
     - [`step`](api/step.md): Represent a callable with preconfigured arguments and provide convenient execution and composition operations.
 
-Example:
+## Example:
 
 ```python
 from pipeline import Pipeline
