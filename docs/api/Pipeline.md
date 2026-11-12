@@ -1,6 +1,5 @@
 ::: pipeline.Pipeline
     options:
-      members: false
       heading_level: 1
 
 ## Execution

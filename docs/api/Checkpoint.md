@@ -5,7 +5,6 @@ hide:
 
 ::: pipeline.Checkpoint
     options:
-      members: false
       heading_level: 1
 
 ## Synchronization

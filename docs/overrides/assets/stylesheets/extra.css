@@ -18,9 +18,17 @@
 }
 
 .md-palette-dialog label {
-	display: block;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 	padding: 0.5rem;
 	cursor: pointer;
+}
+
+.md-palette-dialog label svg {
+	width: 1.2em;
+	height: 1.2em;
+	flex-shrink: 0;
 }
 
 .md-search {

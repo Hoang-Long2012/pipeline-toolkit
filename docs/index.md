@@ -17,4 +17,4 @@ No runtime dependencies.
 ::: pipeline
     options:
       show_root_heading: false
-      members: false
+      heading_level: 1

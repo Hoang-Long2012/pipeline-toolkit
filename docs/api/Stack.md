@@ -1,6 +1,5 @@
 ::: pipeline.stack.Stack
     options:
-      members: false
       heading_level: 1
 
 ## Capacity

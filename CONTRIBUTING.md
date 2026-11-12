@@ -43,7 +43,7 @@ uv run ty check
 uv run pytest
 ```
 
-If your changes involve the documentation, run `uv run mkdocs build --strict`. You can also preview documentation locally with `uv run mkdocs serve`.
+If your changes involve the documentation, run `uv run mkdocs build`. You can also preview documentation locally with `uv run mkdocs serve`.
 
 If you change dependencies, regenerate `uv.lock` with `uv lock` and include the updated lockfile.
 

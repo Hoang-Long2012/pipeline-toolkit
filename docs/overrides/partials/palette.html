@@ -6,13 +6,18 @@
     {% set icon = "material/brightness-7" %}
     {% include ".icons/" ~ icon ~ ".svg" %}
   </button>
-  <dialog id="__palette_dialog" class="md-palette-dialog" aria-labelledby="__palette_dialog_title" role="dialog" data-palette-menu>
+  <dialog id="__palette_dialog" class="md-palette-dialog" aria-labelledby="__palette_dialog_title" data-palette-menu>
     <h2 id="__palette_dialog_title">Color scheme</h2>
     <div role="radiogroup" aria-labelledby="__palette_dialog_title">
       {% for option in config.theme.palette %}
         {% set scheme = option.scheme | d("default", true) %}
-        <input type="radio" id="scheme-{{ loop.index0 }}" aria-labelledby="scheme-label-{{ loop.index0 }}" name="color-scheme" value="{{ scheme | replace(' ', '-') }}" data-palette-option data-md-color-media="{{ option.media }}" data-md-color-scheme="{{ scheme | replace(' ', '-') }}" data-md-color-primary="{{ option.primary | d('indigo', true) | replace(' ', '-') }}" data-md-color-accent="{{ option.accent | d('indigo', true) | replace(' ', '-') }}" data-palette-index="{{ loop.index0 }}">
-        <label id="scheme-label-{{ loop.index0 }}" for="scheme-{{ loop.index0 }}">{{ option.toggle.name if option.toggle else scheme }}</label>
+        <input type="radio" id="scheme-{{ loop.index0 }}" name="color-scheme" value="{{ scheme | replace(' ', '-') }}" data-palette-option data-md-color-media="{{ option.media }}" data-md-color-scheme="{{ scheme | replace(' ', '-') }}" data-md-color-primary="{{ option.primary | d('indigo', true) | replace(' ', '-') }}" data-md-color-accent="{{ option.accent | d('indigo', true) | replace(' ', '-') }}" data-palette-index="{{ loop.index0 }}">
+        <label for="scheme-{{ loop.index0 }}">
+          {% if option.toggle and option.toggle.icon %}
+            {% include ".icons/" ~ option.toggle.icon ~ ".svg" %}
+          {% endif %}
+          {{ option.toggle.name if option.toggle else scheme }}
+        </label>
       {% endfor %}
     </div>
     <button type="button" class="md-palette-dialog__close md-icon" aria-label="Close" data-palette-close>

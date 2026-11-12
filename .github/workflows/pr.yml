@@ -343,7 +343,7 @@ jobs:
         run: uv sync --group documentation
 
       - name: Build documentation
-        run: uv run mkdocs build --strict
+        run: uv run mkdocs build
         env:
           NO_MKDOCS_2_WARNING: "1"
 

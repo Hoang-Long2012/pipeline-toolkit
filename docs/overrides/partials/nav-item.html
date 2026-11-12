@@ -104,7 +104,7 @@
         <input class="md-nav__toggle md-toggle {{ indeterminate }}" type="checkbox" id="{{ path }}" {{ checked }}>
         {% if not index %}
           {% set tabindex = "0" if not is_section %}
-          <label class="md-nav__link" for="{{ path }}" id="{{ path }}_label" tabindex="{{ tabindex }}" role="link" aria-haspopup="menu" aria-expanded="false">
+          <label class="md-nav__link" for="{{ path }}" id="{{ path }}_label" tabindex="{{ tabindex }}" role="link" aria-haspopup="menu" aria-expanded="{{ nav_item.active | tojson }}">
             {{ render_content(nav_item) }}
             <span class="md-nav__icon md-icon"></span>
           </label>
