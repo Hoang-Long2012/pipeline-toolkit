@@ -122,7 +122,7 @@
             {% endif %}
           </div>
         {% endif %}
-        <nav class="md-nav" data-md-level="{{ level }}" aria-expanded="{{ nav_item.active | tojson }}">
+        <nav class="md-nav" data-md-level="{{ level }}">
           <ul class="md-nav__list" data-md-scrollfix>
             {% for item in nav_item.children %}
               {% if not index or item != index %}
