@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.7.0
+- Added `flow()` generator utility for executing callables sequentially and yielding intermediate results.
+
 ## 0.6.14
 - Documentation-only release: Updated package docstring.
 

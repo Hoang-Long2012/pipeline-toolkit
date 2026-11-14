@@ -13,6 +13,7 @@ The main components are:
 ## **Functional utilities**:
 - [`chain`](api/chain.md): Apply multiple callables sequentially, passing each result to the next callable.
 - [`compose`](api/compose.md): Create a callable that applies multiple callables sequentially to a value.
+- [`flow`](api/flow.md): Execute callables sequentially, yielding each intermediate result.
 - [`mut`](api/mut.md): Apply a function directly to an object for side effects and return the same object.
 - [`tap`](api/tap.md): Apply a side effect to a deep copy of a value while returning the original value unchanged.
 - [`pipe`](api/pipe.md): Wrap a callable as a factory for creating [`step`](api/step.md) objects with preconfigured arguments.
@@ -50,6 +51,7 @@ from importlib.metadata import PackageNotFoundError, version
 from .chain import chain as chain
 from .checkpoint import Checkpoint as Checkpoint
 from .compose import compose as compose
+from .flow import flow as flow
 from .group import Group as Group
 from .mut import mut as mut
 from .pipe import pipe as pipe
@@ -63,4 +65,4 @@ except PackageNotFoundError:
 	__version__ = "0.0.0-dev0"
 
 __author__ = "Hoàng Long"
-__all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "mut", "pipe", "step", "tap"]
+__all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "flow", "mut", "pipe", "step", "tap"]
