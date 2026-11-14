@@ -17,6 +17,7 @@ The main components are:
 - [`mut`](api/mut.md): Apply a function directly to an object for side effects and return the same object.
 - [`tap`](api/tap.md): Apply a side effect to a deep copy of a value while returning the original value unchanged.
 - [`pipe`](api/pipe.md): Wrap a callable as a factory for creating [`step`](api/step.md) objects with preconfigured arguments.
+- [`repeat`](api/repeat.md): Yield a callable step repeated a specified number of times.
 - [`step`](api/step.md): Represent a callable with preconfigured arguments and provide convenient execution and composition operations.
 
 ## Example:
@@ -57,6 +58,7 @@ from .mut import mut as mut
 from .pipe import pipe as pipe
 from .pipe import step as step
 from .pipeline import Pipeline as Pipeline
+from .repeat import repeat as repeat
 from .tap import tap as tap
 
 try:
@@ -65,4 +67,4 @@ except PackageNotFoundError:
 	__version__ = "0.0.0-dev0"
 
 __author__ = "Hoàng Long"
-__all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "flow", "mut", "pipe", "step", "tap"]
+__all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "flow", "mut", "pipe", "repeat", "step", "tap"]

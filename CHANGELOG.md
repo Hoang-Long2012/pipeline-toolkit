@@ -10,6 +10,7 @@ Documentation-only and metadata-only releases are explicitly identified.
 
 ## 0.7.0
 - Added `flow()` generator utility for executing callables sequentially and yielding intermediate results.
+- Added `repeat()` generator utility for yielding repeated callable steps with preconfigured arguments.
 
 ## 0.6.14
 - Documentation-only release: Updated package docstring.
