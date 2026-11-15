@@ -38,13 +38,18 @@
     {{ render_status(nav_item, nav_item.meta.status) }}
   {% endif %}
 {% endmacro %}
+{% macro render_external(nav_item) %}
+  {% if nav_item.is_link %}
+    target="_blank" rel="noopener noreferrer"
+  {% endif %}
+{% endmacro %}
 {% macro render_pruned(nav_item, ref) %}
   {% set ref = ref or nav_item %}
   {% set first = nav_item.children | first %}
   {% if first and first.children %}
     {{ render_pruned(first, ref) }}
   {% else %}
-    <a href="{{ first.url | url }}" class="md-nav__link">
+    <a href="{{ first.url | url }}" class="md-nav__link" {{ render_external(first) }}>
       {{ render_content(ref) }}
       {% if nav_item.children | length > 0 %}
         <span class="md-nav__icon md-icon"></span>
@@ -111,7 +116,7 @@
         {% else %}
           {% set class = "md-nav__link--active" if index == page %}
           <div class="md-nav__link md-nav__container">
-            <a href="{{ index.url | url }}" class="md-nav__link {{ class }}" {% if index == page %}aria-current="page"{% endif %}>
+            <a href="{{ index.url | url }}" class="md-nav__link {{ class }}" {% if index == page %}aria-current="page"{% endif %} {{ render_external(index) }}>
               {{ render_content(index, nav_item) }}
             </a>
             {% if nav_item.children | length > 1 %}
@@ -137,13 +142,13 @@
     </li>
   {% elif nav_item == page %}
     <li class="{{ class }}">
-      <a href="{{ nav_item.url | url }}" class="md-nav__link md-nav__link--active" aria-current="page">
+      <a href="{{ nav_item.url | url }}" class="md-nav__link md-nav__link--active" aria-current="page" {{ render_external(nav_item) }}>
         {{ render_content(nav_item) }}
       </a>
     </li>
   {% else %}
     <li class="{{ class }}">
-      <a href="{{ nav_item.url | url }}" class="md-nav__link">
+      <a href="{{ nav_item.url | url }}" class="md-nav__link" {{ render_external(nav_item) }}>
         {{ render_content(nav_item) }}
       </a>
     </li>
