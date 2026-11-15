@@ -69,6 +69,17 @@
 		display: block;
 	}
 
+	/* Restore tree-like primary navigation on mobile. */
+	.md-nav--primary,
+	.md-nav--primary .md-nav {
+		position: static;
+		inset: auto;
+		transform: none;
+		width: auto;
+		height: auto;
+		background: transparent;
+	}
+
 	/* Respect Material's hidden attribute. */
 	.md-sidebar[hidden] {
 		display: none !important;
