@@ -69,25 +69,50 @@
 		display: block;
 	}
 
-	/* Restore tree-like primary navigation on mobile. */
+/* Keep the primary navigation in the document flow. */
+	.md-nav--primary {
+		position: static;
+		inset: auto;
+		top: auto;
+		z-index: auto;
+		display: block;
+		width: auto;
+		height: auto;
+		background: transparent;
+	}
+
+	/* Turn nested navigation panes into normal tree branches. */
 	.md-nav--primary .md-nav {
 		position: static;
 		inset: auto;
+		top: auto;
+		z-index: auto;
 		display: block;
 		width: auto;
 		height: auto;
 		transform: none;
+		opacity: 1;
+		visibility: visible;
+		transition: none;
 		background: transparent;
 	}
 
+	/* Collapse nested branches by default. */
 	.md-nav--primary .md-nav__toggle ~ .md-nav {
 		display: none;
-		opacity: 1;
-		visibility: visible;
 	}
 
+	/* Expand a branch when its checkbox is checked. */
 	.md-nav--primary .md-nav__toggle:checked ~ .md-nav {
 		display: block;
+	}
+
+	/* Restore normal scrolling for the root navigation list. */
+	.md-nav--primary > .md-nav__list {
+		flex: initial;
+		overflow: visible;
+		touch-action: auto;
+		scroll-snap-type: none;
 	}
 
 	/* Respect Material's hidden attribute. */
