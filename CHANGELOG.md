@@ -12,6 +12,8 @@ Documentation-only and metadata-only releases are explicitly identified.
 - Added `flow()` generator utility for executing callables sequentially and yielding intermediate results.
 - Added `repeat()` generator utility for yielding repeated callable steps with preconfigured arguments.
 - Changed `chain()` to accept callables in `steps` in addition to pipeline step tuples.
+- Changed `compose()` to return a callable wrapper instead of executing functions immediately. The wrapper accepts an input value and applies the composed functions sequentially.
+- Removed the `default` parameter from `compose()`.
 
 ## 0.6.14
 - Documentation-only release: Updated package docstring.

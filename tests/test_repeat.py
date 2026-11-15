@@ -49,7 +49,7 @@ class TestRepeatBasic:
 		def add(value, amount):
 			return value + amount
 
-		result = compose(repeat(4, add, 5), default=10)
+		result = compose(repeat(4, add, 5))(10)
 		assert result == 30  # 10 + 5 * 4
 
 	def test_repeat_integration_with_flow(self):
