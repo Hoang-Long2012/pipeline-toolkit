@@ -70,14 +70,24 @@
 	}
 
 	/* Restore tree-like primary navigation on mobile. */
-	.md-nav--primary,
 	.md-nav--primary .md-nav {
 		position: static;
 		inset: auto;
-		transform: none;
+		display: block;
 		width: auto;
 		height: auto;
+		transform: none;
 		background: transparent;
+	}
+
+	.md-nav--primary .md-nav__toggle ~ .md-nav {
+		display: none;
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.md-nav--primary .md-nav__toggle:checked ~ .md-nav {
+		display: block;
 	}
 
 	/* Respect Material's hidden attribute. */
