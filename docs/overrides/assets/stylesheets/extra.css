@@ -48,7 +48,7 @@
 /*
  * Keep the primary navigation and table of contents in the page
  * instead of switching to Material's mobile drawer layout.
- */
+*/
 @media screen and (max-width: 76.1875em) {
 	/* Hide the mobile drawer button. */
 	.md-header__button[for="__drawer"] {
@@ -69,7 +69,7 @@
 		display: block;
 	}
 
-/* Keep the primary navigation in the document flow. */
+	/* Keep the primary navigation in the document flow. */
 	.md-nav--primary {
 		position: static;
 		inset: auto;
