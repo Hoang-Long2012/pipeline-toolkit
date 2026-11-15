@@ -11,7 +11,7 @@
     <div role="radiogroup">
       {% for option in config.theme.palette %}
         {% set scheme = option.scheme | d("default", true) %}
-        <input type="radio" id="scheme-{{ loop.index0 }}" name="color-scheme" value="{{ scheme | replace(' ', '-') }}" data-palette-option data-md-color-media="{{ option.media }}" data-md-color-scheme="{{ scheme | replace(' ', '-') }}" data-md-color-primary="{{ option.primary | d('indigo', true) | replace(' ', '-') }}" data-md-color-accent="{{ option.accent | d('indigo', true) | replace(' ', '-') }}" data-palette-index="{{ loop.index0 }}">
+        <input type="radio" id="scheme-{{ loop.index0 }}" name="color-scheme" value="{{ scheme | replace(' ', '-') }}" data-palette-option data-md-color-media="{{ option.media }}" data-md-color-scheme="{{ scheme | replace(' ', '-') }}" data-md-color-primary="{{ option.primary | d('indigo', true) | replace(' ', '-') }}" data-md-color-accent="{{ option.accent | d('indigo', true) | replace(' ', '-') }}" data-palette-index="{{ loop.index0 }}" title="{{ option.toggle.name if option.toggle else scheme }}">
         <label for="scheme-{{ loop.index0 }}">
           {% if option.toggle and option.toggle.icon %}
             {% include ".icons/" ~ option.toggle.icon ~ ".svg" %}
@@ -20,7 +20,7 @@
         </label>
       {% endfor %}
     </div>
-    <button type="button" class="md-palette-dialog__close md-icon" aria-label="Close" data-palette-close>
+    <button type="button" accesskey="c" class="md-palette-dialog__close md-icon" aria-label="Close" data-palette-close>
       {% set icon = "material/close" %}
       {% include ".icons/" ~ icon ~ ".svg" %}
     </button>

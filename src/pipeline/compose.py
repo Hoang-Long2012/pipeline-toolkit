@@ -1,14 +1,12 @@
 """Utility for composing functions sequentially."""
 
-def compose(steps, default=None):
+def compose(callables):
 	"""Apply callables sequentially to a value.
 
 	The result of each callable is passed as the first argument to the next callable.
 
 	Args:
-		steps: Callables to apply sequentially.
-		default: Initial value passed to the first callable.
-			Defaults to ``None``.
+		callables: Callables to apply sequentially.
 
 	Returns:
 		The result produced by the last callable, or ``default`` when no callables are provided.
@@ -16,9 +14,12 @@ def compose(steps, default=None):
 	Raises:
 		TypeError: If `steps` is not iterable, or any step is not callable.
 	"""
-	result = default
-	for function in steps:
-		if not callable(function):
-			raise TypeError("function is not callable.")
-		result = function(result)
-	return result
+	def wrapper(data=None):
+		for function in callables:
+			if not callable(function):
+				raise TypeError("function is not callable.")
+		result = data
+		for function in callables:
+			result = function(result)
+		return result
+	return wrapper
