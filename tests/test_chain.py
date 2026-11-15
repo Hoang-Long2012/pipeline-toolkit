@@ -28,6 +28,37 @@ class TestChainContract:
 		result = chain([(add_one,), (multiply_two,)], default=5)
 		assert result == 12  # (5 + 1) * 2
 
+	def test_chain_executes_callables_directly(self):
+		"""Test chain invokes bare callables with the previous result."""
+		def add_one(x):
+			return x + 1
+
+		def multiply_two(x):
+			return x * 2
+
+		result = chain([add_one, multiply_two], default=5)
+		assert result == 12  # (5 + 1) * 2
+
+	def test_chain_mixes_callables_and_step_tuples(self):
+		"""Test chain passes results between callables and step tuples."""
+		def add(x, amount):
+			return x + amount
+
+		def double(x):
+			return x * 2
+
+		result = chain([double, (add, (3,))], default=5)
+		assert result == 13  # (5 * 2) + 3
+
+	def test_chain_accepts_callable_objects(self):
+		"""Test chain accepts objects that implement __call__."""
+		class AddOne:
+			def __call__(self, x):
+				return x + 1
+
+		result = chain([AddOne(), AddOne()], default=1)
+		assert result == 3
+
 	def test_chain_passes_default_to_first_step(self):
 		"""Test that default is passed as input to the first step."""
 		def identity(x):
@@ -37,7 +68,7 @@ class TestChainContract:
 		assert result == "expected_value"
 
 	def test_chain_validates_all_steps_before_execution(self):
-		"""Test that all steps are validated before any step is executed."""
+		"""Test that non-callable steps are validated before any step is executed."""
 		executed = []
 
 		def record_step(x):

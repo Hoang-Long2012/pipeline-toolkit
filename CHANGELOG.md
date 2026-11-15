@@ -11,6 +11,7 @@ Documentation-only and metadata-only releases are explicitly identified.
 ## 0.7.0
 - Added `flow()` generator utility for executing callables sequentially and yielding intermediate results.
 - Added `repeat()` generator utility for yielding repeated callable steps with preconfigured arguments.
+- Changed `chain()` to accept callables in `steps` in addition to pipeline step tuples.
 
 ## 0.6.14
 - Documentation-only release: Updated package docstring.
