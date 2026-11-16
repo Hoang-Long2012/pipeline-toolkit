@@ -7,7 +7,7 @@ hide:
 # Pipeline Toolkit {{ config.extra.version }}
 
 ```bash
-pip install pipeline-toolkit
+pip install pipeline-toolkit=={{ config.extra.version }}
 ```
 
 Requires Python 3.8 or later.
