@@ -1,6 +1,6 @@
 """A small functional pipeline toolkit for Python.
 
-Build reusable, editable pipelines that execute asynchronously from ordinary Python callables.
+Build reusable, editable pipelines that execute ordinary Python callables asynchronously in worker threads.
 
 The main components are:
 
@@ -11,7 +11,7 @@ The main components are:
 - [`Stack`](api/Stack.md): A simple LIFO container with optional maximum capacity, useful for storing pipeline results and errors.
 
 ## Functional utilities:
-- [`chain`](api/chain.md): Apply multiple callables or pipeline step tuples sequentially, passing each result to the next step.
+- [`chain`](api/chain.md): Apply multiple callables or pipeline step tuples sequentially, passing each result to the next step and returning the final result.
 - [`compose`](api/compose.md): Create a callable that applies multiple callables sequentially to a value.
 - [`flow`](api/flow.md): Execute callables sequentially, yielding each intermediate result.
 - [`mut`](api/mut.md): Apply a function directly to an object for side effects and return the same object.
