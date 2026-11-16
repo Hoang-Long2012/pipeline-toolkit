@@ -117,6 +117,8 @@ validation:
     omitted_files: ignore
 
 exclude_docs: |
+  overrides/*
+  !overrides/assets/
   scripts/
   _redirects
 
