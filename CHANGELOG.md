@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.7.1
+- Documentation-only release: Updated `chain` description in package docstring.
+
 ## 0.7.0
 - Added `flow()` generator utility for executing callables sequentially and yielding intermediate results.
 - Added `repeat()` generator utility for yielding repeated callable steps with preconfigured arguments.
