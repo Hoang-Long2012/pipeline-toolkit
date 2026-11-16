@@ -127,6 +127,7 @@ jobs:
         run: |
           uv venv --clear /tmp/test-env
           uv pip install --python /tmp/test-env/bin/python dist/*.whl
+          cd /tmp
           /tmp/test-env/bin/python -c "import pipeline"
           rm -rf /tmp/test-env
 
@@ -134,11 +135,17 @@ jobs:
         run: |
           uv venv --clear /tmp/test-env
           uv pip install --python /tmp/test-env/bin/python dist/*.tar.gz
+          cd /tmp
           /tmp/test-env/bin/python -c "import pipeline"
           rm -rf /tmp/test-env
 
       - name: Check distributions with Twine
         run: uvx twine check dist/*
+
+      - name: Generate SHA-256 checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS
 
       - name: Generate artifact attestation
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
