@@ -82,3 +82,21 @@ def on_page_markdown(markdown, page, config, files):
 def on_post_page(output, page, config):
 	doc = JustHTML(output, sanitize=False)
 	return doc.to_html(pretty=True, indent_size=2) + "\n"
+
+
+def on_post_build(config):
+	site_dir = Path(config["site_dir"])
+	error_page = site_dir / "404.html"
+
+	if not error_page.exists():
+		return
+
+	content = error_page.read_text(encoding="utf-8")
+
+	for prefix in ("/assets/", "/overrides/assets/"):
+		content = content.replace(
+			f'="{prefix}',
+			f'="/pipeline-toolkit{prefix}',
+		)
+
+	error_page.write_text(content, encoding="utf-8")
