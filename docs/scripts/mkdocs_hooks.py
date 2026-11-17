@@ -21,6 +21,7 @@ def on_config(config):
 	now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))
 	if keywords:
 		config["site_keywords"] = keywords
+	config["extra"]["package_name"] = data["project"]["name"]
 	config["extra"]["version"] = version("pipeline-toolkit")
 	config["extra"]["material_version"] = version("mkdocs-material")
 	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")

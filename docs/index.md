@@ -4,10 +4,10 @@ hide:
   - toc
 ---
 
-# Pipeline Toolkit {{ config.extra.version }}
+# {{ config.site_name }} {{ config.extra.version }}
 
 ```bash
-pip install pipeline-toolkit=={{ config.extra.version }}
+pip install {{ config.extra.package_name }}=={{ config.extra.version }}
 ```
 
 Requires Python 3.8 or later.
