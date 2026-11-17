@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.7.2
+- Documentation-only release: Cleaned up the markup in all package's docstrings.
+
 ## 0.7.1
 - Documentation-only release: Updated `chain` description in package docstring.
 
