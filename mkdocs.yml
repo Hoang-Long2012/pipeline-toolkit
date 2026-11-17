@@ -123,10 +123,6 @@ exclude_docs: |
   _redirects
 
 extra:
-  version: ""
-  material_version: ""
-  deployment_date: ""
-  deployment_time: ""
   analytics:
     provider: google
     property: G-ZZ1MDHKZ3H

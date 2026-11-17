@@ -1,3 +1,5 @@
+import tomllib
+
 from datetime import datetime
 from importlib import import_module
 from importlib.metadata import version
@@ -10,7 +12,15 @@ from zoneinfo import ZoneInfo
 
 
 def on_config(config):
+	path = Path("pyproject.toml")
+	with path.open("rb") as file:
+		data = tomllib.load(file)
+	keywords = data["project"].get("keywords")
+	if not keywords:
+		keywords = None
 	now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))
+	if keywords:
+		config["site_keywords"] = keywords
 	config["extra"]["version"] = version("pipeline-toolkit")
 	config["extra"]["material_version"] = version("mkdocs-material")
 	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")

@@ -4,6 +4,7 @@
 {% extends "base.html" %}
 
 {% block extrahead %}
+  <meta name="keywords" content="{{ (['Python', config.site_name] + config.site_keywords) | unique | join(', ') }}">
   <meta name="color-scheme" content="light dark">
   <meta name="robots" content="index, follow">
   <link rel="icon" type="image/png" href="{{ 'overrides/assets/images/favicon.png' | url }}">
