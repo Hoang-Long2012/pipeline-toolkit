@@ -1,5 +1,3 @@
-import tomllib
-
 from datetime import datetime
 from importlib import import_module
 from importlib.metadata import version
@@ -7,6 +5,7 @@ from inspect import getdoc
 from pathlib import Path
 from pkgutil import walk_packages
 
+import tomllib
 from justhtml import JustHTML
 from zoneinfo import ZoneInfo
 
