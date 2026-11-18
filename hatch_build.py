@@ -42,6 +42,8 @@ class CleanDocstrings(BuildHookInterface):
 	_tempdir = None
 
 	def initialize(self, version, build_data):
+		if version == "editable":
+			return
 		if self.target_name == "wheel" and (Path(self.root) / "PKG-INFO").is_file():
 			return
 
