@@ -13,6 +13,7 @@ on:
       - "uv.lock"
       - ".python-version"
       - ".github/workflows/docs.yml"
+      - "hatch_build.py"
       - "src/pipeline/**"
   workflow_dispatch:
 
