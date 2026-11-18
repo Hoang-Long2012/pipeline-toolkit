@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.8.0
+- Changed the `Pipeline.run()` error handler parameter name from `handler_error` to `error_handler`.
+
 ## 0.7.2
 - Documentation-only release: Cleaned up the markup in all package's docstrings.
 
