@@ -1313,6 +1313,39 @@ class TestPipelineResults:
 class TestPipelineErrors:
 	"""Test pipeline error handling."""
 
+	def test_base_exception_is_not_caught_by_pipeline(self, monkeypatch):
+		"""Test BaseException subclasses escape the worker without being recorded."""
+		uncaught = []
+		later_step_called = threading.Event()
+
+		class StepAbort(BaseException):
+			pass
+
+		def raise_abort(value):
+			raise StepAbort("step aborted")
+
+		def later_step(value):
+			later_step_called.set()
+			return value
+
+		monkeypatch.setattr(
+			threading,
+			"excepthook",
+			lambda args: uncaught.append(args.exc_value),
+		)
+		pipeline = Pipeline([(raise_abort,), (later_step,)])
+		pipeline.run(10).wait()
+
+		assert len(uncaught) == 1
+		assert isinstance(uncaught[0], StepAbort)
+		assert str(uncaught[0]) == "step aborted"
+		assert not pipeline.errors
+		assert not pipeline.calls
+		assert not later_step_called.is_set()
+		assert not pipeline.running
+		assert pipeline.step == 0
+		assert pipeline.result == 10
+
 	def test_errors_stack_on_exception(self):
 		"""Test errors are stored in errors stack."""
 
