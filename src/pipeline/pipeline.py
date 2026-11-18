@@ -33,7 +33,7 @@ class Pipeline:
 	pipeline = Pipeline([
 	    (add, (5,)),
 	    (add, (10,)),
-	)
+	])
 	pipeline.run(0).wait().result  # 15
 	```
 	"""
@@ -96,7 +96,11 @@ class Pipeline:
 		Each step receives the result of the preceding step as its first positional argument.
 
 		The pipeline is snapshotted when execution starts, so modifications to the configured steps do not affect the current execution.
-		Execution stops when all steps have completed, ``stop()`` is called, or an exception is raised while ``stop_on_error`` is enabled.
+		Execution normally stops when all steps have completed, a stop request is received, or a step raises a caught exception while ``stop_on_error`` is enabled.
+		Uncaught exceptions also terminate the worker.
+
+		When a step raises an exception, the pipeline catches it only if it is derived from ``Exception``.
+		Exceptions derived from ``BaseException`` but not ``Exception`` are not caught by the pipeline.
 
 		Args:
 			default: The initial value passed to the first step.
@@ -107,7 +111,7 @@ class Pipeline:
 				Defaults to ``0``.
 			daemon: Whether the worker thread should be a daemon thread.
 				Defaults to ``False``.
-			stop_on_error: Whether execution should stop after the first exception.
+			stop_on_error: Whether execution should stop after the first caught exception raised by a step.
 				When disabled, the failed step's result is not added to ``results``, the exception is added to ``errors``, and execution continues with the previous result.
 				Defaults to ``True``.
 			handler_error: An optional callable invoked when a step raises an exception.
@@ -177,7 +181,7 @@ class Pipeline:
 					if delay and index < len(steps) - 1:
 						self._stop_event.wait(delay)
 			finally:
-				if  not self._stop_event.is_set() and  (not self.errors or  not stop_on_error):
+				if not self._stop_event.is_set() and (not self.errors or not stop_on_error):
 					self._step = 0
 				if self._thread is threading.current_thread():
 					self._thread = None
@@ -319,7 +323,7 @@ class Pipeline:
 		if self.results:
 			return self.results.get()
 	def error(self, reraise=True):
-		"""Return or raise the most recent exception raised by the pipeline.
+		"""Return or raise the most recent caught exception raised by the pipeline.
 
 		By default, the exception is raised.
 		If ``reraise`` is ``False``, the exception is returned instead.
@@ -330,7 +334,7 @@ class Pipeline:
 
 		Returns:
 			The most recent exception if ``reraise`` is ``False``.
-			``None`` if no exception was raised.
+			``None`` if no exception was recorded.
 
 		Raises:
 			RuntimeError: If the pipeline is currently running.
@@ -362,7 +366,7 @@ class Pipeline:
 		return self._results
 	@property
 	def errors(self):
-		"""Return the stack containing exceptions raised by pipeline steps."""
+		"""Return the stack containing caught exceptions raised by pipeline steps."""
 		return self._errors
 	def add(self, step):
 		"""Append a validated step to the pipeline.
@@ -840,7 +844,7 @@ class Pipeline:
 		Returns:
 			The one-based index of the currently executing step.
 			``0`` when the pipeline is not currently executing a step, or when the previous execution completed without stopping on an error.
-				If execution stopped because of an error while ``stop_on_error`` is enabled, the index of the failed step is retained.
+				If a step raises a caught exception while ``stop_on_error`` is enabled, the index of that step is retained.
 		"""
 		return self._step
 	@property
