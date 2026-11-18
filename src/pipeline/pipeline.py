@@ -89,7 +89,7 @@ class Pipeline:
 		core.validate_step(step)
 	def _execute_step(self, step, default):
 		return core.execute_step(step, default)
-	def run(self, default=_DEFAULT, delay=0, daemon=False, stop_on_error=True, handler_error=None):
+	def run(self, default=_DEFAULT, delay=0, daemon=False, stop_on_error=True, error_handler=None):
 		"""Run the pipeline asynchronously in a worker thread.
 
 		The supplied ``default`` value is stored as the initial result.
@@ -114,7 +114,7 @@ class Pipeline:
 			stop_on_error: Whether execution should stop after the first caught exception raised by a step.
 				When disabled, the failed step's result is not added to ``results``, the exception is added to ``errors``, and execution continues with the previous result.
 				Defaults to ``True``.
-			handler_error: An optional callable invoked when a step raises an exception.
+			error_handler: An optional callable invoked when a step raises an exception.
 				It receives an ``ErrorContext`` instance containing the one-based step index, the failed step, the exception object, and the result passed to the failed step.
 				The handler's own exceptions are not caught by the pipeline.
 				Defaults to ``None``.
@@ -123,7 +123,7 @@ class Pipeline:
 			This pipeline instance.
 
 		Raises:
-			TypeError: If ``delay`` is not an integer or floating-point number, or if ``handler_error`` is not callable.
+			TypeError: If ``delay`` is not an integer or floating-point number, or if ``error_handler`` is not callable.
 			ValueError: If ``delay`` is negative.
 			RuntimeError: If the pipeline is already running.
 		"""
@@ -131,8 +131,8 @@ class Pipeline:
 			raise TypeError("Delay is not int or float.")
 		if delay < 0:
 			raise ValueError("Delay cannot be negative.")
-		if handler_error is not None and not callable(handler_error):
-			raise TypeError("handler_error is not a callable.")
+		if error_handler is not None and not callable(error_handler):
+			raise TypeError("error_handler is not a callable.")
 		if self.running:
 			raise RuntimeError("Pipeline is already running.")
 		self._stop_event.clear()
@@ -169,9 +169,9 @@ class Pipeline:
 						result = self._execute_step(step, previous_result)
 					except Exception as error:
 						self.errors.push(error)
-						if handler_error is not None:
+						if error_handler is not None:
 							context = ErrorContext(index=self._step, step=step, error=error, previous_result=previous_result)
-							handler_error(context)
+							error_handler(context)
 						if stop_on_error:
 							break
 					else:

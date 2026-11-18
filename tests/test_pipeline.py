@@ -763,7 +763,7 @@ class TestPipelineRerun:
 class TestPipelineErrorHandler:
 	"""Test pipeline error handler."""
 
-	def test_handler_error_receives_error_context(self):
+	def test_error_handler_receives_error_context(self):
 		"""Test handler receives an ErrorContext instance."""
 
 		def raise_error(x):
@@ -775,12 +775,12 @@ class TestPipelineErrorHandler:
 			received.append(context)
 
 		pipeline = Pipeline([(raise_error,)])
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		assert len(received) == 1
 		assert isinstance(received[0], ErrorContext)
 
-	def test_handler_error_receives_step_index(self):
+	def test_error_handler_receives_step_index(self):
 		"""Test context contains the one-based index of the failed step."""
 
 		def identity(x):
@@ -798,11 +798,11 @@ class TestPipelineErrorHandler:
 			(identity,),
 			(raise_error,),
 		])
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		assert received[0].index == 2
 
-	def test_handler_error_receives_failed_step(self):
+	def test_error_handler_receives_failed_step(self):
 		"""Test context contains the failed step."""
 
 		def raise_error(x):
@@ -815,11 +815,11 @@ class TestPipelineErrorHandler:
 			received.append(context)
 
 		pipeline = Pipeline([failing])
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		assert received[0].step == failing
 
-	def test_handler_error_receives_exception(self):
+	def test_error_handler_receives_exception(self):
 		"""Test context contains the exception raised by the step."""
 
 		def raise_error(x):
@@ -831,12 +831,12 @@ class TestPipelineErrorHandler:
 			received.append(context)
 
 		pipeline = Pipeline([(raise_error,)])
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		assert isinstance(received[0].error, ValueError)
 		assert str(received[0].error) == "Test error"
 
-	def test_handler_error_receives_previous_result(self):
+	def test_error_handler_receives_previous_result(self):
 		"""Test context contains the input passed to the failed step."""
 
 		def add(x, y):
@@ -854,11 +854,11 @@ class TestPipelineErrorHandler:
 			(add, (5,)),
 			(raise_error,),
 		])
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		assert received[0].previous_result == 15
 
-	def test_handler_error_receives_initial_value_on_first_step_failure(self):
+	def test_error_handler_receives_initial_value_on_first_step_failure(self):
 		"""Test context contains the initial value when the first step fails."""
 
 		def raise_error(x):
@@ -870,11 +870,11 @@ class TestPipelineErrorHandler:
 			received.append(context)
 
 		pipeline = Pipeline([(raise_error,)])
-		pipeline.run(42, handler_error=handler).wait()
+		pipeline.run(42, error_handler=handler).wait()
 
 		assert received[0].previous_result == 42
 
-	def test_handler_error_is_called_for_each_failure(self):
+	def test_error_handler_is_called_for_each_failure(self):
 		"""Test handler is called for every failed step."""
 
 		def raise_error(x):
@@ -892,7 +892,7 @@ class TestPipelineErrorHandler:
 		pipeline.run(
 			10,
 			stop_on_error=False,
-			handler_error=handler,
+			error_handler=handler,
 		).wait()
 
 		assert len(received) == 2
@@ -902,7 +902,7 @@ class TestPipelineErrorHandler:
 			for context in received
 		)
 
-	def test_handler_error_called_before_continuing(self):
+	def test_error_handler_called_before_continuing(self):
 		"""Test handler is called before execution continues after an error."""
 
 		handler_called = threading.Event()
@@ -925,13 +925,13 @@ class TestPipelineErrorHandler:
 		pipeline.run(
 			10,
 			stop_on_error=False,
-			handler_error=handler,
+			error_handler=handler,
 		).wait()
 
 		assert handler_called.is_set()
 		assert second_step_started.is_set()
 
-	def test_handler_error_does_not_run_for_successful_step(self):
+	def test_error_handler_does_not_run_for_successful_step(self):
 		"""Test handler is not called for successful steps."""
 
 		def identity(x):
@@ -943,11 +943,11 @@ class TestPipelineErrorHandler:
 			called.set()
 
 		pipeline = Pipeline([(identity,)])
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		assert not called.is_set()
 
-	def test_handler_error_does_not_run_for_skipped_step(self):
+	def test_error_handler_does_not_run_for_skipped_step(self):
 		"""Test handler is not called for skipped steps."""
 
 		ready_to_skip = threading.Event()
@@ -969,7 +969,7 @@ class TestPipelineErrorHandler:
 			(first,),
 			(second,),
 		])
-		pipeline.run(0, handler_error=handler)
+		pipeline.run(0, error_handler=handler)
 
 		assert ready_to_skip.wait(timeout=1.0), (
 			"First step never reached sync point"
@@ -981,7 +981,7 @@ class TestPipelineErrorHandler:
 
 		assert not called.is_set()
 
-	def test_handler_error_is_optional(self):
+	def test_error_handler_is_optional(self):
 		"""Test pipeline runs normally without an error handler."""
 
 		def raise_error(x):
@@ -992,16 +992,16 @@ class TestPipelineErrorHandler:
 
 		assert len(pipeline.errors) == 1
 
-	def test_handler_error_invalid_type(self):
+	def test_error_handler_invalid_type(self):
 		"""Test non-callable handler raises TypeError."""
 
 		pipeline = Pipeline()
 
 		with pytest.raises(
 			TypeError,
-			match="handler_error is not a callable",
+			match="error_handler is not a callable",
 		):
-			pipeline.run(10, handler_error="invalid")
+			pipeline.run(10, error_handler="invalid")
 
 	def test_handler_exception_is_not_caught_by_pipeline(self, monkeypatch):
 		"""Test exceptions raised by the handler reach the thread hook."""
@@ -1010,7 +1010,7 @@ class TestPipelineErrorHandler:
 		def raise_step_error(value):
 			raise ValueError("step error")
 
-		def raise_handler_error(context):
+		def raise_error_handler(context):
 			raise RuntimeError("handler error")
 
 		monkeypatch.setattr(
@@ -1019,7 +1019,7 @@ class TestPipelineErrorHandler:
 			lambda args: uncaught.append(args.exc_value),
 		)
 		pipeline = Pipeline([(raise_step_error,)])
-		pipeline.run(handler_error=raise_handler_error).wait()
+		pipeline.run(error_handler=raise_error_handler).wait()
 
 		assert len(pipeline.errors) == 1
 		assert isinstance(pipeline.errors.get(), ValueError)
@@ -1027,7 +1027,7 @@ class TestPipelineErrorHandler:
 		assert isinstance(uncaught[0], RuntimeError)
 		assert str(uncaught[0]) == "handler error"
 
-	def test_handler_error_receives_immutable_context(self):
+	def test_error_handler_receives_immutable_context(self):
 		"""Test ErrorContext fields cannot be reassigned."""
 
 		def raise_error(x):
@@ -1039,7 +1039,7 @@ class TestPipelineErrorHandler:
 			received.append(context)
 
 		pipeline = Pipeline([(raise_error,)])
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		with pytest.raises(AttributeError):
 			received[0].index = 2
@@ -1194,7 +1194,7 @@ class TestPipelineCalls:
 		failing = (raise_error,)
 		pipeline = Pipeline([failing])
 
-		pipeline.run(10, handler_error=handler).wait()
+		pipeline.run(10, error_handler=handler).wait()
 
 		assert handler_called.is_set()
 		assert len(pipeline.calls) == 0
