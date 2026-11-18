@@ -23,6 +23,12 @@ theme:
     - content.code.copy
 
   palette:
+    - media: "(prefers-color-scheme)"
+      scheme: default
+      toggle:
+        icon: material/brightness-auto
+        name: Follow system
+
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       toggle:

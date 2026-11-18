@@ -14,8 +14,31 @@ document.addEventListener("DOMContentLoaded", () => {
 	if (!button || !dialog || !options.length)
 		return;
 
-	function applyPalette(option) {
-		const palette = {
+	const systemMedia = window.matchMedia(
+		"(prefers-color-scheme)"
+	);
+
+	const lightMedia = window.matchMedia(
+		"(prefers-color-scheme: light)"
+	);
+
+	const systemOption = options.find(
+		option => option.dataset.mdColorMedia ===
+			"(prefers-color-scheme)"
+	);
+
+	function getSystemPalette() {
+		const media = lightMedia.matches
+			? "(prefers-color-scheme: light)"
+			: "(prefers-color-scheme: dark)";
+
+		return options.find(
+			option => option.dataset.mdColorMedia === media
+		) || systemOption;
+	}
+
+	function applyPalette(option, save = false) {
+		const selected = {
 			index: Number(option.dataset.paletteIndex),
 			color: {
 				media: option.dataset.mdColorMedia,
@@ -25,13 +48,24 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		};
 
-		for (const [key, value] of Object.entries(palette.color))
-			document.body.setAttribute(`data-md-color-${key}`, value);
+		const applied = option === systemOption
+			? getSystemPalette()
+			: option;
+
+		if (!applied)
+			return;
+
+		for (const key of ["media", "scheme", "primary", "accent"])
+			document.body.setAttribute(
+				`data-md-color-${key}`,
+				applied.dataset[`mdColor${key[0].toUpperCase()}${key.slice(1)}`]
+			);
 
 		for (const item of options)
 			item.checked = item === option;
 
-		__md_set("__palette", palette);
+		if (save)
+			__md_set("__palette", selected);
 	}
 
 	function openDialog() {
@@ -40,15 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		const selected = options.find(option => option.checked);
 		(selected || options[0]).focus();
-
-		button.setAttribute("aria-expanded", "true");
 	}
 
 	function closeDialog() {
 		if (dialog.open)
 			dialog.close();
-
-		button.setAttribute("aria-expanded", "false");
 	}
 
 	button.addEventListener("click", () => {
@@ -65,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	options.forEach(option => {
 		option.addEventListener("change", () => {
-			applyPalette(option);
+			applyPalette(option, true);
 		});
 	});
 
@@ -82,6 +112,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
+	systemMedia.addEventListener("change", () => {
+		const selected = options.find(option => option.checked);
+
+		if (selected === systemOption)
+			applyPalette(systemOption);
+	});
+
 	const saved = __md_get("__palette");
 
 	if (
@@ -92,18 +129,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		applyPalette(options[saved.index]);
 	}
 	else {
-		const media = window.matchMedia(
-			"(prefers-color-scheme: light)"
-		);
-
-		const index = options.findIndex(
-			option => option.dataset.mdColorMedia === (
-				media.matches
-					? "(prefers-color-scheme: light)"
-					: "(prefers-color-scheme: dark)"
-			)
-		);
-
-		applyPalette(options[index >= 0 ? index : 0]);
+		applyPalette(systemOption || getSystemPalette());
 	}
 });
