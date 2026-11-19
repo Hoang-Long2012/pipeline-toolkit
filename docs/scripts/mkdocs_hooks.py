@@ -8,6 +8,7 @@ from pkgutil import walk_packages
 import tomllib
 from justhtml import JustHTML
 from pygments.formatters import HtmlFormatter
+from pygments.token import Token
 from zoneinfo import ZoneInfo
 
 
@@ -23,8 +24,19 @@ def generate_pygments_css(config):
 		for scheme, style in styles:
 			formatter = HtmlFormatter(style=style)
 			selector = f'body[data-md-color-scheme="{scheme}"] .highlight'
+
 			file.write(formatter.get_style_defs(selector) + "\n")
 
+			foreground = formatter.style.style_for_token(Token.Text)["color"]
+			background = formatter.style.background_color
+
+			file.write(
+				f'body[data-md-color-scheme="{scheme}"] '
+				f'.md-typeset :not(pre) > code {{\n'
+				f'    color: #{foreground};\n'
+				f'    background-color: {background};\n'
+				f'}}\n'
+			)
 
 def on_config(config):
 	generate_pygments_css(config)
