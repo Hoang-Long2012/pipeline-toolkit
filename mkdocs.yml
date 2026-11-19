@@ -92,6 +92,7 @@ hooks:
 
 extra_css:
   - overrides/assets/stylesheets/extra.css
+  - overrides/assets/stylesheets/pygments.css
 
 extra_javascript:
   - overrides/assets/javascripts/nav-subsection.js
@@ -104,8 +105,6 @@ markdown_extensions:
       preserve_tabs: true
   - pymdownx.highlight:
       anchor_linenums: true
-      noclasses: true
-      pygments_style: material
   - pymdownx.inlinehilite
 
 watch:

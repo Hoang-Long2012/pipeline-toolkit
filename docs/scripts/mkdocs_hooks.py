@@ -7,10 +7,27 @@ from pkgutil import walk_packages
 
 import tomllib
 from justhtml import JustHTML
+from pygments.formatters import HtmlFormatter
 from zoneinfo import ZoneInfo
 
 
+def generate_pygments_css(config):
+	path = Path(config["docs_dir"]) / "overrides/assets/stylesheets/pygments.css"
+
+	styles = (
+		("default", "github-light"),
+		("slate", "github-dark"),
+	)
+
+	with path.open("w", encoding="utf-8") as file:
+		for scheme, style in styles:
+			formatter = HtmlFormatter(style=style)
+			selector = f'html[data-md-color-scheme="{scheme}"] .highlight'
+			file.write(formatter.get_style_defs(selector) + "\n")
+
+
 def on_config(config):
+	generate_pygments_css(config)
 	path = Path("pyproject.toml")
 	with path.open("rb") as file:
 		data = tomllib.load(file)
@@ -36,7 +53,7 @@ def on_pre_build(config):
 	changelog_src = root / "CHANGELOG.md"
 	changelog_dest = docs_dir / "changelog.md"
 	if changelog_src.exists():
-		content = "---\nhide:\n  - toc\n---\n" + changelog_src.read_text(encoding="utf-8")
+		content = "---\nhide:\n	 - toc\n---\n" + changelog_src.read_text(encoding="utf-8")
 		if not changelog_dest.exists() or changelog_dest.read_text(encoding="utf-8") != content:
 			changelog_dest.write_text(content, encoding="utf-8")
 
