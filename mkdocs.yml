@@ -104,7 +104,8 @@ markdown_extensions:
       preserve_tabs: true
   - pymdownx.highlight:
       anchor_linenums: true
-      pygments_style: monokai
+      noclass: true
+      pygments_style: material
   - pymdownx.inlinehilite
 
 watch:
