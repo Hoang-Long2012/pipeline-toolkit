@@ -15,14 +15,14 @@ def generate_pygments_css(config):
 	path = Path(config["docs_dir"]) / "overrides/assets/stylesheets/pygments.css"
 
 	styles = (
-		("default", "a11y-light"),
-		("slate", "a11y-dark"),
+		("default", "github-light"),
+		("slate", "github-dark"),
 	)
 
 	with path.open("w", encoding="utf-8") as file:
 		for scheme, style in styles:
 			formatter = HtmlFormatter(style=style)
-			selector = f'html[data-md-color-scheme="{scheme}"] .highlight'
+			selector = f'body[data-md-color-scheme="{scheme}"] .highlight'
 			file.write(formatter.get_style_defs(selector) + "\n")
 
 
@@ -42,7 +42,7 @@ def on_config(config):
 	config["extra"]["material_version"] = version("mkdocs-material")
 	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")
 	config["extra"]["deployment_time"] = now.strftime("%H:%M")
-	config["nav"].append({"api": {Path(api_file).stem: str(Path(api_file).relative_to("docs")) for api_file in sorted(Path("docs/api").glob("*.md"))}})
+	config["nav"].append({"api": {Path(api_file).stem: str(Path(api_file).relative_to(config["docs_dir"])) for api_file in sorted(Path(f"{config["docs_dir"]}/api").glob("*.md"))}})
 	return config
 
 
