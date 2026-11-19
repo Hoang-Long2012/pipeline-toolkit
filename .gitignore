@@ -169,7 +169,7 @@ venv.bak/
 /site
 /docs/changelog.md
 /docs/contributing.md
-docs/overrides/assets/stylesheets/pygments.css/
+docs/overrides/assets/stylesheets/pygments.css
 
 # mypy
 .mypy_cache/
