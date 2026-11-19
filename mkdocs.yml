@@ -95,6 +95,7 @@ extra_css:
   - overrides/assets/stylesheets/pygments.css
 
 extra_javascript:
+  - overrides/assets/javascripts/live-region.js
   - overrides/assets/javascripts/nav-subsection.js
   - overrides/assets/javascripts/palette.js
   - overrides/assets/javascripts/search-suggest.js
