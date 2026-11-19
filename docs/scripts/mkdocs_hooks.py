@@ -15,8 +15,8 @@ def generate_pygments_css(config):
 	path = Path(config["docs_dir"]) / "overrides/assets/stylesheets/pygments.css"
 
 	styles = (
-		("default", "github-light"),
-		("slate", "github-dark"),
+		("default", "a11y-light"),
+		("slate", "a11y-dark"),
 	)
 
 	with path.open("w", encoding="utf-8") as file:
