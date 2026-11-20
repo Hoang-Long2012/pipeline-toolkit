@@ -93,6 +93,7 @@ testpaths = ["tests"]
 addopts = "-ra --cov -n auto"
 timeout = 10
 strict_config = true
+strict_markers = true
 
 [tool.coverage.run]
 source_pkgs = ["pipeline"]
