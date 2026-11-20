@@ -16,12 +16,15 @@ dependencies = []
 
 keywords = [
 	"pipeline",
+	"pipeline object",
 	"functional programming",
 	"functional pipeline",
 	"functional toolkit",
 	"sequence pipeline",
 	"execute object",
+	"executor",
 	"workflow",
+	"task",
 	"async",
 	"asynchronous",
 	"threading",
@@ -51,6 +54,7 @@ Homepage = "https://pipeline-toolkit.pages.dev"
 Repository = "https://github.com/Hoang-Long2012/pipeline-toolkit"
 Documentation = "https://pipeline-toolkit.pages.dev"
 Issues = "https://github.com/Hoang-Long2012/pipeline-toolkit/issues"
+Discussions = "https://github.com/Hoang-Long2012/pipeline-toolkit/discussions"
 Changelog = "https://pipeline-toolkit.pages.dev/changelog"
 Contributing = "https://pipeline-toolkit.pages.dev/contributing"
 
