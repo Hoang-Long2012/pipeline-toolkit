@@ -113,7 +113,7 @@
           <div class="md-banner__inner md-grid md-typeset" role="alert">
             {% block announce %}{% endblock %}
             {% if "announce.dismiss" in features %}
-              <button class="md-banner__button md-icon" aria-label="dismiss">
+              <button class="md-banner__button md-icon" aria-label="Dismiss">
                 {% set icon = config.theme.icon.close or "material/close" %}
                 {% include ".icons/" ~ icon ~ ".svg" %}
               </button>
