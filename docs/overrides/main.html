@@ -31,3 +31,12 @@
   <meta property="og:locale" content="{{ lang.t('language') }}">
   <meta name="twitter:card" content="summary_large_image">
 {% endblock %}
+
+{% block announce %}
+  <p>
+    {{ config.extra.package_name }} {{ config.extra.version }} is now available!
+    <a href="https://pypi.org/project/{{ config.extra.package_name }}/" target="_blank" rel="noopener">
+      Check it out
+    </a>
+  </p>
+{% endblock %}
