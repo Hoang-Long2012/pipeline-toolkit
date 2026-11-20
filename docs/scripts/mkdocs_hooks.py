@@ -65,7 +65,7 @@ def on_pre_build(config):
 	changelog_src = root / "CHANGELOG.md"
 	changelog_dest = docs_dir / "changelog.md"
 	if changelog_src.exists():
-		content = "---\nhide:\n	 - toc\n---\n" + changelog_src.read_text(encoding="utf-8")
+		content = "---\nhide:\n  - toc\n---\n\n" + changelog_src.read_text(encoding="utf-8")
 		if not changelog_dest.exists() or changelog_dest.read_text(encoding="utf-8") != content:
 			changelog_dest.write_text(content, encoding="utf-8")
 
