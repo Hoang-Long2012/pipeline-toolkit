@@ -84,8 +84,8 @@
   {% endif %}
   {% if not config.extra.generator == false %}
     Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs {{ config.extra.material_version }}
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener" aria-label="Material for MkDocs {{ config.extra.material_version }}">
+      {% include ".icons/material/material-design.svg" %}
     </a>
   {% endif %}
   <div class="md-deployment">
