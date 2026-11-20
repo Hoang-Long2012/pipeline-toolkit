@@ -65,14 +65,26 @@ def on_pre_build(config):
 	changelog_src = root / "CHANGELOG.md"
 	changelog_dest = docs_dir / "changelog.md"
 	if changelog_src.exists():
-		content = "---\nhide:\n  - toc\n---\n\n" + changelog_src.read_text(encoding="utf-8")
+		content = (
+			"---\n"
+			"icon: material/history\n"
+			"hide:\n"
+			"  - toc\n"
+			"---\n\n"
+			+ changelog_src.read_text(encoding="utf-8")
+		)
 		if not changelog_dest.exists() or changelog_dest.read_text(encoding="utf-8") != content:
 			changelog_dest.write_text(content, encoding="utf-8")
 
 	contributing_src = root / "CONTRIBUTING.md"
 	contributing_dest = docs_dir / "contributing.md"
 	if contributing_src.exists():
-		content = contributing_src.read_text(encoding="utf-8")
+		content = (
+			"---\n"
+			"icon: material/source-pull\n"
+			"---\n\n"
+			+ contributing_src.read_text(encoding="utf-8")
+		)
 		if not contributing_dest.exists() or contributing_dest.read_text(encoding="utf-8") != content:
 			contributing_dest.write_text(content, encoding="utf-8")
 

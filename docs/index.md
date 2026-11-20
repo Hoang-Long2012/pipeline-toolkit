@@ -1,5 +1,6 @@
 ---
 title: Home
+icon: material/home
 hide:
   - toc
 ---
