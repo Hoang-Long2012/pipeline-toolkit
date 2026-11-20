@@ -54,7 +54,7 @@ def on_config(config):
 	config["extra"]["material_version"] = version("mkdocs-material")
 	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")
 	config["extra"]["deployment_time"] = now.strftime("%H:%M")
-	config["nav"].append({"api": {Path(api_file).stem: str(Path(api_file).relative_to(config["docs_dir"])) for api_file in sorted(Path(f"{config['docs_dir']}/api").glob("*.md"))}})
+	config["nav"].append({"API": {Path(api_file).stem: str(Path(api_file).relative_to(config["docs_dir"])) for api_file in sorted(Path(f"{config['docs_dir']}/api").glob("*.md"))}})
 	return config
 
 
