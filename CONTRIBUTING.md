@@ -25,7 +25,7 @@ Install [uv](https://docs.astral.sh/uv/) and sync the development environment fr
 uv sync
 ```
 
-The repository uses Python 3.14 for development.
+The repository uses Python 3.15 for development.
 
 The package itself supports Python 3.8 and newer.
 
