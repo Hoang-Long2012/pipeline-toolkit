@@ -375,6 +375,28 @@
 	overflow-y: visible;
 }
 
+/* Make the code block copy button easier to spot and use. */
+.md-typeset .md-clipboard {
+	color: var(--md-accent-fg-color);
+	background: var(--md-default-bg-color);
+	border: 1px solid var(--md-default-fg-color--lightest);
+	border-radius: 0.25rem;
+	box-shadow: var(--md-shadow-z1);
+	opacity: 1;
+	transition: color 125ms, background-color 125ms, border-color 125ms;
+}
+
+.md-typeset .md-clipboard:hover {
+	color: var(--md-accent-bg-color);
+	background: var(--md-accent-fg-color);
+	border-color: var(--md-accent-fg-color);
+}
+
+.md-typeset .md-clipboard:focus-visible {
+	outline: 2px solid var(--md-accent-fg-color);
+	outline-offset: 2px;
+}
+
 /*
  * Keep the primary navigation and table of contents in the page
  * instead of switching to Material's mobile drawer layout.
