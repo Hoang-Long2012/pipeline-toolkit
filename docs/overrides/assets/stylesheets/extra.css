@@ -217,6 +217,10 @@
 	transition: background-color 125ms, color 125ms;
 }
 
+.md-header__nav > .md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link {
+	color: var(--md-primary-bg-color);
+}
+
 .md-header__nav .md-nav__link svg {
 	width: 1.1em;
 	height: 1.1em;
@@ -229,10 +233,20 @@
 	background-color: var(--md-accent-fg-color--transparent);
 }
 
+.md-header__nav > .md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link:hover {
+	color: var(--md-primary-bg-color);
+	background-color: rgb(255 255 255 / 16%);
+}
+
 .md-header__nav .md-nav__link--active,
 .md-header__nav .md-nav__item--active > .md-nav__link {
 	color: var(--md-accent-fg-color);
 	font-weight: 700;
+}
+
+.md-header__nav > .md-nav--primary > .md-nav__list > .md-nav__item--active > .md-nav__link {
+	color: var(--md-primary-bg-color);
+	background-color: rgb(255 255 255 / 16%);
 }
 
 /* Dropdown menu for nested items (API) */
