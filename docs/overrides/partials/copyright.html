@@ -2,13 +2,15 @@
   This file was automatically generated - do not edit
 -#}
 {% macro render_updated(date) %}
-  <div class="md-source-file__fact">
-    Last updated {{ date | striptags }}
+  <div class="md-source-file__fact md-source-file__date md-source-file__date--updated">
+    <span class="md-source-file__label">Last updated</span>
+    <span class="md-source-file__value">{{ date | striptags }}</span>
   </div>
 {% endmacro %}
 {% macro render_created(date) %}
-  <div class="md-source-file__fact">
-    Created {{ date | striptags }}
+  <div class="md-source-file__fact md-source-file__date md-source-file__date--created">
+    <span class="md-source-file__label">Created</span>
+    <span class="md-source-file__value">{{ date | striptags }}</span>
   </div>
 {% endmacro %}
 {% macro render_authors(authors) %}
@@ -82,11 +84,17 @@
       {{ config.copyright }}
     </div>
   {% endif %}
+  {% if config.extra.social %}
+    {% include "partials/social.html" %}
+  {% endif %}
   {% if not config.extra.generator == false %}
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener" aria-label="Material for MkDocs {{ config.extra.material_version }}">
-      {% include ".icons/material/material-design.svg" %}
-    </a>
+    <div class="md-copyright__generator">
+      Made with
+      <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+        {% include ".icons/material/material-design.svg" %}
+        <span>Material for MkDocs {{ config.extra.material_version }}</span>
+      </a>
+    </div>
   {% endif %}
   <div class="md-deployment">
     Deployed at {{ config.extra.deployment_date }} {{ config.extra.deployment_time }}

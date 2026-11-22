@@ -120,8 +120,6 @@ nav:
   - Home: index.md
   - Changelog: changelog.md
   - Contributing: contributing.md
-  - GitHub: https://github.com/Hoang-Long2012/pipeline-toolkit
-  - PyPI: https://pypi.org/project/pipeline-toolkit
 
 validation:
   nav:
@@ -138,3 +136,12 @@ extra:
   analytics:
     provider: google
     property: G-ZZ1MDHKZ3H
+
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Hoang-Long2012/pipeline-toolkit
+      name: Pipeline Toolkit on GitHub
+
+    - icon: material/package-variant
+      link: https://pypi.org/project/pipeline-toolkit/
+      name: Pipeline Toolkit on PyPI

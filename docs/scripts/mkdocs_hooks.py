@@ -28,13 +28,24 @@ def generate_pygments_css(config):
 			file.write(formatter.get_style_defs(selector) + "\n")
 
 			foreground = formatter.style.style_for_token(Token.Text)["color"]
-			background = formatter.style.background_color
+			background = (
+				"var(--md-code-bg-color)"
+				if scheme == "default"
+				else formatter.style.background_color
+			)
 
 			file.write(
 				f'body[data-md-color-scheme="{scheme}"] '
 				f'.md-typeset :not(pre) > code {{\n'
 				f'    color: #{foreground};\n'
 				f'    background-color: {background};\n'
+				f'}}\n'
+			)
+
+			file.write(
+				f'body[data-md-color-scheme="{scheme}"] '
+				f'.highlight pre {{\n'
+				f'    background-color: transparent;\n'
 				f'}}\n'
 			)
 
@@ -54,8 +65,21 @@ def on_config(config):
 	config["extra"]["material_version"] = version("mkdocs-material")
 	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")
 	config["extra"]["deployment_time"] = now.strftime("%H:%M")
-	config["nav"].append({"API": {Path(api_file).stem: str(Path(api_file).relative_to(config["docs_dir"])) for api_file in sorted(Path(f"{config['docs_dir']}/api").glob("*.md"))}})
+	config["nav"].append({
+		"API": {
+			Path(api_file).stem: str(Path(api_file).relative_to(config["docs_dir"]))
+			for api_file in sorted(Path(f"{config['docs_dir']}/api").glob("*.md"))
+		}
+	})
 	return config
+
+
+def on_nav(nav, config, files):
+	for item in nav:
+		if item.is_section and item.title == "API":
+			item.icon = "material/library"
+
+	return nav
 
 
 def on_pre_build(config):
