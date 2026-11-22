@@ -58,6 +58,123 @@
 	margin-left: auto;
 }
 
+.md-search__inner {
+	position: relative;
+	width: 13rem;
+	transition: width 200ms ease;
+}
+
+.md-search__inner:focus-within {
+	width: 20rem;
+}
+
+.md-search__form {
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: 1.8rem;
+	background: var(--md-code-bg-color);
+	border: 1px solid var(--md-default-fg-color--lighter);
+	border-radius: 0.25rem;
+	transition: border-color 125ms, box-shadow 125ms;
+}
+
+.md-search__form:hover {
+	border-color: var(--md-default-fg-color--light);
+}
+
+.md-search__form:focus-within {
+	border-color: var(--md-accent-fg-color);
+	box-shadow: 0 0 0 1px var(--md-accent-fg-color);
+}
+
+.md-search__form .md-search__icon[for="search-input"] {
+	position: absolute;
+	left: 0.5rem;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	pointer-events: none;
+	display: flex;
+	align-items: center;
+	width: 1.1rem;
+	height: 1.1rem;
+	font-size: 0;
+	color: var(--md-default-fg-color--light);
+}
+
+.md-search__form .md-search__icon[for="search-input"] svg:first-child {
+	display: block;
+	width: 1rem;
+	height: 1rem;
+	fill: currentColor;
+}
+
+.md-search__form .md-search__icon[for="search-input"] svg:last-child {
+	display: none;
+}
+
+.md-search__input {
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	padding-left: 2rem !important;
+	padding-right: 1.8rem !important;
+	font-size: 0.75rem;
+	color: var(--md-default-fg-color);
+	background: transparent;
+	border: 0;
+	outline: none;
+	box-shadow: none;
+}
+
+.md-search__input::placeholder {
+	color: var(--md-default-fg-color--light);
+	opacity: 1;
+}
+
+.md-search__form .md-search__options {
+	position: absolute;
+	right: 0.4rem;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	display: flex;
+	align-items: center;
+}
+
+.md-search__form .md-search__options button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	color: var(--md-default-fg-color--light);
+}
+
+.md-search__form .md-search__options button:hover {
+	color: var(--md-accent-fg-color);
+}
+
+.md-search__form .md-search__options button svg {
+	width: 1rem;
+	height: 1rem;
+	fill: currentColor;
+}
+
+@media screen and (max-width: 45em) {
+	.md-search__inner {
+		width: 9.5rem;
+	}
+
+	.md-search__inner:focus-within {
+		width: 14rem;
+	}
+}
+
 /* Header navigation horizontal layout */
 .md-header__nav {
 	display: flex;
