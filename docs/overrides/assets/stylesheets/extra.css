@@ -362,6 +362,19 @@
 	margin-top: 0.75rem;
 }
 
+/* Prevent code blocks from being clipped or hidden when scrolling */
+.md-typeset .highlight,
+.md-typeset pre,
+.md-typeset code {
+	position: relative;
+	z-index: 0;
+}
+
+.md-typeset .highlight pre {
+	overflow-x: auto;
+	overflow-y: visible;
+}
+
 /*
  * Keep the primary navigation and table of contents in the page
  * instead of switching to Material's mobile drawer layout.
