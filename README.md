@@ -22,7 +22,11 @@ pipeline = Pipeline([
 	(multiply, (2,)),
 ])
 
-pipeline.run(10).wait()
+pipeline.run(10)
+
+# Do something
+
+pipeline.wait()
 
 print(pipeline.result)  # 30
 ```
