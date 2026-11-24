@@ -1979,6 +1979,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pastel"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/f1/4594f5e0fcddb6953e5b8fe00da8c317b8b41b547e2b3ae2da7512943c62/pastel-0.2.1.tar.gz", hash = "sha256:e6581ac04e973cac858828c6202c1e1e81fee1dc7de7683f3e1ffe0bfd8a573d", size = 7555, upload-time = "2020-09-16T19:21:12.43Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/aa/18/a8444036c6dd65ba3624c63b734d3ba95ba63ace513078e1580590075d21/pastel-0.2.1-py2.py3-none-any.whl", hash = "sha256:4349225fcdf6c2bb34d483e523475de5bb04a5c10ef711263452cb37d7dd4364", size = 5955, upload-time = "2020-09-16T19:21:11.409Z" },
+]
+
+[[package]]
 name = "pathspec"
 version = "0.12.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2032,6 +2041,9 @@ dev = [
     { name = "mkdocstrings", version = "0.30.1", source = { registry = "https://pypi.org/simple" }, extra = ["python"], marker = "python_full_version == '3.9.*'" },
     { name = "mkdocstrings", version = "1.0.6", source = { registry = "https://pypi.org/simple" }, extra = ["python"], marker = "python_full_version == '3.10.*'" },
     { name = "mkdocstrings", version = "1.0.8", source = { registry = "https://pypi.org/simple" }, extra = ["python"], marker = "python_full_version >= '3.11'" },
+    { name = "poethepoet", version = "0.30.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
+    { name = "poethepoet", version = "0.37.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
+    { name = "poethepoet", version = "0.49.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "pytest", version = "8.3.5", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
     { name = "pytest", version = "8.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.9.*'" },
     { name = "pytest", version = "9.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
@@ -2110,6 +2122,7 @@ dev = [
     { name = "mkdocs-macros-plugin", specifier = ">=1.5.0" },
     { name = "mkdocs-material", specifier = ">=9.7.7" },
     { name = "mkdocstrings", extras = ["python"], specifier = ">=0.26.1" },
+    { name = "poethepoet", specifier = ">=0.30.0" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "pytest-cov", specifier = ">=5.0.0" },
     { name = "pytest-metadata", specifier = ">=3.1.1" },
@@ -2231,6 +2244,58 @@ resolution-markers = [
 sdist = { url = "https://files.pythonhosted.org/packages/bf/db/7fc19e6f2dc92a966727031389fc2e08b558f0f25eb7403c1119ad4713cd/pluggy-1.7.0.tar.gz", hash = "sha256:d1eaa46ebb595891b860ab086b4d09c8588af65ebd4361b8e8f4bb8920b90ba8", size = 123304, upload-time = "2026-10-15T09:50:58.343Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/40/9e/2b38731e0fc536806f16490e1a12d7f0dc2a1235aa8cc07bcc75416a7daa/pluggy-1.7.0-py3-none-any.whl", hash = "sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec", size = 27082, upload-time = "2026-10-15T09:50:56.808Z" },
+]
+
+[[package]]
+name = "poethepoet"
+version = "0.30.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version < '3.9'",
+]
+dependencies = [
+    { name = "pastel" },
+    { name = "pyyaml", version = "6.0.3", source = { registry = "https://pypi.org/simple" } },
+    { name = "tomli" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/be/07/dfaed168414cf1e10f5c90860cdc29ffd871df80be81f3d7abd0451a4508/poethepoet-0.30.0.tar.gz", hash = "sha256:9f7ccda2d6525616ce989ca8ef973739fd668f50bef0b9d3631421d504d9ae4a", size = 60139, upload-time = "2024-11-09T22:16:58.189Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/25/98/12bff83ac39ba78ba4736c2f217bab294187de5d71ffbfeb3e126c230704/poethepoet-0.30.0-py3-none-any.whl", hash = "sha256:bf875741407a98da9e96f2f2d0b2c4c34f56d89939a7f53a4b6b3a64b546ec4e", size = 78036, upload-time = "2024-11-09T22:16:56.712Z" },
+]
+
+[[package]]
+name = "poethepoet"
+version = "0.37.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version == '3.9.*'",
+]
+dependencies = [
+    { name = "pastel" },
+    { name = "pyyaml", version = "6.0.3", source = { registry = "https://pypi.org/simple" } },
+    { name = "tomli" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a5/f2/273fe54a78dc5c6c8dd63db71f5a6ceb95e4648516b5aeaeff4bde804e44/poethepoet-0.37.0.tar.gz", hash = "sha256:73edf458707c674a079baa46802e21455bda3a7f82a408e58c31b9f4fe8e933d", size = 68570, upload-time = "2025-08-11T18:00:29.103Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/92/1b/5337af1a6a478d25a3e3c56b9b4b42b0a160314e02f4a0498d5322c8dac4/poethepoet-0.37.0-py3-none-any.whl", hash = "sha256:861790276315abcc8df1b4bd60e28c3d48a06db273edd3092f3c94e1a46e5e22", size = 90062, upload-time = "2025-08-11T18:00:27.595Z" },
+]
+
+[[package]]
+name = "poethepoet"
+version = "0.49.0"
+source = { registry = "https://pypi.org/simple" }
+resolution-markers = [
+    "python_full_version >= '3.11.5'",
+    "python_full_version >= '3.11' and python_full_version < '3.11.5'",
+    "python_full_version == '3.10.*'",
+]
+dependencies = [
+    { name = "pyyaml", version = "6.0.4", source = { registry = "https://pypi.org/simple" } },
+    { name = "tomli", marker = "python_full_version < '3.11'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4e/7e/160d391368d359f7dd6dd647575499c395687beb4a6b2ebfbfbf8a20b817/poethepoet-0.49.0.tar.gz", hash = "sha256:256b72c057b5f60341bbe09498212939e558341fac4ab59d0ce478aca04f0d2a", size = 157750, upload-time = "2026-10-15T06:08:57.094Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a1/f5/a2404b9cb3c299cd148533d07e1a378b60aa4ae640c69fb522596ca157ae/poethepoet-0.49.0-py3-none-any.whl", hash = "sha256:97b456f3c52c9af75d4bc504e0f5cfee44545a84f446ba645a0a8f6a0131422f", size = 195985, upload-time = "2026-10-15T06:08:55.332Z" },
 ]
 
 [[package]]

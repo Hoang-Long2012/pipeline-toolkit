@@ -36,14 +36,10 @@ Keep changes focused and follow the existing coding style (use tabs for Python i
 Before opening a pull request, run:
 
 ```bash
-git diff --check
-uv run validate-pyproject pyproject.toml
-uv run ruff check
-uv run ty check
-uv run pytest
+uv run poe check
 ```
 
-If your changes involve the documentation, run `uv run mkdocs build`. You can also preview documentation locally with `uv run mkdocs serve`.
+If your changes involve the documentation, run `uv run poe docs`. You can also preview documentation locally with `uv run poe preview`.
 
 If you change dependencies, regenerate `uv.lock` with `uv lock` and include the updated lockfile.
 

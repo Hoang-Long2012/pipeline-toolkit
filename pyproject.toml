@@ -90,7 +90,7 @@ respect-ignore-files = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --cov -n auto"
+addopts = "-ra --cov -n auto -p no:cacheprovider"
 timeout = 10
 strict_config = true
 strict_markers = true
@@ -106,6 +106,83 @@ show_missing = true
 
 [tool.coverage.html]
 skip_covered = true
+
+[tool.poe.tasks.validate-pyproject]
+cmd = "validate-pyproject pyproject.toml"
+help = "Validate the pyproject.toml configuration."
+
+[tool.poe.tasks.lint]
+cmd = "ruff check --no-cache"
+help = "Run Ruff lint checks."
+
+[tool.poe.tasks.typecheck]
+cmd = "ty check"
+help = "Run static type checks."
+
+[tool.poe.tasks.diff-check]
+sequence = [
+	{ cmd = "git diff --check" },
+	{ cmd = "git diff --cached --check" },
+]
+help = "Check for whitespace errors in Git changes."
+
+[tool.poe.tasks.test]
+cmd = "pytest"
+help = "Run the test suite."
+
+[tool.poe.tasks.build]
+cmd = "uv build"
+help = "Build source and wheel distributions."
+
+[tool.poe.tasks.docs]
+cmd = "mkdocs build"
+help = "Build documentation."
+
+[tool.poe.tasks.preview]
+cmd = "mkdocs serve"
+help = "Start the documentation development server."
+
+[tool.poe.tasks.check]
+sequence = [
+	"diff-check",
+	"validate-pyproject",
+	"lint",
+	"typecheck",
+	"test",
+]
+help = "Run all quality checks."
+
+[tool.poe.tasks.verify]
+sequence = [
+	"check",
+	"build",
+	"docs",
+]
+help = "Run all quality checks and build artifacts."
+
+[tool.poe.tasks.release-check]
+sequence = [
+	{ cmd = "git diff --quiet" },
+	{ cmd = "git diff --cached --quiet" },
+]
+help = "Ensure the Git working tree and index are clean."
+
+[tool.poe.tasks.release]
+sequence = [
+	"release-check",
+	{ cmd = "git rev-parse --verify --quiet refs/tags/v${_version}", not = true },
+	"verify",
+	{ cmd = "uv version ${_version}" },
+	{ cmd = "uv lock" },
+	{ cmd = "git add pyproject.toml uv.lock" },
+	{ cmd = 'git commit -m "Bump version to ${_version}."' },
+	{ cmd = "git tag v${_version}" },
+	{ cmd = "git push origin v${_version}" },
+]
+args = [
+	{ name = "_version", positional = true, help = "Target release version." },
+]
+help = "Prepare and publish a version tag to GitHub."
 
 [build-system]
 requires = ["hatchling>=1.27", "libcst>=1.1", "markdown-it-py>=3.0", "mdit-plain>=1.0.1"]
@@ -140,4 +217,5 @@ dev = [
 	{include-group = "quality"},
 	{include-group = "test"},
 	{include-group = "documentation"},
+	"poethepoet>=0.30.0",
 ]
