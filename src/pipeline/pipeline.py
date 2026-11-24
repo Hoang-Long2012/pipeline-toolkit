@@ -34,8 +34,10 @@ class Pipeline:
 	    (add, (5,)),
 	    (add, (10,)),
 	])
+
 	pipeline.run(0).wait().result  # 15
 	```
+
 	The value flows through each step sequentially:
 	```text
 	0
