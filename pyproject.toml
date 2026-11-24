@@ -170,7 +170,7 @@ help = "Ensure the Git working tree and index are clean."
 [tool.poe.tasks.release]
 sequence = [
 	"release-check",
-	{ cmd = "git rev-parse --verify --quiet refs/tags/v${_version}", not = true },
+	{ cmd = "uv run python -c \"import subprocess, sys; sys.exit(subprocess.run(['git', 'show-ref', '--verify', '--quiet', 'refs/tags/v${_version}']).returncode == 0)\"" },
 	"verify",
 	{ cmd = "uv version ${_version}" },
 	{ cmd = "uv lock" },
