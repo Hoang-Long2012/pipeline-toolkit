@@ -46,6 +46,20 @@ pipeline.wait()
 
 print(pipeline.result)  # 12
 ```
+
+The value flows through each step sequentially:
+
+```text
+5
+ ↓
+add(5, 1)
+ ↓
+6
+ ↓
+multiply(6, 2)
+ ↓
+12
+```
 """
 from importlib.metadata import PackageNotFoundError, version
 

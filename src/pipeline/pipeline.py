@@ -36,6 +36,18 @@ class Pipeline:
 	])
 	pipeline.run(0).wait().result  # 15
 	```
+	The value flows through each step sequentially:
+	```text
+	0
+	 ↓
+	add(0, 5)
+	 ↓
+	5
+	 ↓
+	add(5, 10)
+	 ↓
+	15
+	```
 	"""
 	def __init__(self, iterable=(), default=None, name=None, *, run_now=False, run_args=(), run_kwargs=None):
 		"""Initialize a pipeline.
