@@ -105,6 +105,41 @@ class TestStepOperators:
 		s = step(int)
 		assert s.__mul__(1.5) is NotImplemented
 
+	def test_step_power_operator_creates_distinct_copies(self):
+		"""Create the requested number of equivalent step instances."""
+		def add(x, amount):
+			return x + amount
+		s = step(add, 5)
+		s.default = 10
+
+		steps = s ** 3
+
+		assert len(steps) == 3
+		assert all(isinstance(item, step) for item in steps)
+		assert all(item == s for item in steps)
+		assert all(item is not s for item in steps)
+		assert len({id(item) for item in steps}) == 3
+		assert all(item.default == 10 for item in steps)
+
+	def test_step_power_with_zero(self):
+		"""Require at least one copied step."""
+		s = step(int)
+
+		with pytest.raises(ValueError, match="other < 1"):
+			s ** 0
+
+	def test_step_power_with_negative(self):
+		"""Reject a negative number of copies."""
+		s = step(int)
+
+		with pytest.raises(ValueError, match="other < 1"):
+			s ** -1
+
+	def test_step_power_with_non_integer(self):
+		"""Return NotImplemented when the exponent is not an integer."""
+		s = step(int)
+		assert s.__pow__(1.5) is NotImplemented
+
 	def test_step_chaining_with_pipe_operator(self):
 		"""Test chaining steps with pipe operator."""
 		def add(x, amount):

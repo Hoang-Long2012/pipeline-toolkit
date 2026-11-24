@@ -45,6 +45,10 @@ hide:
     options:
       heading_level: 3
 
+::: pipeline.step.__pow__
+    options:
+      heading_level: 3
+
 ::: pipeline.step.__lt__
     options:
       heading_level: 3

@@ -1,4 +1,5 @@
 """Tools for creating reusable pipeline steps from callables."""
+import copy
 from functools import wraps
 
 from ._compat import _DEFAULT
@@ -105,6 +106,26 @@ class step:
 		for _ in range(other):
 			result = self._function(result, *self._args, **self._kwargs)
 		return result
+	def __pow__(self, other):
+		"""Create multiple copies of the step.
+
+		Args:
+			other: The number of step instances to create.
+
+		Returns:
+			A list containing the created step instances, or ``NotImplemented`` if ``other`` is not an integer.
+
+		Raises:
+			ValueError: If ``other`` is less than 1.
+		"""
+		if not isinstance(other, int):
+			return NotImplemented
+		if other < 1:
+			raise ValueError("other < 1.")
+		steps = []
+		for _ in range(other):
+			steps.append(copy.copy(self))
+		return steps
 	def __lt__(self, other):
 		"""Read a value from a file-like object and execute the step with it.
 
