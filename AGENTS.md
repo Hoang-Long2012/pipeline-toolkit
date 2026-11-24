@@ -147,6 +147,10 @@ Do not change any of these merely as an implementation improvement.
 - Avoid unnecessary mocks, timing assumptions, or external dependencies.
 - When modifying tests, inspect the current implementation first and test its intended existing behavior.
 
+## Release Pipeline
+
+Run `uv run poe release <VERSION>` and the pipeline will run automatically.
+
 ## Verification
 
 After making changes:
