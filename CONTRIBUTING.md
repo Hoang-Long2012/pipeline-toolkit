@@ -39,6 +39,8 @@ Before opening a pull request, run:
 uv run poe check
 ```
 
+This runs the project's configured quality checks and test suite.
+
 If your changes involve the documentation, run `uv run poe docs`. You can also preview documentation locally with `uv run poe preview`.
 
 If you change dependencies, regenerate `uv.lock` with `uv lock` and include the updated lockfile.

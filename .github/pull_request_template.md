@@ -20,12 +20,9 @@
 
 <!-- List the checks you ran and their results. -->
 
-- [ ] `git diff --check`
-- [ ] `uv run validate-pyproject pyproject.toml`
-- [ ] `uv run ruff check`
-- [ ] `uv run ty check`
-- [ ] `uv run pytest`
-- [ ] `uv run mkdocs build --strict`
+- [ ] `uv run poe check`
+- [ ] `uv run poe build`
+- [ ] `uv run poe docs`
 
 ## Contributor checklist
 
