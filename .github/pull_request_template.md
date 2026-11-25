@@ -28,4 +28,5 @@
 
 - [ ] I added or updated tests for behavior changes.
 - [ ] I updated user-facing documentation when needed.
+- [ ] I updated changelog when needed.
 - [ ] I kept this pull request focused on one change.
