@@ -5,12 +5,15 @@ from inspect import getdoc
 from pathlib import Path
 from pkgutil import walk_packages
 
-import tomllib
 from justhtml import JustHTML
 from pygments.formatters import HtmlFormatter
 from pygments.token import Token
 from zoneinfo import ZoneInfo
 
+try:
+	import tomllib
+except ModuleNotFoundError:
+	import tomli as tomllib
 
 def generate_pygments_css(config):
 	path = Path(config["docs_dir"]) / "overrides/assets/stylesheets/pygments.css"
