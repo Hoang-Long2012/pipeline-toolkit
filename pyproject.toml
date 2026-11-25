@@ -173,10 +173,10 @@ help = "Ensure the Git working tree and index are clean."
 sequence = [
 	"release-check",
 	{ expr = "sys.exit(subprocess.run(['git', 'show-ref', '--verify', '--quiet', 'refs/tags/v${_version}']).returncode == 0)", imports = ["subprocess", "sys"] },
-	{ expr = "sys.exit(f'## {_version}' not in pathlib.Path('CHANGELOG.md').read_text(encoding='utf-8'))", imports = ["sys", "pathlib"] },
-	"verify",
+	{ expr = "sys.exit(f'## {_version}\\n' not in pathlib.Path('CHANGELOG.md').read_text(encoding='utf-8'))", imports = ["sys", "pathlib"] },
 	{ cmd = "uv version ${_version}" },
 	{ cmd = "uv lock" },
+	"verify",
 	{ cmd = "git add pyproject.toml uv.lock" },
 	{ cmd = 'git commit -m "Bump version to ${_version}."' },
 	{ cmd = "git tag v${_version}" },
