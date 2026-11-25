@@ -145,3 +145,7 @@ extra:
     - icon: material/package-variant
       link: https://pypi.org/project/pipeline-toolkit/
       name: Pipeline Toolkit on PyPI
+
+    - icon: material/bookshelf
+      link: https://libraries.io/pypi/pipeline-toolkit
+      name: Pipeline Toolkit on Libraries.io
