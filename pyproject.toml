@@ -136,10 +136,12 @@ help = "Build source and wheel distributions."
 
 [tool.poe.tasks.docs]
 cmd = "mkdocs build"
+env = { NO_MKDOCS_2_WARNING = "1" }
 help = "Build documentation."
 
 [tool.poe.tasks.preview]
 cmd = "mkdocs serve"
+env = { NO_MKDOCS_2_WARNING = "1" }
 help = "Start the documentation development server."
 
 [tool.poe.tasks.check]
