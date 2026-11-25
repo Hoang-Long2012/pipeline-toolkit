@@ -141,7 +141,7 @@ jobs:
           rm -rf /tmp/test-env
 
       - name: Check distributions with Twine
-        run: uvx twine check dist/*
+        run: uv run twine check dist/*
 
       - name: Generate SHA-256 checksums
         run: sha256sum dist/* > SHA256SUMS
