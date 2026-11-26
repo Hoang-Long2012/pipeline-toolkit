@@ -261,12 +261,13 @@ class Pipeline:
 		Returns:
 			The one-based index of the step at which execution was stopped, or ``0`` if the pipeline was not running.
 		"""
-		if self._thread is not None and self.running:
-			self._stop_event.set()
-			self._thread.join()
-			step = self._step
-			self._step = 0
-			return step
+		if self._thread is not threading.current_thread():
+			if self._thread is not None and self.running:
+				self._stop_event.set()
+				self._thread.join()
+				step = self._step
+				self._step = 0
+				return step
 		return 0
 	def skip(self):
 		"""Request the currently running pipeline to skip its next step.
@@ -276,8 +277,9 @@ class Pipeline:
 		Returns:
 			This pipeline instance.
 		"""
-		if self._thread is not None and self.running:
-			self._skip_event.set()
+		if self._thread is not threading.current_thread():
+			if self._thread is not None and self.running:
+				self._skip_event.set()
 		return self
 	def wait(self, timeout=None):
 		"""Wait until the currently running pipeline finishes.
@@ -297,6 +299,8 @@ class Pipeline:
 			TypeError: If ``timeout`` is not an integer, a floating-point number, or ``None``.
 			ValueError: If ``timeout`` is negative.
 		"""
+		if self._thread is threading.current_thread():
+			return self
 		if not isinstance(timeout, (int, float, type(None))):
 			raise TypeError("timeout is not int, float, or None.")
 		if timeout is not None and timeout < 0:
@@ -312,8 +316,9 @@ class Pipeline:
 		Returns:
 			This pipeline instance.
 		"""
-		self.stop()
-		self.run(*args, **kwargs)
+		if self._thread is not threading.current_thread():
+			self.stop()
+			self.run(*args, **kwargs)
 		return self
 	@property
 	def running(self):

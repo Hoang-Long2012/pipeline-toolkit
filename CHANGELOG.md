@@ -12,6 +12,7 @@ Documentation-only and metadata-only releases are explicitly identified.
 - Added `Checkpoint.value` setter to set the published value.
 - Added `context_executor()` utility for executing a context manager with a value and returning its result.
 - Changed `Pipeline.__call__()` to run the pipeline synchronously, wait for execution to complete, reraise the most recent caught exception, and return the final result.
+- Changed `Pipeline.stop()`, `skip()`, `wait()`, and `rerun()` to return early without blocking when called from within the pipeline's own worker thread.
 
 ## 0.8.1
 - Added support for the `**` operator to create multiple copies of a `step`.

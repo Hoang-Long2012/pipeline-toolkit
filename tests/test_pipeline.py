@@ -545,6 +545,20 @@ class TestPipelineExecution:
 		pipeline.wait()
 		assert not pipeline.running
 
+	def test_wait_from_within_pipeline_thread(self):
+		"""Test calling wait from within a pipeline step returns self without deadlocking."""
+		ret = []
+
+		def step_func(x):
+			ret.append(pipeline.wait())
+			ret.append(pipeline.wait(timeout=1.0))
+			return x + 1
+
+		pipeline = Pipeline([(step_func,)])
+		pipeline.run(10).wait()
+		assert ret == [pipeline, pipeline]
+		assert pipeline.result == 11
+
 
 class TestPipelineStop:
 	"""Test pipeline stop functionality."""
@@ -642,6 +656,26 @@ class TestPipelineStop:
 		assert pipeline.step == 0
 		assert len(pipeline.errors) == 1
 
+	def test_stop_from_within_pipeline_thread(self):
+		"""Test calling stop from within a pipeline step returns 0."""
+		stopped = []
+		executed = []
+
+		def step1(x):
+			stopped.append(pipeline.stop())
+			executed.append("step1")
+			return x + 1
+
+		def step2(x):
+			executed.append("step2")
+			return x + 1
+
+		pipeline = Pipeline([(step1,), (step2,)])
+		pipeline.run(10).wait()
+		assert stopped == [0]
+		assert executed == ["step1", "step2"]
+		assert pipeline.result == 12
+
 
 class TestPipelineSkip:
 	"""Test pipeline skip functionality."""
@@ -706,6 +740,26 @@ class TestPipelineSkip:
 		assert called == ["second"]
 		assert pipeline.result == 10
 
+	def test_skip_from_within_pipeline_thread(self):
+		"""Test calling skip from within a pipeline step returns self and does not skip next step."""
+		called = []
+		returned = []
+
+		def step1(x):
+			called.append("step1")
+			returned.append(pipeline.skip())
+			return x + 1
+
+		def step2(x):
+			called.append("step2")
+			return x + 1
+
+		pipeline = Pipeline([(step1,), (step2,)])
+		pipeline.run(0).wait()
+		assert returned == [pipeline]
+		assert called == ["step1", "step2"]
+		assert pipeline.result == 2
+
 
 class TestPipelineRerun:
 	"""Test pipeline rerun functionality."""
@@ -758,6 +812,22 @@ class TestPipelineRerun:
 		result = pipeline.rerun(10)
 		assert result is pipeline
 		pipeline.wait()
+
+	def test_rerun_from_within_pipeline_thread(self):
+		"""Test calling rerun from within a pipeline step returns self without rerunning."""
+		runs = []
+		returned = []
+
+		def step_func(x):
+			runs.append(x)
+			returned.append(pipeline.rerun(99))
+			return x + 1
+
+		pipeline = Pipeline([(step_func,)])
+		pipeline.run(10).wait()
+		assert returned == [pipeline]
+		assert runs == [10]
+		assert pipeline.result == 11
 
 
 class TestPipelineErrorHandler:
