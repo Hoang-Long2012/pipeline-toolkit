@@ -131,7 +131,7 @@ cmd = "pytest"
 help = "Run the test suite."
 
 [tool.poe.tasks.build]
-cmd = "uv build"
+cmd = "uv build --no-create-gitignore"
 help = "Build source and wheel distributions."
 
 [tool.poe.tasks.docs]
