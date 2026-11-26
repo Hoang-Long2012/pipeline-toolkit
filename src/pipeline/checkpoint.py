@@ -32,6 +32,11 @@ class Checkpoint:
 		"""Return the most recently published value."""
 		with self._condition:
 			return self._value
+	@value.setter
+	def value(self, value):
+		"""Set the published value."""
+		with self._condition:
+			self._value = value
 	@property
 	def is_active(self):
 		"""Return whether the checkpoint is currently active."""

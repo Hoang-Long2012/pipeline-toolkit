@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.9.0
+- Added `Checkpoint.value` setter to set the published value.
+
 ## 0.8.1
 - Added support for the `**` operator to create multiple copies of a `step`.
 

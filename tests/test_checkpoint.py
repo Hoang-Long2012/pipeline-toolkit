@@ -323,6 +323,60 @@ class TestCheckpointValue:
 		assert finished.wait(timeout=1.0)
 		thread.join(timeout=1.0)
 
+	def test_value_setter_updates_value(self):
+		"""Test setting value updates the stored value directly."""
+		checkpoint = Checkpoint()
+		checkpoint.value = 100
+
+		assert checkpoint.value == 100
+
+	def test_value_setter_overwrites_published_value(self):
+		"""Test setting value overwrites the published value while checkpoint is active."""
+		checkpoint = Checkpoint()
+		finished = threading.Event()
+
+		def run():
+			checkpoint(42)
+			finished.set()
+
+		thread = threading.Thread(target=run)
+		thread.start()
+
+		while checkpoint.value is None:
+			threading.Event().wait(0.001)
+
+		assert checkpoint.value == 42
+		checkpoint.value = 99
+		assert checkpoint.value == 99
+
+		checkpoint.next()
+
+		assert finished.wait(timeout=1.0)
+		thread.join(timeout=1.0)
+
+	def test_value_setter_after_release(self):
+		"""Test setting value after checkpoint has been released."""
+		checkpoint = Checkpoint()
+		finished = threading.Event()
+
+		def run():
+			checkpoint("initial")
+			finished.set()
+
+		thread = threading.Thread(target=run)
+		thread.start()
+
+		while checkpoint.value is None:
+			threading.Event().wait(0.001)
+
+		checkpoint.next()
+		assert finished.wait(timeout=1.0)
+		thread.join(timeout=1.0)
+
+		assert checkpoint.value == "initial"
+		checkpoint.value = "updated"
+		assert checkpoint.value == "updated"
+
 
 class TestCheckpointIsActive:
 	"""Test the checkpoint active state."""
