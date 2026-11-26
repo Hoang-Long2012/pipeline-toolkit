@@ -637,14 +637,24 @@ class Pipeline:
 		"""
 		return bool(self._steps)
 	def __call__(self, *args, **kwargs):
-		"""Run the pipeline.
+		"""Run the pipeline synchronously.
 
-		Arguments are passed directly to ``run()``.
+		All arguments are passed directly to ``run()``.
+		The method waits for execution to finish and reraises the most recent caught exception, if any.
 
 		Returns:
-			This pipeline instance.
+			The final result of the pipeline.
+
+		Raises:
+			TypeError: If any argument passed to ``run()`` is invalid.
+			ValueError: If any argument passed to ``run()`` has an invalid value.
+			RuntimeError: If the pipeline is already running.
+			Exception: The most recent exception raised by a pipeline step.
 		"""
-		return self.run(*args, **kwargs)
+		self.run(*args, **kwargs).wait()
+		if self.step and self.errors:
+			self.error()
+		return self.result
 	def __contains__(self, item):
 		"""Return whether a callable or step configuration exists in the pipeline.
 

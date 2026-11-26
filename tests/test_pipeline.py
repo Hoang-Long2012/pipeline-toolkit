@@ -2485,17 +2485,44 @@ class TestPipelineCopy:
 class TestPipelineCallable:
 	"""Test pipeline callable interface."""
 
-	def test_pipeline_call_equivalent_to_run(self):
-		"""Test calling pipeline is equivalent to calling run."""
+	def test_pipeline_call_runs_synchronously_and_returns_result(self):
+		"""Test calling pipeline runs synchronously and returns the final result."""
 
 		def add(x, y):
 			return x + y
 
 		pipeline = Pipeline([(add, (5,))])
-		pipeline(10)
-		pipeline.wait()
+		result = pipeline(10)
 
+		assert result == 15
 		assert pipeline.results.get() == 15
+		assert not pipeline.running
+
+	def test_pipeline_call_passes_arguments_to_run(self):
+		"""Test calling pipeline passes arguments to run."""
+
+		def add(x, y):
+			return x + y
+
+		pipeline = Pipeline([(add, (5,))])
+		result = pipeline(default=10)
+
+		assert result == 15
+		assert pipeline.result == 15
+
+	def test_pipeline_call_reraises_step_exception(self):
+		"""Test calling pipeline reraises the exception raised by a failed step."""
+
+		def fail(x):
+			raise ValueError("step failed")
+
+		pipeline = Pipeline([(fail,)])
+
+		with pytest.raises(ValueError, match="step failed"):
+			pipeline(10)
+
+		assert pipeline.step == 1
+		assert len(pipeline.errors) == 1
 
 	def test_pipeline_bool_reflects_whether_steps_are_configured(self):
 		"""Test pipeline bool reflects whether steps are configured."""

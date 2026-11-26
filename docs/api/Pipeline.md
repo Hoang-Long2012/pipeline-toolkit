@@ -12,10 +12,6 @@
     options:
       heading_level: 4
 
-::: pipeline.Pipeline.__call__
-    options:
-      heading_level: 3
-
 ::: pipeline.Pipeline.wait
     options:
       heading_level: 3
@@ -29,6 +25,12 @@
       heading_level: 3
 
 ::: pipeline.Pipeline.rerun
+    options:
+      heading_level: 3
+
+## Synchronous Execution
+
+::: pipeline.Pipeline.__call__
     options:
       heading_level: 3
 

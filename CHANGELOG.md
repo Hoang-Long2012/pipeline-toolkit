@@ -10,6 +10,7 @@ Documentation-only and metadata-only releases are explicitly identified.
 
 ## 0.9.0
 - Added `Checkpoint.value` setter to set the published value.
+- Changed `Pipeline.__call__()` to run the pipeline synchronously, wait for execution to complete, reraise the most recent caught exception, and return the final result.
 
 ## 0.8.1
 - Added support for the `**` operator to create multiple copies of a `step`.
