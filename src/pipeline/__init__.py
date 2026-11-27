@@ -15,6 +15,7 @@ The main components are:
 - [`compose`](api/compose.md): Create a callable that applies multiple callables sequentially to a value.
 - [`context_executor`](api/context_executor.md): Execute a context manager with a value and return its result.
 - [`flow`](api/flow.md): Execute callables sequentially, yielding each intermediate result.
+- [`forward`](api/forward.md): Forward a value to a specific positional or keyword argument of a callable.
 - [`mut`](api/mut.md): Apply a function directly to an object for side effects and return the same object.
 - [`tap`](api/tap.md): Apply a side effect to a deep copy of a value while returning the original value unchanged.
 - [`pipe`](api/pipe.md): Wrap a callable as a factory for creating [`step`](api/step.md) objects with preconfigured arguments.
@@ -69,6 +70,7 @@ from .checkpoint import Checkpoint as Checkpoint
 from .compose import compose as compose
 from .context_executor import context_executor as context_executor
 from .flow import flow as flow
+from .forward import forward as forward
 from .group import Group as Group
 from .mut import mut as mut
 from .pipe import pipe as pipe
@@ -83,4 +85,4 @@ except PackageNotFoundError:
 	__version__ = "0.0.0-dev0"
 
 __author__ = "Hoàng Long"
-__all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "context_executor", "flow", "mut", "pipe", "repeat", "step", "tap"]
+__all__ = ["Checkpoint", "Group", "Pipeline", "__author__", "__version__", "chain", "compose", "context_executor", "flow", "forward", "mut", "pipe", "repeat", "step", "tap"]
