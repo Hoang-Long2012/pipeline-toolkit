@@ -8,6 +8,9 @@ Changes are categorized using labels such as `Added`, `Changed`, `Improved`, `Fi
 
 Documentation-only and metadata-only releases are explicitly identified.
 
+## 0.9.1
+- Added `forward()` utility for forwarding a value to a specific positional or keyword argument of a callable.
+
 ## 0.9.0
 - Added `Checkpoint.value` setter to set the published value.
 - Added `context_executor()` utility for executing a context manager with a value and returning its result.
