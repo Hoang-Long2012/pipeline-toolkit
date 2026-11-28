@@ -1,0 +1,126 @@
+name: Pull request auto label
+
+on:
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+      - ready_for_review
+
+permissions:
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: pr-auto-label-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply labels from the pull request and changed files
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const managedLabels = [
+              "bug",
+              "enhancement",
+              "documentation",
+              "dependencies",
+              "tests",
+              "source",
+              "other",
+              "configuration",
+              "github_actions",
+            ];
+            const labelsByType = {
+              "Bug fix": "bug",
+              "New feature": "enhancement",
+              "Documentation update": "documentation",
+              "Test suite update": "tests",
+              "Source code update": "source",
+              "GitHub Actions update": "github_actions",
+              "Dependencies update": "dependencies",
+              "Package metadata update": "configuration",
+              "Other (describe below)": "other",
+            };
+            const body = context.payload.pull_request.body ?? "";
+            const checkedTypes = new Set(
+              [...body.matchAll(/^\s*-\s+\[x\]\s+(.+?)\s*$/gim)]
+                .map(([, type]) => type.trim()),
+            );
+            const selectedLabels = new Set(Object.entries(labelsByType)
+              .filter(([type]) => checkedTypes.has(type))
+              .map(([, label]) => label));
+
+            if (selectedLabels.size === 0) {
+              const files = await github.paginate(github.rest.pulls.listFiles, {
+                ...context.repo,
+                pull_number: context.issue.number,
+                per_page: 100,
+              });
+
+              for (const file of files) {
+                const path = file.filename;
+                if (
+                  path.startsWith("docs/") ||
+                  ["README.md", "CONTRIBUTING.md", "mkdocs.yml"].includes(path)
+                ) selectedLabels.add("documentation");
+                if (path.startsWith("tests/")) selectedLabels.add("tests");
+                if (path.startsWith("src/pipeline/") || path === "hatch_build.py") {
+                  selectedLabels.add("source");
+                }
+                if (path === "uv.lock") selectedLabels.add("dependencies");
+                if (["pyproject.toml", "uv.lock", ".python-version"].includes(path)) {
+                  selectedLabels.add("configuration");
+                }
+                if (path.startsWith(".github/")) selectedLabels.add("github_actions");
+              }
+            }
+
+            for (const label of selectedLabels) {
+              try {
+                await github.rest.issues.getLabel({ ...context.repo, name: label });
+              } catch (error) {
+                if (error.status === 404) {
+                  throw new Error(`Required repository label is missing: ${label}`);
+                }
+                throw error;
+              }
+            }
+
+            const issueParams = {
+              ...context.repo,
+              issue_number: context.issue.number,
+            };
+            const currentLabels = new Set(
+              (await github.rest.issues.listLabelsOnIssue(issueParams)).data
+                .map(({ name }) => name),
+            );
+
+            for (const label of managedLabels) {
+              if (!currentLabels.has(label) || selectedLabels.has(label)) continue;
+              try {
+                await github.rest.issues.removeLabel({
+                  ...issueParams,
+                  name: label,
+                });
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+
+            const labelsToAdd = [...selectedLabels].filter(
+              label => !currentLabels.has(label),
+            );
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                ...issueParams,
+                labels: labelsToAdd,
+              });
+            }

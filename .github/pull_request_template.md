@@ -12,6 +12,8 @@
 - [ ] New feature
 - [ ] Documentation update
 - [ ] Test suite update
+- [ ] Source code update
+- [ ] GitHub Actions update
 - [ ] Dependencies update
 - [ ] Package metadata update
 - [ ] Other (describe below)
