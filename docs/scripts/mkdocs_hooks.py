@@ -68,18 +68,28 @@ def on_config(config):
 	config["extra"]["material_version"] = version("mkdocs-material")
 	config["extra"]["deployment_date"] = now.strftime("%Y-%m-%d")
 	config["extra"]["deployment_time"] = now.strftime("%H:%M")
-	config["nav"].append({
+	api_section = {
 		"API": {
 			Path(api_file).stem: str(Path(api_file).relative_to(config["docs_dir"]))
 			for api_file in sorted(Path(f"{config['docs_dir']}/api").glob("*.md"))
 		}
-	})
+	}
+	nav = config["nav"]
+	changelog_index = next(
+		(index for index, item in enumerate(nav) if isinstance(item, dict) and "Changelog" in item),
+		len(nav),
+	)
+	nav.insert(changelog_index, api_section)
 	return config
 
 
 def on_nav(nav, config, files):
 	for item in nav:
-		if item.is_section and item.title == "API":
+		if not item.is_section:
+			continue
+		if item.title == "Guides":
+			item.icon = "material/book-open-page-variant"
+		elif item.title == "API":
 			item.icon = "material/library"
 
 	return nav
