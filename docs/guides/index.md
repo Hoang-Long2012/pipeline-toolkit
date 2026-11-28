@@ -1,3 +1,8 @@
+---
+hide:
+  - toc
+___
+
 # Guides
 
 These guides introduce the main ways to build, edit, compose, and coordinate pipelines with `pipeline-toolkit`.
