@@ -119,10 +119,13 @@ watch:
 nav:
   - Home: index.md
   - Guides:
-      - Getting started: guides/getting-started.md
-      - Core concepts: guides/core-concepts.md
-      - Async pipelines: guides/async-pipelines.md
-      - Recipes: guides/recipes.md
+      - Overview: guides/index.md
+      - Getting Started: guides/getting-started.md
+      - Building & Editing Pipelines: guides/building-and-editing-pipelines.md
+      - Functional Composition & Steps: guides/functional-composition.md
+      - Side Effects & State: guides/side-effects-and-state.md
+      - Concurrency & Coordination: guides/concurrency-and-coordination.md
+      - Error Handling: guides/error-handling.md
   - Changelog: changelog.md
   - Contributing: contributing.md
 
