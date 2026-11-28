@@ -114,6 +114,10 @@ help = "Validate the pyproject.toml configuration."
 cmd = "ruff check --no-cache"
 help = "Run Ruff lint checks."
 
+[tool.poe.tasks.fix]
+cmd = "ruff check --no-cache --fix"
+help = "Automatically fix linting issues."
+
 [tool.poe.tasks.typecheck]
 cmd = "ty check"
 help = "Run static type checks."
