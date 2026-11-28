@@ -92,8 +92,7 @@ respect-ignore-files = true
 testpaths = ["tests"]
 addopts = "-ra --cov -n auto -p no:cacheprovider"
 timeout = 10
-strict_config = true
-strict_markers = true
+strict = true
 
 [tool.coverage.run]
 source_pkgs = ["pipeline"]
