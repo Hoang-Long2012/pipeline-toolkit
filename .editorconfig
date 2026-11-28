@@ -23,3 +23,11 @@ indent_size = 4
 [*.{html,json}]
 indent_style = space
 indent_size = 2
+
+[*.{xml,svg}]
+indent_style = space
+indent_size = 2
+
+[*.{js,css,scss}]
+indent_style = tab
+indent_size = 4
