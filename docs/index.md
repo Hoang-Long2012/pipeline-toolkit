@@ -19,3 +19,7 @@ No runtime dependencies.
     options:
       show_root_heading: false
       heading_level: 1
+
+Ready to build your first pipeline?
+
+[Start with the Getting Started guide](guides/getting-started.md).
