@@ -118,6 +118,11 @@ watch:
 
 nav:
   - Home: index.md
+  - Guides:
+      - Getting started: guides/getting-started.md
+      - Core concepts: guides/core-concepts.md
+      - Async pipelines: guides/async-pipelines.md
+      - Recipes: guides/recipes.md
   - Changelog: changelog.md
   - Contributing: contributing.md
 
